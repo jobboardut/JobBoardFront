@@ -3,6 +3,7 @@ import { ROUTES } from './routes'
 import { PrivateRoute } from './PrivateRoute'
 import { LoginPage } from '@/pages/LoginPage'
 import { SeleccionCuenta } from '@/components/SeleccionCuenta'
+import { RegistroEstudiante } from '@/components/RegistroEstudiante'
 
 export const AppRouter = () => {
   return (
@@ -13,6 +14,7 @@ export const AppRouter = () => {
         {/* Rutas publicas */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SELECCION_CUENTA} element={<SeleccionCuenta />} />
+        <Route path="/registro/estudiante" element={<RegistroEstudiante />} />
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={
