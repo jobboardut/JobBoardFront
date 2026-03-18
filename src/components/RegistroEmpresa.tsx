@@ -52,9 +52,9 @@ export const RegistroEmpresa = () => {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate('/registro/confirmacion')
-  }
+  e.preventDefault()
+  navigate('/registro/confirmacion?tipo=empresa')
+}
 
   return (
     <div

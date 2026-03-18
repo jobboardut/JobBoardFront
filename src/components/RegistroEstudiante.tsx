@@ -67,10 +67,9 @@ export const RegistroEstudiante = () => {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate('/registro/confirmacion')
-  }
-
+  e.preventDefault()
+  navigate('/registro/confirmacion?tipo=estudiante')
+}
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
