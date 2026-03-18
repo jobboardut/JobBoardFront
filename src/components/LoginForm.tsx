@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useLogin } from '../hooks/useAuth'
 import type { LoginRequest } from '../types/auth.types'
+import campusImg from '@/assets/images/campus.png'
+import logoBlanco from '@/assets/images/logoblanco.png'
 
 export const LoginForm = () => {
   const { mutate: login, isPending, isError } = useLogin()
@@ -20,41 +22,46 @@ export const LoginForm = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-md">
+    <div
+      className="min-h-screen w-full flex items-center justify-end bg-cover bg-center relative"
+      style={{ backgroundImage: `url(${campusImg})` }}
+    >
+      {/* Overlay ligero */}
+      <div className="absolute inset-0 bg-black/20" />
 
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <img
-            src="https://www.figma.com/api/mcp/asset/feae3d59-0aeb-4c97-a7d2-b94b64ab53f6"
-            alt="UTTecam"
-            className="w-48"
-          />
-        </div>
+      {/* Logo izquierda con efecto vidrio */}
+      <div className="absolute left-16 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md rounded-2xl p-10 hidden lg:flex flex-col items-center justify-center">
+        <img
+          src={logoBlanco}
+          alt="UTTecam"
+          className="w-64"
+        />
+      </div>
 
-        {/* Titulo */}
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          Iniciar sesión
+      {/* Formulario derecha */}
+      <div className="relative z-10 bg-white rounded-2xl shadow-xl p-10 w-full max-w-md mr-16">
+
+        <h1 className="text-3xl font-bold text-gray-800 mb-1">
+          Bienvenido
         </h1>
-        <p className="text-center text-gray-500 text-sm mb-8">
-          Ingresa tus credenciales para continuar
+        <p className="text-gray-500 text-sm mb-8">
+          Ingresa tus datos para acceder a la plataforma
         </p>
 
-        {/* Formulario */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">
-              Correo electrónico
+              Email
             </label>
             <input
               name="email"
               type="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="correo@uttecam.edu.mx"
+              placeholder="Ingresa tu Email"
               required
-              className="border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
 
@@ -67,27 +74,36 @@ export const LoginForm = () => {
               type="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="••••••••"
+              placeholder="Ingresa tu contraseña"
               required
-              className="border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
 
-          {/* Error */}
+          <p className="text-right text-sm text-emerald-500 cursor-pointer hover:underline">
+            Olvidaste tu contraseña?
+          </p>
+
           {isError && (
             <p className="text-red-500 text-sm text-center">
               Correo o contraseña incorrectos
             </p>
           )}
 
-          {/* Boton */}
           <button
             type="submit"
             disabled={isPending}
             className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50"
           >
-            {isPending ? 'Entrando...' : 'Entrar'}
+            {isPending ? 'Entrando...' : 'Iniciar Sesión'}
           </button>
+
+          <p className="text-center text-sm text-gray-500">
+            No tienes cuenta?{' '}
+            <span className="text-emerald-500 cursor-pointer hover:underline">
+              Crea una aquí
+            </span>
+          </p>
 
         </form>
       </div>
