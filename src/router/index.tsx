@@ -4,6 +4,7 @@ import { PrivateRoute } from './PrivateRoute'
 import { LoginPage } from '@/pages/LoginPage'
 import { SeleccionCuenta } from '@/components/SeleccionCuenta'
 import { RegistroEstudiante } from '@/components/RegistroEstudiante'
+import { RegistroEmpresa } from '@/components/RegistroEmpresa'
 
 export const AppRouter = () => {
   return (
@@ -15,6 +16,8 @@ export const AppRouter = () => {
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SELECCION_CUENTA} element={<SeleccionCuenta />} />
         <Route path="/registro/estudiante" element={<RegistroEstudiante />} />
+        <Route path="/registro/empresa" element={<RegistroEmpresa/>}/>
+
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={
