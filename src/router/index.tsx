@@ -1,7 +1,26 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ROUTES } from './routes'
+import { PrivateRoute } from './PrivateRoute'
+import { PageWrapper } from '@/components/layout/PageWrapper'
+
 export const AppRouter = () => {
   return (
-    <div>
-      <h1>Hola mundo</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+
+        <Route path={ROUTES.LOGIN} element={<div>Login</div>} />
+
+        <Route path={ROUTES.DASHBOARD} element={
+          <PrivateRoute>
+            <PageWrapper role="administrador">
+              <h1>Dashboard Admin</h1>
+            </PageWrapper>
+          </PrivateRoute>
+        } />
+
+        <Route path="*" element={<div>404</div>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
