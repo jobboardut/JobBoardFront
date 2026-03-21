@@ -2,10 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ROUTES } from './routes'
 import { PrivateRoute } from './PrivateRoute'
 import { LoginPage } from '@/pages/LoginPage'
-import { SeleccionCuenta } from '@/components/SeleccionCuenta'
-import { RegistroEstudiante } from '@/components/RegistroEstudiante'
-import { RegistroEmpresa } from '@/components/RegistroEmpresa'
-import { RegistroCompletado } from '@/components/RegistroCompletado'
+import { SeleccionCuenta } from '@/features/auth/components/SeleccionCuenta'
+import { RegistroEstudiante } from '@/features/auth/components/RegistroEstudiante'
+import { RegistroEmpresa } from '@/features/auth/components/RegistroEmpresa'
+import { RegistroCompletado } from '@/features/auth/components/RegistroCompletado'
 
 export const AppRouter = () => {
   return (
