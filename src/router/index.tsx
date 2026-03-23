@@ -6,6 +6,8 @@ import { SeleccionCuenta } from '@/features/auth/components/SeleccionCuenta'
 import { RegistroEstudiante } from '@/features/auth/components/RegistroEstudiante'
 import { RegistroEmpresa } from '@/features/auth/components/RegistroEmpresa'
 import { RegistroCompletado } from '@/features/auth/components/RegistroCompletado'
+import { EmpresaLayout } from '@/features/empresas/components/EmpresaLayout'
+import { PanelControl } from '@/features/empresas/components/PanelControl'
 
 export const AppRouter = () => {
   return (
@@ -19,6 +21,7 @@ export const AppRouter = () => {
         <Route path="/registro/estudiante" element={<RegistroEstudiante />} />
         <Route path="/registro/empresa" element={<RegistroEmpresa />} />
         <Route path="/registro/confirmacion" element={<RegistroCompletado />} />
+        <Route path={ROUTES.EMPRESA_DASHBOARD} element={<PrivateRoute><EmpresaLayout> <PanelControl /></EmpresaLayout></PrivateRoute>} />
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={

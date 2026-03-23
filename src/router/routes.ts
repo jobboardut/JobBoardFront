@@ -4,10 +4,10 @@ export const ROUTES = {
   DASHBOARD:        '/dashboard',
 
   // Administrador
-  ADMIN_VALIDACION:    '/administradores/validacion',
-  ADMIN_GESTION:       '/administradores/gestion',
-  ADMIN_PUBLICACIONES: '/administradores/publicaciones',
-  ADMIN_SEGUIMIENTO:   '/administradores/seguimiento',
+  ADMIN_VALIDACION:     '/administradores/validacion',
+  ADMIN_GESTION:        '/administradores/gestion',
+  ADMIN_PUBLICACIONES:  '/administradores/publicaciones',
+  ADMIN_SEGUIMIENTO:    '/administradores/seguimiento',
 
   // Empresa
   EMPRESA_DASHBOARD:     '/empresas/dashboard',
