@@ -7,6 +7,7 @@ export interface Vacante {
   descripcion: string
   estatus: EstatusVacante
   postulantes: number
+  fechaPublicacion: string
 }
 
 export interface Postulante {

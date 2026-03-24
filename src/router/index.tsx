@@ -8,6 +8,7 @@ import { RegistroEmpresa } from '@/features/auth/components/RegistroEmpresa'
 import { RegistroCompletado } from '@/features/auth/components/RegistroCompletado'
 import { EmpresaLayout } from '@/features/empresas/components/EmpresaLayout'
 import { PanelControl } from '@/features/empresas/components/PanelControl'
+import { MisPublicaciones } from '@/features/empresas/components/MisPublicaciones'
 
 export const AppRouter = () => {
   return (
@@ -22,6 +23,7 @@ export const AppRouter = () => {
         <Route path="/registro/empresa" element={<RegistroEmpresa />} />
         <Route path="/registro/confirmacion" element={<RegistroCompletado />} />
         <Route path={ROUTES.EMPRESA_DASHBOARD} element={<PrivateRoute><EmpresaLayout> <PanelControl /></EmpresaLayout></PrivateRoute>} />
+        <Route path={ROUTES.EMPRESA_PUBLICACIONES} element={<PrivateRoute><EmpresaLayout><MisPublicaciones /></EmpresaLayout></PrivateRoute>} />
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={
