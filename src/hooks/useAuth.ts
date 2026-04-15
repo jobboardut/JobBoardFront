@@ -17,7 +17,7 @@ export const useLogin = () => {
       const role = response.data.user.role
       if (role === 'administrador') navigate(ROUTES.DASHBOARD)
       if (role === 'empresa')       navigate(ROUTES.EMPRESA_DASHBOARD)
-      if (role === 'estudiante')    navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
+      if (role === 'estudiante')    navigate(ROUTES.ESTUDIANTE_DASHBOARD)
     },
 
     onError: (error: Error) => {

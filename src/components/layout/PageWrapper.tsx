@@ -14,7 +14,7 @@ export const PageWrapper = ({ children, role }: PageWrapperProps) => {
       <Sidebar role={role} />
 
       {/* Contenido de la página */}
-      <main className="flex-1 p-8">
+      <main className="relative flex-1">
         {children}
       </main>
 

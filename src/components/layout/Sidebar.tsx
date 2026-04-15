@@ -1,4 +1,14 @@
 import { NavLink } from 'react-router-dom'
+import {
+  BriefcaseBusiness,
+  CircleUserRound,
+  ClipboardList,
+  Home,
+  LogOut,
+  ShieldCheck,
+  UserRoundCheck,
+  Users,
+} from 'lucide-react'
 import type { UserRole } from '@/types/auth.types'
 import { ROUTES } from '@/router/routes'
 
@@ -8,21 +18,22 @@ interface SidebarProps {
 
 const menuItems = {
   administrador: [
-    { label: 'Dashboard',                    path: ROUTES.DASHBOARD },
-    { label: 'Centro de validación',         path: '/administradores/validacion' },
-    { label: 'Centro de gestión',            path: '/administradores/gestion' },
-    { label: 'Publicaciones',               path: '/administradores/publicaciones' },
-    { label: 'Seguimiento de postulaciones', path: '/administradores/seguimiento' },
+    { label: 'Dashboard',                    path: ROUTES.DASHBOARD, icon: Home },
+    { label: 'Centro de validacion',         path: '/administradores/validacion', icon: ShieldCheck },
+    { label: 'Centro de gestion',            path: '/administradores/gestion', icon: ClipboardList },
+    { label: 'Publicaciones',                path: '/administradores/publicaciones', icon: BriefcaseBusiness },
+    { label: 'Seguimiento de postulaciones', path: '/administradores/seguimiento', icon: Users },
   ],
   empresa: [
-    { label: 'Panel de control', path: '/empresas/dashboard' },
-    { label: 'Publicaciones',   path: '/empresas/publicaciones' },
-    { label: 'Postulantes',     path: '/empresas/postulantes' },
+    { label: 'Panel de control', path: '/empresas/dashboard', icon: Home },
+    { label: 'Publicaciones',    path: '/empresas/publicaciones', icon: BriefcaseBusiness },
+    { label: 'Seguimiento',      path: '/empresas/postulantes', icon: UserRoundCheck },
   ],
   estudiante: [
-    { label: 'Publicaciones', path: '/estudiantes/publicaciones' },
-    { label: 'Mi perfil',     path: '/estudiantes/perfil' },
-    { label: 'Seguimiento',   path: '/estudiantes/seguimiento' },
+    { label: 'Panel de control', path: '/estudiantes/dashboard', icon: Home },
+    { label: 'Publicaciones', path: '/estudiantes/publicaciones', icon: BriefcaseBusiness },
+    { label: 'Mi perfil',     path: '/estudiantes/perfil', icon: CircleUserRound },
+    { label: 'Seguimiento',   path: '/estudiantes/seguimiento', icon: UserRoundCheck },
   ],
 }
 
@@ -30,34 +41,46 @@ export const Sidebar = ({ role }: SidebarProps) => {
   const items = menuItems[role]
 
   return (
-    <aside className="w-64 min-h-screen bg-white shadow-md flex flex-col py-6 px-4">
-      {/* Logo */}
-      <div className="mb-8 px-2">
-        <img
-          src="https://www.figma.com/api/mcp/asset/feae3d59-0aeb-4c97-a7d2-b94b64ab53f6"
-          alt="UTTecam"
-          className="w-40"
-        />
+    <aside className="flex min-h-screen w-64 flex-col border-r border-[#dfd9cf] bg-[#f8f7f4]">
+      <div className="border-b border-[#e6dfd5] px-4 py-4">
+        <div className="flex items-center">
+          <img
+            src="/logouttecam-removebg-preview.png"
+            alt="UTTECAM"
+            className="h-10 w-auto max-w-40"
+          />
+        </div>
       </div>
 
-      {/* Menu */}
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-1 flex-col gap-3 p-4 pt-5">
         {items.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+              `group flex items-center gap-3 rounded-2xl px-3 py-3 text-base font-semibold transition-all duration-200 ${
                 isActive
-                  ? 'bg-gray-100 text-emerald-500 shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-50'
+                  ? 'bg-[#10B981] text-white shadow-[0_8px_16px_rgba(16,185,129,0.35)]'
+                  : 'text-slate-500 hover:-translate-y-0.5 hover:bg-[#efebe5] hover:text-slate-700'
               }`
             }
           >
-            {item.label}
+            <item.icon size={20} strokeWidth={2} />
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
+
+      <div className="border-t border-[#e6dfd5] p-4">
+        <button
+          type="button"
+          aria-label="Salir"
+          className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 font-semibold transition-all duration-200 text-slate-500 hover:bg-red-500 hover:text-white"
+        >
+          <LogOut size={20} strokeWidth={2} />
+          <span>Salir</span>
+        </button>
+      </div>
     </aside>
   )
 }

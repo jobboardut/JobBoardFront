@@ -96,9 +96,9 @@ export const RegistroEstudiante = () => {
               <div className="flex flex-col items-center gap-1">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
                   index === 0
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-[#009A4D] text-white'
                     : index === 1
-                    ? 'bg-orange-400 text-white'
+                    ? 'bg-[#EA580C] text-white'
                     : 'bg-gray-200 text-gray-400'
                 }`}>
                   {index === 0
@@ -108,9 +108,9 @@ export const RegistroEstudiante = () => {
                 </div>
                 <span className={`text-xs text-center w-24 leading-tight ${
                   index === 0
-                    ? 'text-emerald-500 font-semibold'
+                    ? 'text-[#009A4D] font-semibold'
                     : index === 1
-                    ? 'text-orange-400 font-semibold'
+                    ? 'text-[#EA580C] font-semibold'
                     : 'text-gray-400'
                 }`}>
                   {paso}
@@ -119,7 +119,7 @@ export const RegistroEstudiante = () => {
               {index < pasos.length - 1 && (
                 <div className={`w-16 h-1 rounded mb-5 ${
                   index === 0
-                    ? 'bg-gradient-to-r from-emerald-500 to-orange-400'
+                    ? 'bg-gradient-to-r from-[#009A4D] to-[#EA580C]'
                     : 'bg-gray-200'
                 }`} />
               )}
@@ -136,14 +136,14 @@ export const RegistroEstudiante = () => {
             {/* Titulo */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-800">Registro de datos</h2>
-              <span className="bg-emerald-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
+              <span className="bg-[#009A4D] text-white text-sm font-semibold px-3 py-1 rounded-full">
                 Paso 2 de 4
               </span>
             </div>
 
             {/* Seccion informacion personal */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#009A4D] rounded-lg flex items-center justify-center">
                 <User size={16} color="white" />
               </div>
               <div>
@@ -247,7 +247,7 @@ export const RegistroEstudiante = () => {
 
             {/* Seccion informacion escolar */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#009A4D] rounded-lg flex items-center justify-center">
                 <GraduationCap size={16} color="white" />
               </div>
               <div>
@@ -292,7 +292,7 @@ export const RegistroEstudiante = () => {
             <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
               <div
                 onClick={() => fotoRef.current?.click()}
-                className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 border-emerald-100 hover:border-emerald-300 transition-colors"
+                className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 border-[#009A4D] hover:border-[#10B981] transition-colors"
               >
                 {foto
                   ? <img src={foto} alt="foto" className="w-full h-full object-cover" />
@@ -308,9 +308,9 @@ export const RegistroEstudiante = () => {
               <p className="text-sm font-semibold text-gray-700 mb-3">Curriculum Vitae</p>
               <div
                 onClick={() => cvRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-400 transition-colors"
+                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-[#10B981] transition-colors"
               >
-                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#009A4D] rounded-xl flex items-center justify-center">
                   <Upload size={22} color="white" />
                 </div>
                 <p className="text-xs text-gray-500 text-center">
@@ -325,9 +325,9 @@ export const RegistroEstudiante = () => {
               <p className="text-sm font-semibold text-gray-700 mb-3">Documento avalatorio</p>
               <div
                 onClick={() => docRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-emerald-400 transition-colors"
+                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-[#10B981] transition-colors"
               >
-                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#009A4D] rounded-xl flex items-center justify-center">
                   <Upload size={22} color="white" />
                 </div>
                 <p className="text-xs text-gray-500 text-center">
@@ -340,7 +340,7 @@ export const RegistroEstudiante = () => {
             {/* Boton continuar */}
             <button
               type="submit"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-colors"
+              className="bg-[#009A4D] hover:bg-[#10B981] text-white font-bold py-3 rounded-xl transition-colors"
             >
               Continuar
             </button>

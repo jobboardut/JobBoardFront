@@ -82,9 +82,9 @@ export const RegistroEmpresa = () => {
               <div className="flex flex-col items-center gap-1">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
                   index === 0
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-[#009A4D] text-white'
                     : index === 1
-                    ? 'bg-orange-400 text-white'
+                    ? 'bg-[#EA580C] text-white'
                     : 'bg-gray-200 text-gray-400'
                 }`}>
                   {index === 0
@@ -94,9 +94,9 @@ export const RegistroEmpresa = () => {
                 </div>
                 <span className={`text-xs text-center w-24 leading-tight ${
                   index === 0
-                    ? 'text-emerald-500 font-semibold'
+                    ? 'text-[#009A4D] font-semibold'
                     : index === 1
-                    ? 'text-orange-400 font-semibold'
+                    ? 'text-[#EA580C] font-semibold'
                     : 'text-gray-400'
                 }`}>
                   {paso}
@@ -105,7 +105,7 @@ export const RegistroEmpresa = () => {
               {index < pasos.length - 1 && (
                 <div className={`w-16 h-1 rounded mb-5 ${
                   index === 0
-                    ? 'bg-gradient-to-r from-emerald-500 to-orange-400'
+                    ? 'bg-gradient-to-r from-[#009A4D] to-[#EA580C]'
                     : 'bg-gray-200'
                 }`} />
               )}
@@ -122,14 +122,14 @@ export const RegistroEmpresa = () => {
             {/* Titulo */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-800">Registro de datos</h2>
-              <span className="bg-emerald-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
+              <span className="bg-[#009A4D] text-white text-sm font-semibold px-3 py-1 rounded-full">
                 Paso 2 de 4
               </span>
             </div>
 
             {/* Seccion informacion general */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#009A4D] rounded-lg flex items-center justify-center">
                 <Globe size={16} color="white" />
               </div>
               <div>
@@ -220,7 +220,7 @@ export const RegistroEmpresa = () => {
 
             {/* Seccion informacion de contacto */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#009A4D] rounded-lg flex items-center justify-center">
                 <User size={16} color="white" />
               </div>
               <div>
@@ -305,7 +305,7 @@ export const RegistroEmpresa = () => {
             <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
               <div
                 onClick={() => logoRef.current?.click()}
-                className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 border-emerald-100 hover:border-emerald-300 transition-colors"
+                className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 border-[#009A4D] hover:border-[#10B981] transition-colors"
               >
                 {logo
                   ? <img src={logo} alt="logo" className="w-full h-full object-cover" />
@@ -321,7 +321,7 @@ export const RegistroEmpresa = () => {
             {/* Boton continuar */}
             <button
               type="submit"
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition-colors"
+              className="bg-[#009A4D] hover:bg-[#10B981] text-white font-bold py-3 rounded-xl transition-colors"
             >
               Continuar
             </button>
