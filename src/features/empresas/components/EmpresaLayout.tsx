@@ -1,15 +1,16 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Briefcase, Users, Bell } from 'lucide-react'
+import { LayoutDashboard, Briefcase, Users, Bell, Building2 } from 'lucide-react'
 
 
 interface EmpresaLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode   
 }
 
 const menuItems = [
   { label: 'Panel de control', path: '/empresas/dashboard', icon: LayoutDashboard },
   { label: 'Mis publicaciones', path: '/empresas/publicaciones', icon: Briefcase },
   { label: 'Postulantes', path: '/empresas/postulantes', icon: Users },
+  { label: 'Mi perfil', path: '/empresas/perfil', icon: Building2 },
 ]
 
 export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {

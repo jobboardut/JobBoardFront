@@ -13,6 +13,7 @@ export const ROUTES = {
   EMPRESA_DASHBOARD:     '/empresas/dashboard',
   EMPRESA_PUBLICACIONES: '/empresas/publicaciones',
   EMPRESA_POSTULANTES:   '/empresas/postulantes',
+  EMPRESA_PERFIL: '/empresas/perfil',
 
   // Estudiante
   ESTUDIANTE_PUBLICACIONES: '/estudiantes/publicaciones',

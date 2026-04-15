@@ -10,6 +10,8 @@ import { EmpresaLayout } from '@/features/empresas/components/EmpresaLayout'
 import { PanelControl } from '@/features/empresas/components/PanelControl'
 import { MisPublicaciones } from '@/features/empresas/components/MisPublicaciones'
 import { Postulantes } from '@/features/empresas/components/Postulantes'
+import { PerfilEmpresa } from '@/features/empresas/components/PerfilEmpresa'
+
 
 export const AppRouter = () => {
   return (
@@ -26,6 +28,7 @@ export const AppRouter = () => {
         <Route path={ROUTES.EMPRESA_DASHBOARD} element={<PrivateRoute><EmpresaLayout> <PanelControl /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_PUBLICACIONES} element={<PrivateRoute><EmpresaLayout><MisPublicaciones /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_POSTULANTES} element={<PrivateRoute><EmpresaLayout><Postulantes /></EmpresaLayout></PrivateRoute>} />
+        <Route path={ROUTES.EMPRESA_PERFIL} element={<PrivateRoute><EmpresaLayout><PerfilEmpresa /></EmpresaLayout></PrivateRoute>} />
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={
