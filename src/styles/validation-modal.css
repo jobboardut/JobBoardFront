@@ -1,0 +1,464 @@
+.validation-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.36);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 40;
+}
+
+.validation-reject-overlay {
+  z-index: 70;
+}
+
+.validation-modal {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 32px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #ffffff;
+  padding: 18px;
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.validation-modal.has-proof-photo {
+  width: min(760px, 100%);
+}
+
+.validation-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--gray-soft);
+  cursor: pointer;
+}
+
+.validation-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.validation-modal-avatar-button {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: transparent;
+  cursor: zoom-in;
+  flex: 0 0 auto;
+}
+
+.validation-modal-avatar-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.validation-modal-avatar-button.is-company {
+  box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+.validation-modal-avatar-button.is-grad {
+  box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+.validation-modal-head h2 {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.validation-modal-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.validation-modal-avatar.is-company {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.16);
+}
+
+.validation-modal-avatar.is-grad {
+  color: #009a4d;
+  background: rgba(16, 185, 129, 0.16);
+}
+
+.validation-modal-contact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.validation-modal-contact-card {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--gray-soft);
+}
+
+.validation-modal-contact-card small {
+  display: block;
+  text-transform: uppercase;
+  font-size: 0.74rem;
+}
+
+.validation-modal-contact-card strong {
+  color: var(--ink-soft);
+}
+
+.validation-modal-data {
+  margin-top: 14px;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.validation-modal-data.is-company {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.validation-modal-data.is-grad {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.validation-modal-data h3 {
+  margin: 0 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+}
+
+.validation-modal-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.validation-modal-fields small {
+  display: block;
+  color: var(--gray-soft);
+  text-transform: uppercase;
+  font-size: 0.74rem;
+}
+
+.validation-modal-fields strong,
+.validation-modal-fields a {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.validation-modal-fields a {
+  color: #009a4d;
+}
+
+.validation-modal-proof {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.validation-modal-proof header {
+  margin-bottom: 10px;
+}
+
+.validation-modal-proof h3 {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.04rem;
+}
+
+.validation-modal-proof span {
+  color: var(--gray-soft);
+  font-size: 0.84rem;
+}
+
+.validation-modal-proof figure {
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #d6deea;
+  background: #ffffff;
+}
+
+.validation-modal-proof-trigger {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.validation-modal-proof-trigger figure {
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.validation-modal-proof-trigger:hover figure {
+  transform: scale(1.01);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.validation-modal-proof img {
+  width: 100%;
+  height: 245px;
+  object-fit: cover;
+  display: block;
+}
+
+.validation-photo-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 60;
+}
+
+.validation-photo-zoom {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 40px);
+  margin: 0;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.validation-photo-zoom img {
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  object-fit: contain;
+  display: block;
+  background: #0f172a;
+}
+
+.validation-photo-zoom.is-avatar img {
+  background: #eff6ff;
+}
+
+.validation-photo-zoom.is-avatar {
+  width: min(420px, 88vw);
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+}
+
+.validation-photo-zoom.is-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.validation-photo-zoom-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.validation-photo-zoom-close.is-avatar-close {
+  top: 18px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+}
+
+.validation-modal-actions {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.validation-modal-actions.is-single {
+  grid-template-columns: 1fr;
+}
+
+.validation-modal-actions button {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btn-approve {
+  border: 0;
+  color: #ffffff;
+  background: #10b981;
+}
+
+.btn-reject {
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #dc2626;
+  background: #ffffff;
+}
+
+.validation-reject-modal {
+  width: min(560px, 100%);
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.validation-reject-head h2 {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.validation-reject-head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.validation-reject-field {
+  display: grid;
+  gap: 8px;
+}
+
+.validation-reject-field span {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.validation-reject-field textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font: inherit;
+  line-height: 1.55;
+  outline: none;
+}
+
+.validation-reject-field textarea:focus {
+  border-color: rgba(220, 38, 38, 0.45);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.validation-reject-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.validation-reject-actions button {
+  min-height: 44px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reject-secondary {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--ink-soft);
+}
+
+.btn-reject-primary {
+  border: 0;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.btn-reject-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-user-action {
+  border: 0;
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.btn-user-action.is-active {
+  color: #ffffff;
+  background: #10b981;
+}
+
+.btn-user-action.is-inactive {
+  color: #ffffff;
+  background: #ea580c;
+}
+
+@media (max-width: 720px) {
+  .validation-modal.has-proof-photo {
+    width: min(680px, 100%);
+  }
+
+  .validation-modal-avatar-button {
+    width: 58px;
+    height: 58px;
+  }
+
+  .validation-modal-proof img {
+    height: 210px;
+  }
+
+  .validation-modal-contact,
+  .validation-modal-fields,
+  .validation-modal-actions,
+  .validation-reject-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .validation-reject-modal {
+    padding: 18px;
+  }
+
+  .validation-photo-zoom {
+    width: min(100%, 100%);
+  }
+
+  .validation-photo-zoom.is-avatar {
+    width: min(320px, 88vw);
+  }
+}

@@ -1,0 +1,147 @@
+.validation-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 0 16px;
+}
+
+.validation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.validation-table thead th {
+  text-align: left;
+  color: var(--gray-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.validation-table tbody td {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+}
+
+.validation-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.validation-person {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.validation-person > span {
+  display: grid;
+  gap: 2px;
+}
+
+.validation-person strong {
+  font-size: 1.05rem;
+}
+
+.validation-person small {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.validation-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--gray-soft);
+  display: grid;
+  place-items: center;
+}
+
+.validation-type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.validation-type-pill.is-grad {
+  color: #009a4d;
+  background: rgba(16, 185, 129, 0.16);
+}
+
+.validation-type-pill.is-company {
+  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.validation-actions {
+  display: inline-flex;
+  gap: 10px;
+}
+
+.validation-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.validation-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.validation-view-action {
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gray-soft);
+  cursor: pointer;
+}
+
+.validation-view-action span {
+  font-size: 0.96rem;
+}
+
+.validation-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 16px;
+}
+
+.validation-pagination div {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.validation-pagination button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 30px;
+  min-height: 30px;
+  background: #ffffff;
+  color: var(--gray-soft);
+}
+
+@media (max-width: 1024px) {
+  .validation-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .validation-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
