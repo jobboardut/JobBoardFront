@@ -1,11 +1,11 @@
-// src/types/auth.types.ts
-export type UserRole = 'administrador' | 'empresa' | 'estudiante'
+export type UserRole = 'Admin' | 'Empresa' | 'Estudiante' | 'Egresado'
 
 export interface AuthUser {
-  id: string
-  name: string
+  id: number
   email: string
-  role: UserRole
+  rol: UserRole
+  estatusValidacion: string
+  nombreCompleto: string | null
 }
 
 export interface LoginRequest {
@@ -15,5 +15,28 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string
-  user: AuthUser
+  expiracion: string
+  usuario: AuthUser
+}
+
+export interface RegistroEmpresaRequest {
+  email: string
+  password: string
+  nombreEmpresa: string
+  telefonoEmpresa: string
+  direccion: string
+  correoEmpresa: string
+  sectorId: string
+  sitioWeb: string
+  descripcion: string
+  repNombre: string
+  repApellidos: string
+  repPuesto: string
+  repTelefono: string
+  repCorreo: string
+  logo?: File | null
+  situacionFiscal?: File | null
+  docExistencia?: File | null
+  repDocCargo?: File | null
+  repFotoIne?: File | null
 }

@@ -11,18 +11,18 @@ export const useLogin = () => {
     mutationFn: (data: LoginRequest) => authService.login(data),
 
     onSuccess: (response) => {
-      // Guarda el token cuando el login es exitoso
-      localStorage.setItem('token', response.data.token)
-      // Redirige según el rol
-      const role = response.data.user.role
-      if (role === 'administrador') navigate(ROUTES.DASHBOARD)
-      if (role === 'empresa')       navigate(ROUTES.EMPRESA_DASHBOARD)
-      if (role === 'estudiante')    navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
+      // Redirige según el rol que devuelve el backend
+      const rol = response.usuario.rol
+
+      if (rol === 'Admin')      navigate(ROUTES.DASHBOARD)
+      if (rol === 'Empresa')    navigate(ROUTES.EMPRESA_DASHBOARD)
+      if (rol === 'Estudiante') navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
+      if (rol === 'Egresado')   navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
     },
 
     onError: (error: Error) => {
-  console.error('Error de login:', error?.message)
-},
+      console.error('Error de login:', error.message)
+    },
   })
 }
 
