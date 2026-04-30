@@ -1,4 +1,4 @@
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { STATS_ICON_SIZE, STATS_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ValidationMetric } from '../types/validation.types'
 
 type ValidationStatsProps = {
@@ -11,7 +11,7 @@ function ValidationStats({ metrics }: ValidationStatsProps) {
       {metrics.map((metric) => (
         <article key={metric.label} className="validation-stat-card">
           <div className={`validation-stat-icon tone-${metric.tone}`}>
-            <metric.Icon size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+            <metric.Icon size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
           </div>
           <div>
             <p className="validation-stat-label">{metric.label}</p>

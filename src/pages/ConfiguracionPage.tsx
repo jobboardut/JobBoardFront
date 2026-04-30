@@ -53,7 +53,7 @@ function ConfiguracionPage() {
               <Settings2 size={16} strokeWidth={1.9} />
               Configuración
             </p>
-            <h1>Listas maestras del sistema</h1>
+            <h1>Listas de registro</h1>
             <p>
               Administra los programas educativos disponibles para el registro y los sectores empresariales que se
               muestran a las empresas. Solo puedes crear nuevos elementos o eliminarlos.

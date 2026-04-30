@@ -1,75 +1,141 @@
-# React + TypeScript + Vite
+# JobBoardFront
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend administrativo para gestionar dashboard, validacion, gestion, publicaciones, seguimiento de postulaciones y configuracion.
 
-Currently, two official plugins are available:
+Este proyecto ya esta preparado para conectar APIs reales con el menor impacto posible en la UI.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Stack
 
-## React Compiler
+- React 19
+- TypeScript
+- Vite
+- Lucide React (iconografia)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Scripts
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Configuracion de entorno
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Crear un archivo `.env` (o `.env.local`) en la raiz del proyecto:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_BASE_URL=http://localhost:3000
 ```
-# JobBoardFront
-# JobBoardFront
+
+Si `VITE_API_BASE_URL` no existe, el proyecto usa rutas relativas. Eso permite trabajar con mocks sin backend.
+
+## Arquitectura general
+
+La aplicacion esta separada por capas para desacoplar UI y backend:
+
+- `src/pages`: pantallas completas por modulo.
+- `src/components`: layout y UI reutilizable.
+- `src/features/<modulo>`: logica por dominio (`components`, `hooks`, `services`, `types`).
+- `src/router`: resolucion de rutas de la app.
+- `src/services`: cliente HTTP base y endpoints globales.
+
+## Rutas de navegacion
+
+Archivo principal:
+
+- `src/router/appRoutes.ts`
+
+Define:
+
+- Tipo de rutas internas (`AppRoute`).
+- Mapeo hash -> ruta interna.
+- Mapeo ruta interna -> hash.
+
+Ejemplo actual: `#dashboard`, `#validacion`, `#gestion`, `#publicaciones`, `#tracking`, `#configuracion`.
+
+## Integracion de API (punto clave)
+
+### 1) Endpoints centralizados
+
+Archivo:
+
+- `src/services/apiEndpoints.ts`
+
+Aqui se declaran los paths por modulo.
+
+### 2) Cliente HTTP base
+
+Archivo:
+
+- `src/services/apiClient.ts`
+
+Responsabilidades:
+
+- Construir URL final usando `VITE_API_BASE_URL`.
+- Ejecutar requests JSON.
+- Manejo base de errores HTTP.
+
+### 3) Servicios por feature
+
+Carpeta:
+
+- `src/features/*/services`
+
+Cada modulo consume `apiEndpoints` + `requestJson` y entrega datos listos para la UI.
+
+## Flujo recomendado para conectar backend
+
+1. Agregar o ajustar endpoint en `src/services/apiEndpoints.ts`.
+2. Implementar request en el service del feature (`src/features/<modulo>/services`).
+3. Mapear DTO del backend al tipo interno del feature (`src/features/<modulo>/types`).
+4. Mantener `pages` y `components` sin `fetch` directo.
+
+## Ejemplo de integracion en un service
+
+```ts
+import { requestJson } from '../../../services/apiClient'
+import { apiEndpoints } from '../../../services/apiEndpoints'
+import type { DashboardOverviewResponse } from '../types/dashboard.types'
+
+export async function getDashboardOverview(): Promise<DashboardOverviewResponse> {
+  return requestJson<DashboardOverviewResponse>(apiEndpoints.dashboardOverview)
+}
+```
+
+## Regla de mantenimiento
+
+No hacer llamadas HTTP desde:
+
+- `src/pages`
+- `src/components`
+
+Las llamadas deben vivir en:
+
+- `src/features/*/services`
+- o en `src/services` si es infraestructura compartida.
+
+## Modulos preparados para API
+
+- Dashboard
+- Usuarios
+- Validacion
+- Gestion
+- Publicaciones
+- Seguimiento de postulaciones
+- Configuracion
+
+## Checklist rapido para quien integra APIs
+
+1. Configurar `VITE_API_BASE_URL`.
+2. Confirmar/actualizar paths en `apiEndpoints.ts`.
+3. Reemplazar mocks por `requestJson` en services de cada feature.
+4. Ajustar mapeos de tipos (DTO -> tipo UI).
+5. Probar vistas por modulo.
+6. Ejecutar `npm run lint` y `npm run build`.
+
+## Documentacion complementaria
+
+- `API_INTEGRATION_GUIDE.md`
+- `FRONTEND_ARCHITECTURE.md`

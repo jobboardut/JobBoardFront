@@ -1,5 +1,5 @@
 import { BookOpenText, Building2 } from 'lucide-react'
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { STATS_ICON_SIZE, STATS_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 
 type ConfigurationStatsProps = {
   programsCount: number
@@ -11,7 +11,7 @@ function ConfigurationStats({ programsCount, sectorsCount }: ConfigurationStatsP
     <section className="configuration-stats" aria-label="Resumen de configuración">
       <article className="configuration-stat-card">
         <span className="configuration-stat-icon is-blue">
-          <BookOpenText size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+          <BookOpenText size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
         </span>
         <div>
           <strong>{programsCount}</strong>
@@ -21,7 +21,7 @@ function ConfigurationStats({ programsCount, sectorsCount }: ConfigurationStatsP
 
       <article className="configuration-stat-card">
         <span className="configuration-stat-icon is-green">
-          <Building2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+          <Building2 size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
         </span>
         <div>
           <strong>{sectorsCount}</strong>

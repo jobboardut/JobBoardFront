@@ -1,4 +1,4 @@
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { STATS_ICON_SIZE, STATS_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { TrackingMetric } from '../types/tracking.types'
 
 type TrackingStatsProps = {
@@ -11,7 +11,7 @@ function TrackingStats({ metrics }: TrackingStatsProps) {
       {metrics.map((metric) => (
         <article key={metric.label} className="tracking-stat-card">
           <span className={`tracking-stat-icon tone-${metric.tone}`}>
-            <metric.Icon size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+            <metric.Icon size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
           </span>
           <div>
             <strong>{metric.value}</strong>

@@ -1,4 +1,4 @@
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { STATS_ICON_SIZE, STATS_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ManagementMetric } from '../types/management.types'
 
 type ManagementStatsProps = {
@@ -11,7 +11,7 @@ function ManagementStats({ metrics }: ManagementStatsProps) {
       {metrics.map((metric) => (
         <article key={metric.label} className={`management-stat-card tone-${metric.tone}`}>
           <span className="management-stat-icon">
-            <metric.Icon size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+            <metric.Icon size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
           </span>
 
           <div>

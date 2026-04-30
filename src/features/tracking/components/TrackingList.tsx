@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Mail } from 'lucide-react'
+import { ArrowRight, CalendarDays } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { TrackingRow } from '../types/tracking.types'
 
@@ -105,11 +105,6 @@ function TrackingList({ rows }: TrackingListProps) {
                 <CalendarDays size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
                 {row.date}
               </p>
-              <p>
-                <Mail size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
-                {row.email}
-              </p>
-              <small>{row.note}</small>
             </footer>
           </article>
         ))}

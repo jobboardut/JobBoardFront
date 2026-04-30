@@ -1,7 +1,7 @@
-import { BriefcaseBusiness, FileText, LayoutDashboard, Send, Settings2, ShieldCheck } from 'lucide-react'
+import { BriefcaseBusiness, FileText, LayoutDashboard, LogOut, Send, Settings2, ShieldCheck } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../config/iconConfig'
 
-type SidebarKey = 'dashboard' | 'validation' | 'management' | 'publications' | 'tracking' | 'settings'
+type SidebarKey = 'dashboard' | 'validation' | 'management' | 'publications' | 'tracking' | 'settings' | 'logout'
 
 type AdminSidebarProps = {
   activeItem?: SidebarKey
@@ -34,6 +34,15 @@ function AdminSidebar({ activeItem = 'dashboard' }: AdminSidebarProps) {
             {item.label}
           </a>
         ))}
+      </nav>
+
+      <nav className="nav-footer">
+        <a className="nav-item" href="#logout">
+          <span className="nav-icon">
+            <LogOut size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+          </span>
+          Salir
+        </a>
       </nav>
     </aside>
   )

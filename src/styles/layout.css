@@ -11,6 +11,8 @@
   border-right: 1px solid var(--border);
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .brand {
@@ -75,8 +77,30 @@
 
 .nav-item:hover,
 .nav-item.active {
-  background: rgba(17, 24, 39, 0.08);
-  color: var(--text);
+  background: #10b981;
+  color: #ffffff;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item.active .nav-icon {
+  color: #ffffff;
+}
+
+.nav-footer {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.nav-footer .nav-item:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.nav-footer .nav-item:hover .nav-icon {
+  color: #ffffff;
 }
 
 .content {

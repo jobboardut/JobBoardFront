@@ -1,5 +1,5 @@
 import type { SummaryCard } from '../types/dashboard.types'
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { STATS_ICON_SIZE, STATS_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 
 type SummaryGridProps = {
   cards: SummaryCard[]
@@ -11,7 +11,7 @@ function SummaryGrid({ cards }: SummaryGridProps) {
       {cards.map((card) => (
         <article key={card.label} className={`summary-card summary-${card.accent}`}>
           <div className="summary-icon">
-            <card.Icon size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+            <card.Icon size={STATS_ICON_SIZE} strokeWidth={STATS_ICON_STROKE_WIDTH} />
           </div>
           <div>
             <p className="summary-label">{card.label}</p>
