@@ -1,29 +1,32 @@
 import { NavLink } from 'react-router-dom'
-import type { UserRole } from '@/types/auth.types'
+import type { UserRole } from '@/features/auth/types/auth.types'
 import { ROUTES } from '@/router/routes'
 
 interface SidebarProps {
   role: UserRole
 }
 
-const menuItems = {
-  administrador: [
-    { label: 'Dashboard',                    path: ROUTES.DASHBOARD },
-    { label: 'Centro de validación',         path: '/administradores/validacion' },
-    { label: 'Centro de gestión',            path: '/administradores/gestion' },
-    { label: 'Publicaciones',               path: '/administradores/publicaciones' },
-    { label: 'Seguimiento de postulaciones', path: '/administradores/seguimiento' },
+const estudianteItems = [
+  { label: 'Publicaciones', path: ROUTES.ESTUDIANTE_PUBLICACIONES },
+  { label: 'Mi perfil', path: ROUTES.ESTUDIANTE_PERFIL },
+  { label: 'Seguimiento', path: ROUTES.ESTUDIANTE_SEGUIMIENTO },
+]
+
+const menuItems: Record<UserRole, { label: string; path: string }[]> = {
+  Admin: [
+    { label: 'Dashboard', path: ROUTES.DASHBOARD },
+    { label: 'Centro de validacion', path: ROUTES.ADMIN_VALIDACION },
+    { label: 'Centro de gestion', path: ROUTES.ADMIN_GESTION },
+    { label: 'Publicaciones', path: ROUTES.ADMIN_PUBLICACIONES },
+    { label: 'Seguimiento de postulaciones', path: ROUTES.ADMIN_SEGUIMIENTO },
   ],
-  empresa: [
-    { label: 'Panel de control', path: '/empresas/dashboard' },
-    { label: 'Publicaciones',   path: '/empresas/publicaciones' },
-    { label: 'Postulantes',     path: '/empresas/postulantes' },
+  Empresa: [
+    { label: 'Panel de control', path: ROUTES.EMPRESA_DASHBOARD },
+    { label: 'Publicaciones', path: ROUTES.EMPRESA_PUBLICACIONES },
+    { label: 'Postulantes', path: ROUTES.EMPRESA_POSTULANTES },
   ],
-  estudiante: [
-    { label: 'Publicaciones', path: '/estudiantes/publicaciones' },
-    { label: 'Mi perfil',     path: '/estudiantes/perfil' },
-    { label: 'Seguimiento',   path: '/estudiantes/seguimiento' },
-  ],
+  Estudiante: estudianteItems,
+  Egresado: estudianteItems,
 }
 
 export const Sidebar = ({ role }: SidebarProps) => {
@@ -31,7 +34,6 @@ export const Sidebar = ({ role }: SidebarProps) => {
 
   return (
     <aside className="w-64 min-h-screen bg-white shadow-md flex flex-col py-6 px-4">
-      {/* Logo */}
       <div className="mb-8 px-2">
         <img
           src="https://www.figma.com/api/mcp/asset/feae3d59-0aeb-4c97-a7d2-b94b64ab53f6"
@@ -40,7 +42,6 @@ export const Sidebar = ({ role }: SidebarProps) => {
         />
       </div>
 
-      {/* Menu */}
       <nav className="flex flex-col gap-2">
         {items.map((item) => (
           <NavLink

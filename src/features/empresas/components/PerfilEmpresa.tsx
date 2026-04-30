@@ -1,0 +1,183 @@
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { MapPin, Globe, Mail, Pencil } from 'lucide-react'
+import { ROUTES } from '@/router/routes'
+import { useEmpresaPerfil } from '../hooks/useEmpresa'
+
+type Tab = 'descripcion' | 'requisitos'
+
+const tabs: { key: Tab; label: string }[] = [
+  { key: 'descripcion', label: 'Descripción' },
+  { key: 'requisitos',  label: 'Requisitos' },
+]
+
+export const PerfilEmpresa = () => {
+  const [tabActiva, setTabActiva] = useState<Tab>('descripcion')
+  const navigate = useNavigate()
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const [mapReady, setMapReady] = useState(false)
+
+  const { data: perfil, isLoading, isError } = useEmpresaPerfil()
+
+  useEffect(() => {
+    const element = mapRef.current
+    if (!element || mapReady) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setMapReady(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '120px' }
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [mapReady])
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-20">
+      <p className="text-gray-400 text-sm">Cargando perfil...</p>
+    </div>
+  )
+
+  if (isError || !perfil) return (
+    <div className="flex items-center justify-center py-20">
+      <p className="text-red-400 text-sm">Error al cargar el perfil. Intenta de nuevo.</p>
+    </div>
+  )
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+      <div>
+        <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg mb-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center overflow-hidden">
+                {perfil.logoUrl ? (
+                  <img src={perfil.logoUrl} alt={perfil.nombreEmpresa} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-white text-2xl font-bold">
+                    {perfil.nombreEmpresa?.charAt(0) ?? 'E'}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h1 className="mt-3 text-2xl font-semibold">{perfil.nombreEmpresa}</h1>
+                <div className="flex items-center gap-1 mt-2 text-white/80">
+                  <MapPin size={14} />
+                  <p className="text-sm">{perfil.direccion}</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate(ROUTES.EMPRESA_EDITAR_PERFIL)}
+              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-600"
+            >
+              <Pencil size={15} />
+              Editar perfil
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 mb-6">
+          {[
+            { label: 'Estatus',  value: perfil.estatusValidacion ?? 'Sin dato' },
+            { label: 'RFC',      value: perfil.rfc ?? 'Sin dato' },
+          ].map((item) => (
+            <div key={item.label} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-800">{item.value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-6">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setTabActiva(tab.key)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                tabActiva === tab.key
+                  ? 'bg-emerald-500 text-white'
+                  : 'border border-slate-200 text-slate-500 hover:border-emerald-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {tabActiva === 'descripcion' && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Descripción</h2>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              {perfil.descripcion || 'Sin descripción registrada.'}
+            </p>
+          </div>
+        )}
+
+        {tabActiva === 'requisitos' && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Requisitos</h2>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Sin información registrada.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Contacto</h3>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <Globe size={18} className="text-orange-400" />
+              <p className="text-sm text-gray-600">{perfil.sitioWeb || 'Sin sitio web'}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail size={18} className="text-orange-400" />
+              <p className="text-sm text-gray-600">{perfil.correoEmpresa}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Representante</h3>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: 'Nombre',   valor: `${perfil.repNombre} ${perfil.repApellidos}` },
+              { label: 'Puesto',   valor: perfil.repPuesto },
+              { label: 'Teléfono', valor: perfil.repTelefono },
+              { label: 'Correo',   valor: perfil.repCorreo },
+            ].map(dato => (
+              <div key={dato.label} className="flex justify-between">
+                <p className="text-sm text-gray-400">{dato.label}</p>
+                <p className="text-sm text-gray-700 font-medium text-right max-w-40">{dato.valor}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="text-lg font-bold text-emerald-500 mb-3">Ubicación</h3>
+          <div ref={mapRef} className="w-full h-40 bg-gray-100 rounded-xl overflow-hidden">
+            {mapReady ? (
+              <iframe
+                title="ubicacion"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(perfil.direccion ?? 'Tecamachalco,Puebla')}&output=embed`}
+                className="w-full h-full border-0"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-gray-400">
+                Cargando mapa...
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

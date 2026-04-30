@@ -1,5 +1,5 @@
 import { Sidebar } from './Sidebar'
-import type { UserRole } from '@/types/auth.types'
+import type { UserRole } from '@/features/auth/types/auth.types'
 
 interface PageWrapperProps {
   children: React.ReactNode

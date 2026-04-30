@@ -14,6 +14,9 @@ api.interceptors.request.use((requestConfig) => {
   if (token) {
     requestConfig.headers.Authorization = `Bearer ${token}`
   }
+  if (requestConfig.data instanceof FormData) {
+    delete requestConfig.headers['Content-Type']
+  }
   return requestConfig
 })
 
