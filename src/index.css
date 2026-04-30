@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+html,
+body,
+#root {
+	background: #ffffff;
+}
+
+body {
+	color: #0f172a;
+}
+
 .publication-scroll {
 	scrollbar-width: thin;
 	scrollbar-color: rgba(130, 146, 170, 0.28) transparent;

@@ -18,7 +18,7 @@ export const PublicacionesSearchHeader = ({
   onSearchChange,
 }: PublicacionesSearchHeaderProps) => {
   return (
-    <header className="relative flex items-center justify-end border-b border-[#e7e1d9] bg-[#f8f7f4] px-6 py-4">
+    <header className="relative flex items-center justify-end border-b border-[#e7e1d9] bg-white px-6 py-4">
       <div className={`publications-search-shell ${isSearchOpen ? 'open' : ''}`}>
         <Search size={20} className="shrink-0 text-slate-500" />
         <input

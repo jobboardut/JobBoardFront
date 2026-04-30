@@ -29,7 +29,7 @@ export const EstudianteDashboardPage = () => {
 
   return (
     <PageWrapper role="estudiante">
-      <div className="flex h-screen flex-col overflow-hidden bg-[#f6f5f3] text-[#1d2538]">
+      <div className="flex h-screen flex-col overflow-hidden bg-white text-[#1d2538]">
         <SearchHeader
           isSearchOpen={isSearchOpen}
           searchText={searchText}
@@ -41,7 +41,7 @@ export const EstudianteDashboardPage = () => {
 
         {viewMode === 'detail' ? (
           <section className="overflow-y-auto">
-            <div className="bg-[#f6f5f3] px-6 py-6">
+            <div className="bg-white px-6 py-6">
               <MetricsGrid metrics={metrics} />
               <ActivitySection columns={activityColumns} />
             </div>

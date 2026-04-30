@@ -41,13 +41,13 @@ export const Sidebar = ({ role }: SidebarProps) => {
   const items = menuItems[role]
 
   return (
-    <aside className="flex min-h-screen w-64 flex-col border-r border-[#dfd9cf] bg-[#f8f7f4]">
-      <div className="border-b border-[#e6dfd5] px-4 py-4">
-        <div className="flex items-center">
+    <aside className="flex min-h-screen w-64 flex-col border-r border-[#ece7df] bg-white">
+      <div className="px-4 py-8">
+        <div className="flex items-center justify-center">
           <img
             src="/logouttecam-removebg-preview.png"
             alt="UTTECAM"
-            className="h-10 w-auto max-w-40"
+            className="h-16 w-auto max-w-52 object-contain"
           />
         </div>
       </div>
@@ -71,7 +71,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
         ))}
       </nav>
 
-      <div className="border-t border-[#e6dfd5] p-4">
+      <div className="border-t border-[#ece7df] p-4">
         <button
           type="button"
           aria-label="Salir"

@@ -34,8 +34,8 @@ export const EstudiantePerfilPage = () => {
       />
 
       <PageWrapper role="estudiante">
-      <div className="flex h-screen flex-col overflow-hidden bg-[#f6f5f3] text-[#1d2538]">
-        <ProfileHeaderBar />
+        <div className="flex h-screen flex-col overflow-hidden bg-white text-[#1d2538]">
+          <ProfileHeaderBar />
 
         <div className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl px-6 py-8">
@@ -69,7 +69,7 @@ export const EstudiantePerfilPage = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </PageWrapper>
     </>
   )

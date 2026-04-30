@@ -23,7 +23,7 @@ export const EstudiantePublicacionesPage = () => {
 
   return (
     <PageWrapper role="estudiante">
-      <div className="flex h-screen flex-col overflow-hidden bg-[#f6f5f3] text-[#1d2538]">
+      <div className="flex h-screen flex-col overflow-hidden bg-white text-[#1d2538]">
         <PublicacionesSearchHeader
           isSearchOpen={isSearchOpen}
           searchText={searchText}

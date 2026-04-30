@@ -18,7 +18,7 @@ export const ActivitySection = ({ columns }: ActivitySectionProps) => {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-2xl font-semibold">{column.title}</h3>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[rgba(234,88,12,0.12)] text-sm font-bold text-[#EA580C]">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-[rgba(16,185,129,0.12)] text-sm font-bold text-[#059669]">
                 {column.count}
               </span>
             </div>

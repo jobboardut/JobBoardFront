@@ -7,7 +7,7 @@ interface SearchPublicationCardProps {
 
 export const SearchPublicationCard = ({ item }: SearchPublicationCardProps) => {
   return (
-    <article className="group cursor-pointer rounded-xl border border-[#ede8e0] border-b-4 border-b-[#009A4D] bg-white p-5 shadow-[0_2px_12px_rgba(23,34,55,0.06)] transition-all duration-200 hover:border-b-[#EA580C] hover:shadow-[0_8px_20px_rgba(23,34,55,0.15)]">
+    <article className="group cursor-pointer rounded-xl border border-[#ede8e0] border-b-4 border-b-[#009A4D] bg-white p-5 shadow-[0_2px_12px_rgba(23,34,55,0.06)] transition-all duration-200 hover:border-b-[#059669] hover:shadow-[0_8px_20px_rgba(23,34,55,0.15)]">
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">{item.title}</h3>
@@ -26,7 +26,7 @@ export const SearchPublicationCard = ({ item }: SearchPublicationCardProps) => {
         </div>
       </div>
 
-      <p className="mt-3 text-lg font-semibold text-[#EA580C]">{item.salary}</p>
+      <p className="mt-3 text-lg font-semibold text-[#059669]">{item.salary}</p>
 
       <div className="mt-3 inline-block rounded-full bg-[#f4f3f2] px-3 py-1 text-xs font-medium text-slate-600">
         {item.availability}

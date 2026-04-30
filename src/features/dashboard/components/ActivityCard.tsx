@@ -2,8 +2,8 @@ import { BriefcaseBusiness } from 'lucide-react'
 import type { JobStatus } from '../types/dashboard.types'
 
 const statusPillClass: Record<JobStatus, string> = {
-  'En revision': 'bg-[rgba(234,88,12,0.12)] text-[#EA580C]',
-  'En progreso': 'bg-[rgba(234,88,12,0.12)] text-[#EA580C]',
+  'En revision': 'bg-[rgba(16,185,129,0.12)] text-[#059669]',
+  'En progreso': 'bg-[rgba(16,185,129,0.12)] text-[#059669]',
   'Proceso finalizado': 'bg-[#009A4D] text-white',
 }
 
@@ -25,7 +25,7 @@ export const ActivityCard = ({ status }: ActivityCardProps) => {
         </div>
       </div>
 
-      <p className="mt-3 text-xl font-semibold text-[#EA580C]">$80k - $70k</p>
+      <p className="mt-3 text-xl font-semibold text-[#059669]">$80k - $70k</p>
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <div className="text-sm text-slate-500">
