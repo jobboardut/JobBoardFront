@@ -1,4 +1,4 @@
-import { CalendarDays, CircleOff, MapPin, Trash2, Users, X } from 'lucide-react'
+import { CircleOff, MapPin, Trash2, X } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { Publication } from '../types/publications.types'
 

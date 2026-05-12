@@ -3,7 +3,7 @@ import type { StudentProfile } from '../types/profile.types'
 import type { EditContactFormData } from '../modals/EditContactModal'
 
 export const useProfile = () => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing] = useState(false)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [studentProfile, setStudentProfile] = useState<StudentProfile>({
     id: '1',

@@ -1,5 +1,5 @@
 import { ArrowRight, CalendarDays } from 'lucide-react'
-import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { TrackingRow } from '../types/tracking.types'
 
 type TrackingListProps = {
