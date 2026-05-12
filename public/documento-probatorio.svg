@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Documento probatorio">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e5e7eb"/>
+      <stop offset="1" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f1f5f9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="140" y="90" width="920" height="620" rx="30" fill="url(#card)" stroke="#cbd5e1" stroke-width="6"/>
+  <circle cx="330" cy="320" r="95" fill="#cbd5e1"/>
+  <path d="M230 510c28-76 77-118 130-118s102 42 130 118" fill="#cbd5e1"/>
+  <rect x="500" y="220" width="430" height="36" rx="10" fill="#94a3b8" opacity="0.8"/>
+  <rect x="500" y="286" width="350" height="28" rx="10" fill="#94a3b8" opacity="0.65"/>
+  <rect x="500" y="344" width="390" height="28" rx="10" fill="#94a3b8" opacity="0.65"/>
+  <rect x="500" y="402" width="280" height="28" rx="10" fill="#94a3b8" opacity="0.65"/>
+  <rect x="240" y="596" width="720" height="24" rx="8" fill="#64748b" opacity="0.35"/>
+</svg>

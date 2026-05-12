@@ -16,6 +16,12 @@ import { EditarPerfilEmpresa } from '@/features/empresas/components/EditarPerfil
 import FormularioVacante from '@/features/empresas/components/FormularioVacante'
 import { DetalleVacante } from '@/features/empresas/components/DetalleVacante'
 import { DetallePostulante } from '@/features/empresas/components/DetallePostulante'
+import AdministradorDashboardPage from '@/pages/AdministradorDashboardPage'
+import CentroGestionPage from '@/pages/CentroGestionPage'
+import CentroValidacionPage from '@/pages/CentroValidacionPage'
+import ConfiguracionPage from '@/pages/ConfiguracionPage'
+import PublicacionesPage from '@/pages/PublicacionesPage'
+import SeguimientoPostulacionesPage from '@/pages/SeguimientoPostulacionesPage'
 
 
 export const AppRouter = () => {
@@ -40,6 +46,12 @@ export const AppRouter = () => {
         <Route path={ROUTES.EMPRESA_EDITAR_VACANTE} element={<PrivateRoute><EmpresaLayout><FormularioVacante modo="editar" /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_DETALLE_VACANTE} element={<PrivateRoute><EmpresaLayout><DetalleVacante /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_DETALLE_POSTULANTE} element={<PrivateRoute><EmpresaLayout><DetallePostulante /></EmpresaLayout></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_DASHBOARD} element={<PrivateRoute><AdministradorDashboardPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_VALIDACION} element={<PrivateRoute><CentroValidacionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_GESTION} element={<PrivateRoute><CentroGestionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_PUBLICACIONES} element={<PrivateRoute><PublicacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_SEGUIMIENTO} element={<PrivateRoute><SeguimientoPostulacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_CONFIGURACION} element={<PrivateRoute><ConfiguracionPage /></PrivateRoute>} />
 
         {/* Rutas privadas */}
         <Route path={ROUTES.DASHBOARD} element={

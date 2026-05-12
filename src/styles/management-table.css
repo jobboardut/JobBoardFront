@@ -1,0 +1,117 @@
+.management-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.management-table thead th {
+  text-align: left;
+  color: var(--gray-soft);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.management-table tbody td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-soft);
+}
+
+.management-user-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.management-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.5);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.management-user-cell strong {
+  display: block;
+}
+
+.management-user-cell small {
+  color: var(--muted);
+}
+
+.management-type-pill,
+.management-state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.management-type-pill.is-grad {
+  color: #009a4d;
+  background: rgba(16, 185, 129, 0.16);
+}
+
+.management-type-pill.is-company {
+  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.management-state-pill.is-active {
+  color: #166534;
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.management-state-pill.is-inactive {
+  color: #374151;
+  background: rgba(156, 163, 175, 0.24);
+}
+
+.management-view-action {
+  border: 0;
+  background: transparent;
+  color: var(--gray-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.management-view-action span {
+  font-size: 0.94rem;
+}
+
+.management-view-action:hover {
+  color: var(--ink-soft);
+}
+
+.management-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.management-pagination div {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.management-pagination button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 30px;
+  min-height: 30px;
+  background: #ffffff;
+}

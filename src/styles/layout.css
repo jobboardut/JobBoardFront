@@ -1,0 +1,110 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 278px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  padding: 24px 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 20px;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: start;
+  width: 206px;
+  height: 74px;
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-name {
+  font-size: 1.02rem;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.nav {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: var(--text);
+  font-weight: 500;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.nav-icon {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  color: var(--gray-soft);
+}
+
+.nav-icon svg {
+  display: block;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item.active .nav-icon {
+  color: #ffffff;
+}
+
+.nav-footer {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.nav-footer .nav-item:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.nav-footer .nav-item:hover .nav-icon {
+  color: #ffffff;
+}
+
+.content {
+  padding: 18px 20px 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
