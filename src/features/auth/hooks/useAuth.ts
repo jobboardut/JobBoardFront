@@ -11,13 +11,12 @@ export const useLogin = () => {
     mutationFn: (data: LoginRequest) => authService.login(data),
 
     onSuccess: (response) => {
-      // Redirige según el rol que devuelve el backend
       const rol = response.usuario.rol
 
-      if (rol === 'Admin')      navigate(ROUTES.DASHBOARD)
-      if (rol === 'Empresa')    navigate(ROUTES.EMPRESA_DASHBOARD)
-      if (rol === 'Estudiante') navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
-      if (rol === 'Egresado')   navigate(ROUTES.ESTUDIANTE_PUBLICACIONES)
+      if (rol === 'Admin') navigate(ROUTES.ADMIN_DASHBOARD)
+      if (rol === 'Empresa') navigate(ROUTES.EMPRESA_DASHBOARD)
+      if (rol === 'Estudiante') navigate(ROUTES.ESTUDIANTE_DASHBOARD)
+      if (rol === 'Egresado') navigate(ROUTES.ESTUDIANTE_DASHBOARD)
     },
 
     onError: (error: Error) => {

@@ -8,16 +8,9 @@ interface PageWrapperProps {
 
 export const PageWrapper = ({ children, role }: PageWrapperProps) => {
   return (
-    <div className="flex min-h-screen bg-gray-50">
-
-      {/* Sidebar izquierdo */}
+    <div className="flex min-h-screen bg-white">
       <Sidebar role={role} />
-
-      {/* Contenido de la página */}
-      <main className="flex-1 p-8">
-        {children}
-      </main>
-
+      <main className="relative flex-1">{children}</main>
     </div>
   )
 }

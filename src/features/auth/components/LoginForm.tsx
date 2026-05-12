@@ -58,7 +58,7 @@ export const LoginForm = () => {
                 onChange={handleChange}
                 placeholder="Ingresa tu Email"
                 required
-                className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#009A4D]"
               />
             </div>
 
@@ -71,11 +71,11 @@ export const LoginForm = () => {
                 onChange={handleChange}
                 placeholder="Ingresa tu contraseña"
                 required
-                className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#009A4D]"
               />
             </div>
 
-            <p className="text-right text-sm text-emerald-500 cursor-pointer hover:underline">
+            <p className="text-right text-sm text-[#009A4D] cursor-pointer hover:underline">
               Olvidaste tu contraseña?
             </p>
 
@@ -89,7 +89,7 @@ export const LoginForm = () => {
             <button
               type="submit"
               disabled={isPending}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50"
+              className="bg-[#009A4D] hover:bg-[#10B981] text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50"
             >
               {isPending ? 'Entrando...' : 'Iniciar Sesión'}
             </button>
@@ -98,7 +98,7 @@ export const LoginForm = () => {
               No tienes cuenta?{' '}
               <span
                 onClick={() => window.location.href = '/registro'}
-                className="text-emerald-500 cursor-pointer hover:underline"
+                className="text-[#009A4D] cursor-pointer hover:underline"
               >
                 Crea una aquí
               </span>

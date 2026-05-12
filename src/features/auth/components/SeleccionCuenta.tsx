@@ -72,7 +72,7 @@ export const SeleccionCuenta = () => {
               <div className="flex flex-col items-center gap-1">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
                   index === 0
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-[#009A4D] text-white'
                     : 'bg-gray-200 text-gray-400'
                 }`}>
                   {index === 0
@@ -81,14 +81,14 @@ export const SeleccionCuenta = () => {
                   }
                 </div>
                 <span className={`text-xs text-center w-24 leading-tight ${
-                  index === 0 ? 'text-emerald-500 font-semibold' : 'text-gray-400'
+                  index === 0 ? 'text-[#009A4D] font-semibold' : 'text-gray-400'
                 }`}>
                   {paso}
                 </span>
               </div>
               {index < pasos.length - 1 && (
                 <div className={`w-16 h-1 rounded mb-5 ${
-                  index === 0 ? 'bg-emerald-500' : 'bg-gray-200'
+                  index === 0 ? 'bg-[#009A4D]' : 'bg-gray-200'
                 }`} />
               )}
             </div>
@@ -114,20 +114,20 @@ export const SeleccionCuenta = () => {
                 onClick={() => setSeleccionado(tarjeta.tipo)}
                 className={`flex flex-col items-center p-6 rounded-2xl border-4 transition-all ${
                   activo
-                    ? 'border-emerald-500 bg-emerald-50'
+                    ? 'border-[#009A4D] bg-[#009A4D]'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
                 {/* Icono */}
                 <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-3 transition-colors ${
-                  activo ? 'bg-emerald-500' : 'bg-gray-200'
+                  activo ? 'bg-[#009A4D]' : 'bg-gray-200'
                 }`}>
                   <Icono size={32} color={activo ? 'white' : '#9ca3af'} />
                 </div>
 
                 {/* Titulo */}
                 <p className={`text-xl font-bold mb-1 ${
-                  activo ? 'text-emerald-500' : 'text-gray-500'
+                  activo ? 'text-[#009A4D]' : 'text-gray-500'
                 }`}>
                   {tarjeta.titulo}
                 </p>
@@ -139,7 +139,7 @@ export const SeleccionCuenta = () => {
 
                 {/* Linea indicador */}
                 <div className={`mt-3 h-1.5 w-16 rounded-full transition-colors ${
-                  activo ? 'bg-emerald-500' : 'bg-gray-200'
+                  activo ? 'bg-[#009A4D]' : 'bg-gray-200'
                 }`} />
               </button>
             )
@@ -151,7 +151,7 @@ export const SeleccionCuenta = () => {
           <button
             onClick={handleContinuar}
             disabled={!seleccionado}
-            className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-lg px-10 py-3 rounded-xl transition-colors"
+            className="bg-[#009A4D] hover:bg-[#10B981] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-lg px-10 py-3 rounded-xl transition-colors"
           >
             Continuar
           </button>

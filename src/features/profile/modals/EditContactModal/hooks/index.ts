@@ -1,0 +1,1 @@
+export { useEditContact } from './useEditContact'

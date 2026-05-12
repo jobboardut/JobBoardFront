@@ -1,0 +1,1 @@
+export { usePublicaciones } from './usePublicaciones'

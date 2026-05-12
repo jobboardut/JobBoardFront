@@ -15,7 +15,7 @@ export const RegistroCompletado = () => {
   const tipo = searchParams.get('tipo')
 
   // Color según el tipo de usuario
-  const colorIcono = tipo === 'empresa' ? 'bg-blue-500' : 'bg-orange-400'
+  const colorIcono = tipo === 'empresa' ? 'bg-blue-500' : 'bg-[#EA580C]'
 
   return (
     <div
@@ -35,15 +35,15 @@ export const RegistroCompletado = () => {
               <div className="flex flex-col items-center gap-1">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
                   index < 3
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-orange-400 text-white'
+                    ? 'bg-[#009A4D] text-white'
+                    : 'bg-[#EA580C] text-white'
                 }`}>
                   <BadgeCheck size={20} />
                 </div>
                 <span className={`text-xs text-center w-24 leading-tight ${
                   index < 3
-                    ? 'text-emerald-500 font-semibold'
-                    : 'text-orange-400 font-semibold'
+                    ? 'text-[#009A4D] font-semibold'
+                    : 'text-[#EA580C] font-semibold'
                 }`}>
                   {paso}
                 </span>
@@ -51,8 +51,8 @@ export const RegistroCompletado = () => {
               {index < pasos.length - 1 && (
                 <div className={`w-16 h-1 rounded mb-5 ${
                   index < 2
-                    ? 'bg-emerald-500'
-                    : 'bg-gradient-to-r from-emerald-500 to-orange-400'
+                    ? 'bg-[#009A4D]'
+                    : 'bg-gradient-to-r from-[#009A4D] to-[#EA580C]'
                 }`} />
               )}
             </div>
@@ -64,7 +64,7 @@ export const RegistroCompletado = () => {
           <div className={`w-32 h-32 rounded-full flex items-center justify-center ${colorIcono}`}>
             <BadgeCheck size={64} color="white" />
           </div>
-          <div className="absolute -top-2 right-[calc(50%-80px)] w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white">
+          <div className="absolute -top-2 right-[calc(50%-80px)] w-10 h-10 bg-[#009A4D] rounded-full flex items-center justify-center border-2 border-white">
             <Clock size={20} color="white" />
           </div>
         </div>
