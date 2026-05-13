@@ -1,13 +1,13 @@
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { JobDetailModal } from '@/shared/components/JobDetailModal'
-import { PublicacionesFilterPanel, PublicacionesSearchHeader } from '@/features/publicaciones/components'
+import { PublicacionesFilterPanel, PublicacionesSearchHeader } from '@/features/estudiantes/publicaciones/components'
 import { 
   ApplicationsTable, 
   StatusSummary, 
   SearchApplicationCard, 
   ApplicationSearchBar,
   useSeguimiento 
-} from '@/features/seguimiento'
+} from '@/features/estudiantes/seguimiento'
 
 export const EstudianteSeguimientoPage = () => {
   const {

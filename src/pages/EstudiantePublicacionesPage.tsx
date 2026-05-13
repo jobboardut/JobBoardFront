@@ -5,8 +5,8 @@ import {
   PublicacionesSearchHeader,
   PublicationDetail,
   SearchPublicationCard,
-} from '@/features/publicaciones/components'
-import { usePublicaciones } from '@/features/publicaciones/hooks'
+} from '@/features/estudiantes/publicaciones/components'
+import { usePublicaciones } from '@/features/estudiantes/publicaciones/hooks'
 
 export const EstudiantePublicacionesPage = () => {
   const {

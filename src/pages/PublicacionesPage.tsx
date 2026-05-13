@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import PublicationDetailModal from '../features/publications/components/PublicationDetailModal'
-import PublicationsGrid from '../features/publications/components/PublicationsGrid'
-import PublicationsStats from '../features/publications/components/PublicationsStats'
-import PublicationsToolbar from '../features/publications/components/PublicationsToolbar'
-import usePublicationsOverview from '../features/publications/hooks/usePublicationsOverview'
-import type { Publication } from '../features/publications/types/publications.types'
+import DetallePublicacionModal from '../features/administradores/publicaciones/components/DetallePublicacionModal'
+import PublicacionesGrid from '../features/administradores/publicaciones/components/PublicacionesGrid'
+import EstadisticasPublicaciones from '../features/administradores/publicaciones/components/EstadisticasPublicaciones'
+import PublicacionesToolbar from '../features/administradores/publicaciones/components/PublicacionesToolbar'
+import usePublicationsOverview from '../features/administradores/publicaciones/hooks/usePublicationsOverview'
+import type { Publication } from '../features/administradores/publicaciones/types/publicaciones.types'
 
 function PublicacionesPage() {
   const { metrics, publications } = usePublicationsOverview()
@@ -23,12 +23,12 @@ function PublicacionesPage() {
           </div>
         </header>
 
-        <PublicationsStats metrics={metrics} />
-        <PublicationsToolbar />
-        <PublicationsGrid rows={publications} onSelect={setSelectedPublication} />
+        <EstadisticasPublicaciones metrics={metrics} />
+        <PublicacionesToolbar />
+        <PublicacionesGrid rows={publications} onSelect={setSelectedPublication} />
       </main>
 
-      <PublicationDetailModal publication={selectedPublication} onClose={() => setSelectedPublication(null)} />
+      <DetallePublicacionModal publication={selectedPublication} onClose={() => setSelectedPublication(null)} />
     </div>
   )
 }

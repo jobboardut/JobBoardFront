@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Settings2 } from 'lucide-react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import ConfigurationListManager from '../features/configuration/components/ConfigurationListManager'
-import ConfigurationStats from '../features/configuration/components/ConfigurationStats'
-import useConfigurationOverview from '../features/configuration/hooks/useConfigurationOverview'
-import type { ConfigurationItem, ConfigurationListKey } from '../features/configuration/types/configuration.types'
+import GestorListaConfiguracion from '../features/administradores/configuracion/components/GestorListaConfiguracion'
+import EstadisticasConfiguracion from '../features/administradores/configuracion/components/EstadisticasConfiguracion'
+import useConfigurationOverview from '../features/administradores/configuracion/hooks/useConfigurationOverview'
+import type { ConfigurationItem, ConfigurationListKey } from '../features/administradores/configuracion/types/configuration.types'
 
 function ConfiguracionPage() {
   // Estado local temporal: cuando conectes backend, este bloque se reemplaza por datos de API.
@@ -61,10 +61,10 @@ function ConfiguracionPage() {
           </div>
         </header>
 
-        <ConfigurationStats programsCount={totals.programsCount} sectorsCount={totals.sectorsCount} />
+        <EstadisticasConfiguracion programsCount={totals.programsCount} sectorsCount={totals.sectorsCount} />
 
         <section className="configuration-grid">
-          <ConfigurationListManager
+          <GestorListaConfiguracion
             title="Programas educativos"
             description="Se muestran en el registro de alumnos y egresados."
             iconLabel="PE"
@@ -74,7 +74,7 @@ function ConfiguracionPage() {
             onDelete={handleDelete}
           />
 
-          <ConfigurationListManager
+          <GestorListaConfiguracion
             title="Sectores empresariales"
             description="Se muestran al registrar empresas en el sistema."
             iconLabel="SE"

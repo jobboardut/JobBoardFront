@@ -6,8 +6,8 @@ import {
   FilterPanel,
   MetricsGrid,
   SearchHeader,
-} from '@/features/dashboard/components'
-import { useDashboard } from '@/features/dashboard/hooks'
+} from '@/features/estudiantes/dashboard/components'
+import { useDashboard } from '@/features/estudiantes/dashboard/hooks'
 
 export const EstudianteDashboardPage = () => {
   const {

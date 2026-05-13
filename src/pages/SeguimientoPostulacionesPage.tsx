@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { AlertCircle, CheckCircle2, Clock3, Info, XCircle } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../config/iconConfig'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import TrackingList from '../features/tracking/components/TrackingList'
-import TrackingStats from '../features/tracking/components/TrackingStats'
-import TrackingToolbar from '../features/tracking/components/TrackingToolbar'
-import useTrackingOverview from '../features/tracking/hooks/useTrackingOverview'
+import TrackingList from '../features/administradores/seguimiento/components/TrackingList'
+import TrackingStats from '../features/administradores/seguimiento/components/TrackingStats'
+import TrackingToolbar from '../features/administradores/seguimiento/components/TrackingToolbar'
+import useTrackingOverview from '../features/administradores/seguimiento/hooks/useTrackingOverview'
 
 const statusInfoItems = [
   {

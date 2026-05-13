@@ -5,9 +5,9 @@ import {
   ProfileHeader,
   ProfileHeaderBar,
   StatusBadge,
-} from '@/features/profile/components'
-import { EditContactModal } from '@/features/profile/modals/EditContactModal'
-import { useProfile } from '@/features/profile/hooks'
+} from '@/features/estudiantes/perfil/components'
+import { EditContactModal } from '@/features/estudiantes/perfil/modals/EditContactModal'
+import { useProfile } from '@/features/estudiantes/perfil/hooks'
 
 export const EstudiantePerfilPage = () => {
   const {
