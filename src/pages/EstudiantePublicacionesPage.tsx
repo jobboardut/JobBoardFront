@@ -1,12 +1,10 @@
 import { PageWrapper } from '@/components/layout/PageWrapper'
-import {
-  JobListCard,
-  PublicacionesFilterPanel,
-  PublicacionesSearchHeader,
-  PublicationDetail,
-  SearchPublicationCard,
-} from '@/features/estudiantes/publicaciones/components'
-import { usePublicaciones } from '@/features/estudiantes/publicaciones/hooks'
+import { JobListCard } from '@/features/estudiantes/components/JobListCard'
+import { PublicacionesFilterPanel } from '@/features/estudiantes/components/PublicacionesFilterPanel'
+import { PublicacionesSearchHeader } from '@/features/estudiantes/components/PublicacionesSearchHeader'
+import { PublicationDetail } from '@/features/estudiantes/components/PublicationDetail'
+import { SearchPublicationCard } from '@/features/estudiantes/components/SearchPublicationCard'
+import { usePublicaciones } from '@/features/estudiantes/hooks/usePublicaciones'
 
 export const EstudiantePublicacionesPage = () => {
   const {

@@ -1,13 +1,11 @@
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { JobDetailModal } from '@/shared/components/JobDetailModal'
-import {
-  ActivitySection,
-  DashboardSearchCard,
-  FilterPanel,
-  MetricsGrid,
-  SearchHeader,
-} from '@/features/estudiantes/dashboard/components'
-import { useDashboard } from '@/features/estudiantes/dashboard/hooks'
+import { ActivitySection } from '@/features/estudiantes/components/ActivitySection'
+import { DashboardSearchCard } from '@/features/estudiantes/components/DashboardSearchCard'
+import { FilterPanel } from '@/features/estudiantes/components/FilterPanel'
+import { MetricsGrid } from '@/features/estudiantes/components/MetricsGrid'
+import { SearchHeader } from '@/features/estudiantes/components/SearchHeader'
+import { useDashboard } from '@/features/estudiantes/hooks/useDashboard'
 
 export const EstudianteDashboardPage = () => {
   const {

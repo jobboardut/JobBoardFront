@@ -1,13 +1,12 @@
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { JobDetailModal } from '@/shared/components/JobDetailModal'
-import { PublicacionesFilterPanel, PublicacionesSearchHeader } from '@/features/estudiantes/publicaciones/components'
-import { 
-  ApplicationsTable, 
-  StatusSummary, 
-  SearchApplicationCard, 
-  ApplicationSearchBar,
-  useSeguimiento 
-} from '@/features/estudiantes/seguimiento'
+import { PublicacionesFilterPanel } from '@/features/estudiantes/components/PublicacionesFilterPanel'
+import { PublicacionesSearchHeader } from '@/features/estudiantes/components/PublicacionesSearchHeader'
+import { ApplicationsTable } from '@/features/estudiantes/components/ApplicationsTable'
+import { StatusSummary } from '@/features/estudiantes/components/StatusSummary'
+import { SearchApplicationCard } from '@/features/estudiantes/components/SearchApplicationCard'
+import { ApplicationSearchBar } from '@/features/estudiantes/components/ApplicationSearchBar'
+import { useSeguimiento } from '@/features/estudiantes/hooks/useSeguimiento'
 
 export const EstudianteSeguimientoPage = () => {
   const {

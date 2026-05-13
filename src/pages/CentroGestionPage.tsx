@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import ManagementDetailModal from '../features/administradores/gestion/components/ManagementDetailModal'
-import ManagementStats from '../features/administradores/gestion/components/ManagementStats'
-import ManagementToolbar from '../features/administradores/gestion/components/ManagementToolbar'
-import ManagementUsersTable from '../features/administradores/gestion/components/ManagementUsersTable'
-import useManagementOverview from '../features/administradores/gestion/hooks/useManagementOverview'
-import type { ManagementUser } from '../features/administradores/gestion/types/management.types'
+import ManagementDetailModal from '../features/administradores/components/ManagementDetailModal'
+import ManagementStats from '../features/administradores/components/ManagementStats'
+import ManagementToolbar from '../features/administradores/components/ManagementToolbar'
+import ManagementUsersTable from '../features/administradores/components/ManagementUsersTable'
+import useManagementOverview from '../features/administradores/hooks/useManagementOverview'
+import type { ManagementUser } from '../features/administradores/types/management.types'
 
 function CentroGestionPage() {
   const { metrics, users } = useManagementOverview()

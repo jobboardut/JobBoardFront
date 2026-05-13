@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Settings2 } from 'lucide-react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import GestorListaConfiguracion from '../features/administradores/configuracion/components/GestorListaConfiguracion'
-import EstadisticasConfiguracion from '../features/administradores/configuracion/components/EstadisticasConfiguracion'
-import useConfigurationOverview from '../features/administradores/configuracion/hooks/useConfigurationOverview'
-import type { ConfigurationItem, ConfigurationListKey } from '../features/administradores/configuracion/types/configuration.types'
+import GestorListaConfiguracion from '../features/administradores/components/GestorListaConfiguracion'
+import EstadisticasConfiguracion from '../features/administradores/components/EstadisticasConfiguracion'
+import useConfigurationOverview from '../features/administradores/hooks/useConfigurationOverview'
+import type { ConfigurationItem, ConfigurationListKey } from '../features/administradores/types/configuration.types'
 
 function ConfiguracionPage() {
   // Estado local temporal: cuando conectes backend, este bloque se reemplaza por datos de API.

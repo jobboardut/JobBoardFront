@@ -1,11 +1,11 @@
 import AdminSidebar from '../components/layout/AdminSidebar'
 import DashboardHeader from '../components/layout/DashboardHeader'
-import ActivityPanel from '../features/administradores/dashboard/components/ActivityPanel'
-import SummaryGrid from '../features/administradores/dashboard/components/SummaryGrid'
-import VacanciesPanel from '../features/administradores/dashboard/components/VacanciesPanel'
-import useDashboardOverview from '../features/administradores/dashboard/hooks/useDashboardOverview'
-import UsersPanel from '../features/administradores/usuarios/components/UsersPanel'
-import useUsersDashboard from '../features/administradores/usuarios/hooks/useUsersDashboard'
+import ActivityPanel from '../features/administradores/components/ActivityPanel'
+import SummaryGrid from '../features/administradores/components/SummaryGrid'
+import VacanciesPanel from '../features/administradores/components/VacanciesPanel'
+import useDashboardOverview from '../features/administradores/hooks/useDashboardOverview'
+import UsersPanel from '../features/administradores/components/UsersPanel'
+import useUsersDashboard from '../features/administradores/hooks/useUsersDashboard'
 
 function AdministradorDashboardPage() {
   const { summaryCards, vacancyRows, recentActivity } = useDashboardOverview()

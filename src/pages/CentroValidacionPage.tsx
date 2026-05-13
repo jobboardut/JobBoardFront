@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import ValidationDetailModal from '../features/administradores/validacion/components/ValidationDetailModal'
-import ValidationRequestsTable from '../features/administradores/validacion/components/ValidationRequestsTable'
-import ValidationStats from '../features/administradores/validacion/components/ValidationStats'
-import ValidationToolbar from '../features/administradores/validacion/components/ValidationToolbar'
-import useValidationOverview from '../features/administradores/validacion/hooks/useValidationOverview'
-import type { ValidationRequest } from '../features/administradores/validacion/types/validation.types'
+import ValidationDetailModal from '../features/administradores/components/ValidationDetailModal'
+import ValidationRequestsTable from '../features/administradores/components/ValidationRequestsTable'
+import ValidationStats from '../features/administradores/components/ValidationStats'
+import ValidationToolbar from '../features/administradores/components/ValidationToolbar'
+import useValidationOverview from '../features/administradores/hooks/useValidationOverview'
+import type { ValidationRequest } from '../features/administradores/types/validation.types'
 
 function CentroValidacionPage() {
   const { metrics, requests } = useValidationOverview()

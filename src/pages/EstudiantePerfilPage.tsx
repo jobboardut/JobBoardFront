@@ -1,13 +1,11 @@
 import { PageWrapper } from '@/components/layout/PageWrapper'
-import {
-  ContactSection,
-  CurriculumSection,
-  ProfileHeader,
-  ProfileHeaderBar,
-  StatusBadge,
-} from '@/features/estudiantes/perfil/components'
-import { EditContactModal } from '@/features/estudiantes/perfil/modals/EditContactModal'
-import { useProfile } from '@/features/estudiantes/perfil/hooks'
+import { ContactSection } from '@/features/estudiantes/components/ContactSection'
+import { CurriculumSection } from '@/features/estudiantes/components/CurriculumSection'
+import { ProfileHeader } from '@/features/estudiantes/components/ProfileHeader'
+import { ProfileHeaderBar } from '@/features/estudiantes/components/ProfileHeaderBar'
+import { StatusBadge } from '@/features/estudiantes/components/StatusBadge'
+import { EditContactModal } from '@/features/estudiantes/components/EditContactModal'
+import { useProfile } from '@/features/estudiantes/hooks/useProfile'
 
 export const EstudiantePerfilPage = () => {
   const {

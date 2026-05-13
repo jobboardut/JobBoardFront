@@ -1,5 +1,0 @@
-export { ProfileHeader } from './ProfileHeader'
-export { ContactSection } from './ContactSection'
-export { CurriculumSection } from './CurriculumSection'
-export { ProfileHeaderBar } from './ProfileHeaderBar'
-export { StatusBadge } from './StatusBadge'

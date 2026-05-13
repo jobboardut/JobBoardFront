@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import AdminSidebar from '../components/layout/AdminSidebar'
-import DetallePublicacionModal from '../features/administradores/publicaciones/components/DetallePublicacionModal'
-import PublicacionesGrid from '../features/administradores/publicaciones/components/PublicacionesGrid'
-import EstadisticasPublicaciones from '../features/administradores/publicaciones/components/EstadisticasPublicaciones'
-import PublicacionesToolbar from '../features/administradores/publicaciones/components/PublicacionesToolbar'
-import usePublicationsOverview from '../features/administradores/publicaciones/hooks/usePublicationsOverview'
-import type { Publication } from '../features/administradores/publicaciones/types/publicaciones.types'
+import DetallePublicacionModal from '../features/administradores/components/DetallePublicacionModal'
+import PublicacionesGrid from '../features/administradores/components/PublicacionesGrid'
+import EstadisticasPublicaciones from '../features/administradores/components/EstadisticasPublicaciones'
+import PublicacionesToolbar from '../features/administradores/components/PublicacionesToolbar'
+import usePublicationsOverview from '../features/administradores/hooks/usePublicationsOverview'
+import type { Publication } from '../features/administradores/types/publicaciones.types'
 
 function PublicacionesPage() {
   const { metrics, publications } = usePublicationsOverview()
