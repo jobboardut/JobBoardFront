@@ -8,8 +8,13 @@ import useValidationOverview from '../features/administradores/hooks/useValidati
 import type { ValidationRequest } from '../features/administradores/types/validation.types'
 
 function CentroValidacionPage() {
-  const { metrics, requests } = useValidationOverview()
+  const { metrics, requests, validateUser, isValidating } = useValidationOverview()
   const [selectedRequest, setSelectedRequest] = useState<ValidationRequest | null>(null)
+
+  const handleValidate = async (request: ValidationRequest, accion: 'aprobar' | 'rechazar') => {
+    await validateUser({ id: request.id, accion })
+    setSelectedRequest(null)
+  }
 
   return (
     <div className="app-shell">
@@ -26,7 +31,12 @@ function CentroValidacionPage() {
         <ValidationRequestsTable rows={requests} onView={setSelectedRequest} />
       </main>
 
-      <ValidationDetailModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />
+      <ValidationDetailModal
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+        onValidate={handleValidate}
+        isValidating={isValidating}
+      />
     </div>
   )
 }

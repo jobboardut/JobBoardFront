@@ -1,82 +1,102 @@
 import { CircleCheckBig, CircleX, Clock3, FileCheck2, MessagesSquare, Users } from 'lucide-react'
-import { apiEndpoints } from '../../../services/apiEndpoints'
-import type { TrackingMetric, TrackingRow } from '../types/seguimiento.types'
+import { adminService } from './admin.service'
+import type { TrackingMetric, TrackingRow, TrackingStatus } from '../types/seguimiento.types'
 
-export const TRACKING_OVERVIEW_ENDPOINT = apiEndpoints.trackingOverview
+type RawPostulacion = Record<string, unknown>
 
 export type TrackingOverview = {
   metrics: TrackingMetric[]
   rows: TrackingRow[]
 }
 
-export function getTrackingOverview(): TrackingOverview {
-  // Punto de acoplamiento para API futura de seguimiento de postulaciones.
-  const rows: TrackingRow[] = [
-    {
-      id: '1',
-      candidateName: 'María García López',
-      candidateCareer: 'Ingeniería en Software',
-      candidateLetter: 'MG',
-      vacancyTitle: 'Desarrollador Full Stack',
-      companyName: 'TechSolutions S.A.',
-      vacancyLetter: 'T',
-      status: 'Entrevista',
-      date: '2025-01-25',
-      email: 'maria.garcia@email.com',
-      note: 'Entrevista programada para el 30 de enero',
-    },
-    {
-      id: '2',
-      candidateName: 'Juan Pérez Ramírez',
-      candidateCareer: 'Administración de Empresas',
-      candidateLetter: 'JP',
-      vacancyTitle: 'Contador Jr.',
-      companyName: 'Innovaztech Corp',
-      vacancyLetter: 'I',
-      status: 'Pendiente',
-      date: '2025-01-24',
-      email: 'juan.perez@email.com',
-      note: 'En revisión de documentos',
-    },
-    {
-      id: '3',
-      candidateName: 'Laura Sánchez Mora',
-      candidateCareer: 'Diseño Gráfico',
-      candidateLetter: 'LS',
-      vacancyTitle: 'Diseñador UI/UX',
-      companyName: 'Creative Labs',
-      vacancyLetter: 'C',
-      status: 'En revisión',
-      date: '2025-01-23',
-      email: 'laura.sanchez@email.com',
-      note: 'CV revisado, buen perfil',
-    },
-    {
-      id: '4',
-      candidateName: 'Carlos Hernández',
-      candidateCareer: 'Ingeniería Industrial',
-      candidateLetter: 'CH',
-      vacancyTitle: 'Desarrollador Full Stack',
-      companyName: 'TechSolutions S.A.',
-      vacancyLetter: 'T',
-      status: 'Rechazado',
-      date: '2025-01-22',
-      email: 'carlos.h@email.com',
-      note: 'No cumple con los requisitos técnicos',
-    },
-  ]
+const asText = (value: unknown, fallback = 'No especificado'): string =>
+  typeof value === 'string' && value.trim() ? value : fallback
 
-  const metrics: TrackingMetric[] = [
-    { label: 'Total', value: 5, Icon: Users, tone: 'blue' },
-    { label: 'Pendientes', value: 1, Icon: Clock3, tone: 'gray' },
-    { label: 'En revisión', value: 1, Icon: FileCheck2, tone: 'blue' },
-    { label: 'Entrevistas', value: 1, Icon: MessagesSquare, tone: 'orange' },
-    { label: 'Aceptados', value: 1, Icon: CircleCheckBig, tone: 'green' },
-    { label: 'Rechazados', value: 1, Icon: CircleX, tone: 'red' },
-  ]
+const asArray = (value: unknown): RawPostulacion[] => (Array.isArray(value) ? value as RawPostulacion[] : [])
+
+const asStatus = (value: unknown): TrackingStatus => {
+  const status = asText(value, 'Pendiente')
+  const normalized = status.toLowerCase()
+
+  if (normalized.includes('entrevista')) {
+    return 'Entrevista'
+  }
+
+  if (normalized.includes('acept')) {
+    return 'Aceptado'
+  }
+
+  if (normalized.includes('rechaz')) {
+    return 'Rechazado'
+  }
+
+  if (normalized.includes('revision') || normalized.includes('revisi')) {
+    return 'En revisión'
+  }
+
+  return 'Pendiente'
+}
+
+const formatDate = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return 'Sin fecha'
+  }
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
+
+const initials = (value: string): string =>
+  value
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('') || 'NA'
+
+const toTrackingRow = (item: RawPostulacion, index: number): TrackingRow => {
+  const candidateName = asText(item.nombrePostulante ?? item.candidato ?? item.nombreCompleto, 'Postulante')
+  const companyName = asText(item.nombreEmpresa ?? item.empresa, 'Empresa')
+  const vacancyTitle = asText(item.tituloVacante ?? item.vacante ?? item.titulo, 'Vacante')
 
   return {
-    metrics,
+    id: String(item.id ?? index),
+    candidateName,
+    candidateCareer: asText(item.carrera ?? item.programa, 'Sin carrera'),
+    candidateLetter: initials(candidateName),
+    vacancyTitle,
+    companyName,
+    vacancyLetter: companyName.charAt(0).toUpperCase(),
+    status: asStatus(item.estatus ?? item.status),
+    date: formatDate(item.fechaPostulacion ?? item.fecha ?? item.createdAt),
+    email: asText(item.email ?? item.correo, 'Sin correo'),
+    note: asText(item.observacion ?? item.nota, 'Sin observaciones'),
+  }
+}
+
+export async function getTrackingOverview(): Promise<TrackingOverview> {
+  const response = await adminService.getPostulantes()
+  const rows = asArray(response).map(toTrackingRow)
+
+  const countByStatus = (status: TrackingStatus) => rows.filter((row) => row.status === status).length
+
+  return {
+    metrics: [
+      { label: 'Total', value: rows.length, Icon: Users, tone: 'blue' },
+      { label: 'Pendientes', value: countByStatus('Pendiente'), Icon: Clock3, tone: 'gray' },
+      { label: 'En revisión', value: countByStatus('En revisión'), Icon: FileCheck2, tone: 'blue' },
+      { label: 'Entrevistas', value: countByStatus('Entrevista'), Icon: MessagesSquare, tone: 'orange' },
+      { label: 'Aceptados', value: countByStatus('Aceptado'), Icon: CircleCheckBig, tone: 'green' },
+      { label: 'Rechazados', value: countByStatus('Rechazado'), Icon: CircleX, tone: 'red' },
+    ],
     rows,
   }
 }

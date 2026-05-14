@@ -1,8 +1,7 @@
+import { BriefcaseBusiness, CircleCheckBig, Users } from 'lucide-react'
+import { adminService } from './admin.service'
+import type { VacanteReciente } from '../types/admin.types'
 import type { SummaryCard, VacancyRow } from '../types/dashboard.types'
-import { ArrowUpRight, BriefcaseBusiness, Users } from 'lucide-react'
-import { apiEndpoints } from '../../../services/apiEndpoints'
-
-export const DASHBOARD_OVERVIEW_ENDPOINT = apiEndpoints.dashboardOverview
 
 export type DashboardOverview = {
   summaryCards: SummaryCard[]
@@ -10,56 +9,66 @@ export type DashboardOverview = {
   recentActivity: string[]
 }
 
-export function getDashboardOverview(): DashboardOverview {
-  // Punto de acoplamiento para API futura del dashboard.
+const normalizeStatus = (estatus: string): VacancyRow['status'] => {
+  const normalized = estatus.toLowerCase()
+  if (normalized.includes('paus')) {
+    return 'PAUSADO'
+  }
+
+  if (normalized.includes('borr')) {
+    return 'BORRADOR'
+  }
+
+  return 'ACTIVO'
+}
+
+const toVacancyRow = (vacancy: VacanteReciente): VacancyRow => ({
+  title: vacancy.titulo,
+  description: `${vacancy.nombreEmpresa} - ${vacancy.modalidad}`,
+  status: normalizeStatus(vacancy.estatus),
+  applicants: vacancy.totalPostulantes,
+})
+
+export async function getDashboardOverview(): Promise<DashboardOverview> {
+  const [stats, publications, recentVacancies] = await Promise.all([
+    adminService.getEstadisticasUsuarios(),
+    adminService.getPublicaciones(),
+    adminService.getVacantesRecientes(),
+  ])
+
+  const totalUsers = stats.totalEstudiantes + stats.totalEmpresas
+  const totalApplications = publications.publicaciones.reduce(
+    (total, vacancy) => total + vacancy.totalPostulantes,
+    0
+  )
+
   return {
     summaryCards: [
       {
-        label: 'Vacantes totales',
-        value: 12,
-        Icon: BriefcaseBusiness,
+        label: 'Usuarios',
+        value: totalUsers,
+        Icon: Users,
         accent: 'orange',
-        subtitle: 'Publicadas y en revisión',
+        subtitle: `${stats.totalEstudiantes} estudiantes / ${stats.totalEmpresas} empresas`,
       },
       {
         label: 'Vacantes activas',
-        value: 10,
-        Icon: ArrowUpRight,
+        value: publications.activas,
+        Icon: CircleCheckBig,
         accent: 'teal',
-        subtitle: 'Listas para recibir candidatos',
+        subtitle: `${publications.total} publicaciones registradas`,
       },
       {
-        label: 'Usuarios del sistema',
-        value: 28,
-        Icon: Users,
+        label: 'Postulantes',
+        value: totalApplications,
+        Icon: BriefcaseBusiness,
         accent: 'violet',
-        subtitle: 'Cuentas habilitadas para operar',
+        subtitle: 'Postulaciones en publicaciones',
       },
     ],
-    vacancyRows: [
-      {
-        title: 'Desarrollador frontend',
-        description: 'Desarrollo web · Tiempo completo',
-        status: 'ACTIVO',
-        applicants: 10,
-      },
-      {
-        title: 'Desarrollador backend',
-        description: 'Ingeniería de software · Tiempo completo',
-        status: 'ACTIVO',
-        applicants: 0,
-      },
-      {
-        title: 'Diseñador UX/UI',
-        description: 'Diseño de producto · Medio tiempo',
-        status: 'ACTIVO',
-        applicants: 0,
-      },
-    ],
-    recentActivity: [
-      'Nuevo registro de usuario validado por administración.',
-      'Vacante "Desarrollador frontend" actualizada.',
-      'Se generó un nuevo acceso para un administrador.',
-    ],
+    vacancyRows: recentVacancies.map(toVacancyRow),
+    recentActivity: recentVacancies.map(
+      (vacancy) => `${vacancy.nombreEmpresa} publico ${vacancy.titulo}`
+    ),
   }
 }

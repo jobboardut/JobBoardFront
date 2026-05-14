@@ -1,22 +1,78 @@
-import type { ConfigurationOverview } from '../types/configuration.types'
-import { apiEndpoints } from '../../../services/apiEndpoints'
+import api from '@/services/api'
+import type {
+  CatalogItemRequest,
+  CatalogItemResponse,
+  ConfigurationItem,
+  ConfigurationListKey,
+  ConfigurationOverview,
+} from '../types/configuration.types'
 
-export const CONFIGURATION_OVERVIEW_ENDPOINT = apiEndpoints.configurationOverview
+const CATALOG_ENDPOINTS: Record<ConfigurationListKey, string> = {
+  programs: '/catalogo/carreras',
+  sectors: '/catalogo/sectores',
+}
 
-export function getConfigurationOverview(): ConfigurationOverview {
-  // Punto de acoplamiento para API futura de configuracion.
+const toConfigurationItem = (item: CatalogItemResponse): ConfigurationItem => ({
+  id: String(item.id),
+  name: item.nombre,
+})
+
+const toCatalogPayload = (name: string): CatalogItemRequest => ({
+  nombre: name,
+})
+
+export const configurationService = {
+  getCarreras: (): Promise<CatalogItemResponse[]> =>
+    api.get(CATALOG_ENDPOINTS.programs) as Promise<CatalogItemResponse[]>,
+
+  getCarrera: (id: string | number): Promise<CatalogItemResponse> =>
+    api.get(`${CATALOG_ENDPOINTS.programs}/${id}`) as Promise<CatalogItemResponse>,
+
+  createCarrera: (name: string): Promise<CatalogItemResponse> =>
+    api.post(CATALOG_ENDPOINTS.programs, toCatalogPayload(name)) as Promise<CatalogItemResponse>,
+
+  updateCarrera: (id: string | number, name: string): Promise<CatalogItemResponse> =>
+    api.put(`${CATALOG_ENDPOINTS.programs}/${id}`, toCatalogPayload(name)) as Promise<CatalogItemResponse>,
+
+  deleteCarrera: (id: string | number): Promise<void> =>
+    api.delete(`${CATALOG_ENDPOINTS.programs}/${id}`) as Promise<void>,
+
+  getSectores: (): Promise<CatalogItemResponse[]> =>
+    api.get(CATALOG_ENDPOINTS.sectors) as Promise<CatalogItemResponse[]>,
+
+  getSector: (id: string | number): Promise<CatalogItemResponse> =>
+    api.get(`${CATALOG_ENDPOINTS.sectors}/${id}`) as Promise<CatalogItemResponse>,
+
+  createSector: (name: string): Promise<CatalogItemResponse> =>
+    api.post(CATALOG_ENDPOINTS.sectors, toCatalogPayload(name)) as Promise<CatalogItemResponse>,
+
+  updateSector: (id: string | number, name: string): Promise<CatalogItemResponse> =>
+    api.put(`${CATALOG_ENDPOINTS.sectors}/${id}`, toCatalogPayload(name)) as Promise<CatalogItemResponse>,
+
+  deleteSector: (id: string | number): Promise<void> =>
+    api.delete(`${CATALOG_ENDPOINTS.sectors}/${id}`) as Promise<void>,
+}
+
+export async function getConfigurationOverview(): Promise<ConfigurationOverview> {
+  const [programs, sectors] = await Promise.all([
+    configurationService.getCarreras(),
+    configurationService.getSectores(),
+  ])
+
   return {
-    programs: [
-      { id: '1', name: 'Ingeniería en Software' },
-      { id: '2', name: 'Ingeniería Industrial' },
-      { id: '3', name: 'Administración de Empresas' },
-      { id: '4', name: 'Diseño Gráfico' },
-    ],
-    sectors: [
-      { id: '1', name: 'Tecnología' },
-      { id: '2', name: 'Manufactura' },
-      { id: '3', name: 'Servicios' },
-      { id: '4', name: 'Comercio' },
-    ],
+    programs: programs.map(toConfigurationItem),
+    sectors: sectors.map(toConfigurationItem),
   }
+}
+
+export function createConfigurationItem(listKey: ConfigurationListKey, name: string): Promise<CatalogItemResponse> {
+  return listKey === 'programs'
+    ? configurationService.createCarrera(name)
+    : configurationService.createSector(name)
+}
+
+export function deleteConfigurationItem(listKey: ConfigurationListKey, id: string): Promise<void> {
+  return listKey === 'programs'
+    ? configurationService.deleteCarrera(id)
+    : configurationService.deleteSector(id)
 }

@@ -1,16 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Settings2 } from 'lucide-react'
 import AdminSidebar from '../components/layout/AdminSidebar'
 import GestorListaConfiguracion from '../features/administradores/components/GestorListaConfiguracion'
 import EstadisticasConfiguracion from '../features/administradores/components/EstadisticasConfiguracion'
 import useConfigurationOverview from '../features/administradores/hooks/useConfigurationOverview'
-import type { ConfigurationItem, ConfigurationListKey } from '../features/administradores/types/configuration.types'
+import type { ConfigurationListKey } from '../features/administradores/types/configuration.types'
 
 function ConfiguracionPage() {
-  // Estado local temporal: cuando conectes backend, este bloque se reemplaza por datos de API.
-  const overview = useConfigurationOverview()
-  const [programs, setPrograms] = useState<ConfigurationItem[]>(overview.programs)
-  const [sectors, setSectors] = useState<ConfigurationItem[]>(overview.sectors)
+  const { programs, sectors, createItem, deleteItem, isSaving } = useConfigurationOverview()
 
   const totals = useMemo(
     () => ({
@@ -20,27 +17,9 @@ function ConfiguracionPage() {
     [programs.length, sectors.length],
   )
 
-  // Alta de elementos: no hay edicion, solo creacion y eliminacion directa.
-  const handleCreate = (listKey: ConfigurationListKey, value: string) => {
-    const item = { id: `${listKey}-${Date.now()}`, name: value }
+  const handleCreate = (listKey: ConfigurationListKey, value: string) => createItem({ listKey, value })
 
-    if (listKey === 'programs') {
-      setPrograms((current) => [...current, item])
-      return
-    }
-
-    setSectors((current) => [...current, item])
-  }
-
-  // Baja de elementos: el backend despues solo tendra que exponer el delete del item.
-  const handleDelete = (listKey: ConfigurationListKey, itemId: string) => {
-    if (listKey === 'programs') {
-      setPrograms((current) => current.filter((item) => item.id !== itemId))
-      return
-    }
-
-    setSectors((current) => current.filter((item) => item.id !== itemId))
-  }
+  const handleDelete = (listKey: ConfigurationListKey, itemId: string) => deleteItem({ listKey, itemId })
 
   return (
     <div className="app-shell">
@@ -72,6 +51,7 @@ function ConfiguracionPage() {
             listKey="programs"
             onCreate={handleCreate}
             onDelete={handleDelete}
+            isBusy={isSaving}
           />
 
           <GestorListaConfiguracion
@@ -82,6 +62,7 @@ function ConfiguracionPage() {
             listKey="sectors"
             onCreate={handleCreate}
             onDelete={handleDelete}
+            isBusy={isSaving}
           />
         </section>
       </main>

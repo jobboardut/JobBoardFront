@@ -7,9 +7,11 @@ import ValidationRejectionModal from '../components/ValidationRejectionModal'
 type ValidationDetailModalProps = {
 	request: ValidationRequest | null
 	onClose: () => void
+	onValidate?: (request: ValidationRequest, accion: 'aprobar' | 'rechazar') => Promise<void>
+	isValidating?: boolean
 }
 
-function ValidationDetailModal({ request, onClose }: ValidationDetailModalProps) {
+function ValidationDetailModal({ request, onClose, onValidate, isValidating = false }: ValidationDetailModalProps) {
 	const [isPhotoZoomOpen, setIsPhotoZoomOpen] = useState(false)
 	const [isAvatarZoomOpen, setIsAvatarZoomOpen] = useState(false)
 	const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
@@ -116,11 +118,16 @@ function ValidationDetailModal({ request, onClose }: ValidationDetailModalProps)
 				) : null}
 
 				<footer className="validation-modal-actions">
-					<button type="button" className="btn-approve">
+					<button
+						type="button"
+						className="btn-approve"
+						disabled={isValidating}
+						onClick={() => onValidate?.(request, 'aprobar')}
+					>
 						<CheckCircle2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 						Aprobar Solicitud
 					</button>
-					<button type="button" className="btn-reject" onClick={() => setIsRejectModalOpen(true)}>
+					<button type="button" className="btn-reject" disabled={isValidating} onClick={() => setIsRejectModalOpen(true)}>
 						<XCircle size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 						Rechazar
 					</button>
@@ -157,6 +164,8 @@ function ValidationDetailModal({ request, onClose }: ValidationDetailModalProps)
 				isOpen={isRejectModalOpen}
 				requestName={request.fullName}
 				onClose={() => setIsRejectModalOpen(false)}
+				onSubmit={() => onValidate?.(request, 'rechazar') ?? Promise.resolve()}
+				isSubmitting={isValidating}
 			/>
 
 			{hasAvatarPhoto && isAvatarZoomOpen ? (

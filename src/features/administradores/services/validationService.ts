@@ -1,104 +1,80 @@
 import { Building2, FileBadge, GraduationCap, Users } from 'lucide-react'
-import { apiEndpoints } from '../../../services/apiEndpoints'
-import type { ValidationMetric, ValidationRequest } from '../types/validation.types'
-
-export const VALIDATION_OVERVIEW_ENDPOINT = apiEndpoints.validationOverview
+import { adminService } from './admin.service'
+import type { AdminUsuario, ValidarUsuarioAccion } from '../types/admin.types'
+import type { ValidationMetric, ValidationRequest, ValidationType } from '../types/validation.types'
 
 export type ValidationOverview = {
   metrics: ValidationMetric[]
   requests: ValidationRequest[]
 }
 
-export function getValidationOverview(): ValidationOverview {
-  // Punto de acoplamiento para API futura de validacion.
+const toValidationType = (rol: string): ValidationType => {
+  if (rol === 'Empresa') {
+    return 'Empresa'
+  }
+
+  return 'Alumno'
+}
+
+const toRelativeDate = (value: string): string => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
+}
+
+const buildDetailItems = (user: AdminUsuario) => [
+  { label: 'Correo', value: user.email },
+  { label: 'Rol', value: user.rol },
+  { label: 'Estatus', value: user.estatusValidacion },
+  { label: 'Registro', value: toRelativeDate(user.fechaRegistro) },
+]
+
+const mapUserToRequest = (user: AdminUsuario): ValidationRequest => {
+  const type = toValidationType(user.rol)
+
+  return {
+    id: String(user.id),
+    fullName: user.nombreCompleto ?? user.email,
+    profile: user.rol,
+    type,
+    contactEmail: user.email,
+    contactPhone: 'No registrado',
+    submittedAgo: toRelativeDate(user.fechaRegistro),
+    state: 'Pendiente',
+    accountState: user.estatusValidacion === 'Validado' ? 'Activo' : 'Inactivo',
+    detailTitle: type === 'Empresa' ? 'Datos de la Empresa' : 'Datos del Alumno',
+    detailItems: buildDetailItems(user),
+  }
+}
+
+export async function getValidationOverview(): Promise<ValidationOverview> {
+  const response = await adminService.getUsuarios()
+  const requests = response.usuarios
+    .filter((user) => user.estatusValidacion === 'Pendiente')
+    .map(mapUserToRequest)
+
+  const companyCount = requests.filter((request) => request.type === 'Empresa').length
+  const studentCount = requests.filter((request) => request.type === 'Alumno').length
+  const graduateCount = requests.filter((request) => request.type === 'Egresado').length
+
   return {
     metrics: [
-      { label: 'Pendientes', value: 4, Icon: FileBadge, tone: 'orange' },
-      { label: 'Egresados', value: 2, Icon: GraduationCap, tone: 'green' },
-      { label: 'Empresas', value: 2, Icon: Building2, tone: 'blue' },
-      { label: 'Alumnos', value: 6, Icon: Users, tone: 'green' },
+      { label: 'Pendientes', value: requests.length, Icon: FileBadge, tone: 'orange' },
+      { label: 'Egresados', value: graduateCount, Icon: GraduationCap, tone: 'green' },
+      { label: 'Empresas', value: companyCount, Icon: Building2, tone: 'blue' },
+      { label: 'Alumnos', value: studentCount, Icon: Users, tone: 'green' },
     ],
-    requests: [
-      {
-        id: '1',
-        fullName: 'María García López',
-        profile: 'Ingeniería en Software',
-        type: 'Alumno',
-        avatarPhoto: '/perfil-alumno.svg',
-        contactEmail: 'maria.garcia@email.com',
-        contactPhone: '222-123-4567',
-        evidencePhoto: '/documento-probatorio.svg',
-        submittedAgo: 'Hace 2 horas',
-        state: 'Pendiente',
-        accountState: 'Activo',
-        detailTitle: 'Datos del Alumno',
-        detailItems: [
-          { label: 'Programa', value: 'Ingeniería en Software' },
-          { label: 'Nacimiento', value: '2000-04-11' },
-          { label: 'Dirección', value: 'Av. Juárez 101, Puebla' },
-          { label: 'Correo institucional', value: 'maria.garcia@uttec.com' },
-          { label: 'Estado civil', value: 'Soltera' },
-          { label: 'CV', value: 'curriculum_maria.pdf', isLink: true },
-        ],
-      },
-      {
-        id: '2',
-        fullName: 'TechSolutions S.A.',
-        profile: 'Tecnología',
-        type: 'Empresa',
-        contactEmail: 'contacto@techsolutions.com',
-        contactPhone: '222-987-6543',
-        submittedAgo: 'Hace 5 horas',
-        state: 'Pendiente',
-        accountState: 'Inactivo',
-        detailTitle: 'Datos de la Empresa',
-        detailItems: [
-          { label: 'Empresa', value: 'TechSolutions S.A.' },
-          { label: 'Sector', value: 'Tecnología' },
-          { label: 'Ubicación', value: 'Puebla, México' },
-          { label: 'Representante', value: 'Carlos Mendoza' },
-        ],
-      },
-      {
-        id: '3',
-        fullName: 'Juan Pérez Ramírez',
-        profile: 'Administración de Empresas',
-        type: 'Egresado',
-        avatarPhoto: '/perfil-egresado.svg',
-        contactEmail: 'juan.perez@email.com',
-        contactPhone: '222-456-7890',
-        evidencePhoto: '/documento-probatorio.svg',
-        submittedAgo: 'Hace 1 día',
-        state: 'Pendiente',
-        accountState: 'Inactivo',
-        detailTitle: 'Datos del Egresado',
-        detailItems: [
-          { label: 'Programa', value: 'Administración de Empresas' },
-          { label: 'Nacimiento', value: '1999-08-22' },
-          { label: 'Dirección', value: 'Av. Reforma 456, Puebla' },
-          { label: 'Correo institucional', value: 'juan.perez@uttec.com' },
-          { label: 'Estado civil', value: 'Casado' },
-          { label: 'CV', value: 'curriculum_juan.pdf', isLink: true },
-        ],
-      },
-      {
-        id: '4',
-        fullName: 'Innovatech Corp',
-        profile: 'Manufactura',
-        type: 'Empresa',
-        contactEmail: 'rh@innovatech.mx',
-        contactPhone: '222-111-2233',
-        submittedAgo: 'Hace 2 días',
-        state: 'Pendiente',
-        accountState: 'Inactivo',
-        detailTitle: 'Datos de la Empresa',
-        detailItems: [
-          { label: 'Empresa', value: 'Innovatech Corp' },
-          { label: 'Sector', value: 'Manufactura' },
-          { label: 'Ubicación', value: 'Puebla, México' },
-          { label: 'Representante', value: 'Laura Hernández' },
-        ],
-      },
-    ],
+    requests,
   }
+}
+
+export function validateUser(id: string, accion: ValidarUsuarioAccion): Promise<void> {
+  return adminService.validarUsuario(id, { accion })
 }

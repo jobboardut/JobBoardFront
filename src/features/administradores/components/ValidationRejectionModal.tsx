@@ -3,23 +3,31 @@ import { X } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 
 type ValidationRejectionModalProps = {
-	isOpen: boolean
-	requestName: string
-	onClose: () => void
+  isOpen: boolean
+  requestName: string
+  onClose: () => void
+  onSubmit?: () => Promise<void>
+  isSubmitting?: boolean
 }
 
-function ValidationRejectionModal({ isOpen, requestName, onClose }: ValidationRejectionModalProps) {
+function ValidationRejectionModal({
+  isOpen,
+  requestName,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+}: ValidationRejectionModalProps) {
 	const [observations, setObservations] = useState('')
 
 	if (!isOpen) {
 		return null
 	}
 
-	const handleSubmit = () => {
-		// Aqui se conectara el POST de observaciones de rechazo.
-		setObservations('')
-		onClose()
-	}
+  const handleSubmit = async () => {
+    await onSubmit?.()
+    setObservations('')
+    onClose()
+  }
 
 	return (
 		<div className="validation-reject-overlay" role="presentation" onClick={onClose}>
@@ -49,9 +57,14 @@ function ValidationRejectionModal({ isOpen, requestName, onClose }: ValidationRe
 					<button type="button" className="btn-reject-secondary" onClick={onClose}>
 						Cancelar
 					</button>
-					<button type="button" className="btn-reject-primary" onClick={handleSubmit} disabled={!observations.trim()}>
-						Enviar observaciones
-					</button>
+          <button
+            type="button"
+            className="btn-reject-primary"
+            onClick={handleSubmit}
+            disabled={!observations.trim() || isSubmitting}
+          >
+            Enviar observaciones
+          </button>
 				</footer>
 			</article>
 		</div>

@@ -8,10 +8,11 @@ import { VacantesRecientes } from './VacantesRecientes'
 export const PanelControl = () => {
   const navigate = useNavigate()
   const { data: vacantes = [], isLoading } = useVacantes()
+  const safeVacantes = Array.isArray(vacantes) ? vacantes : []
 
-  const totalVacantes    = vacantes.length
-  const totalActivas     = vacantes.filter(v => v.estatus === 'Activa').length
-  const totalPostulantes = vacantes.reduce((acc, v) => acc + (v.postulantes ?? 0), 0)
+  const totalVacantes    = safeVacantes.length
+  const totalActivas     = safeVacantes.filter(v => v.estatus === 'Activa').length
+  const totalPostulantes = safeVacantes.reduce((acc, v) => acc + (v.postulantes ?? 0), 0)
 
   const stats = [
     { label: 'Vacantes',    valor: totalVacantes,    icono: Briefcase,  tone: 'orange'  as const },
@@ -60,7 +61,7 @@ export const PanelControl = () => {
       </div>
 
       <VacantesRecientes
-        vacantes={vacantes.slice(0, 5).map(v => ({
+        vacantes={safeVacantes.slice(0, 5).map(v => ({
           id: String(v.id),
           titulo: v.titulo,
           descripcion: v.modalidad ?? '',

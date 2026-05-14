@@ -8,9 +8,10 @@ type GestorListaConfiguracionProps = {
 	description: string
 	iconLabel: string
 	items: ConfigurationItem[]
-	onCreate: (listKey: ConfigurationListKey, value: string) => void
-	onDelete: (listKey: ConfigurationListKey, itemId: string) => void
+	onCreate: (listKey: ConfigurationListKey, value: string) => Promise<unknown>
+	onDelete: (listKey: ConfigurationListKey, itemId: string) => Promise<unknown>
 	listKey: ConfigurationListKey
+	isBusy?: boolean
 }
 
 function GestorListaConfiguracion({
@@ -21,10 +22,11 @@ function GestorListaConfiguracion({
 	onCreate,
 	onDelete,
 	listKey,
+	isBusy = false,
 }: GestorListaConfiguracionProps) {
 	const [value, setValue] = useState('')
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const trimmedValue = value.trim()
 
@@ -32,7 +34,7 @@ function GestorListaConfiguracion({
 			return
 		}
 
-		onCreate(listKey, trimmedValue)
+		await onCreate(listKey, trimmedValue)
 		setValue('')
 	}
 
@@ -52,8 +54,9 @@ function GestorListaConfiguracion({
 					value={value}
 					onChange={(event) => setValue(event.target.value)}
 					placeholder={`Agregar nuevo ${title.toLowerCase()}`}
+					disabled={isBusy}
 				/>
-				<button type="submit" className="configuration-create-btn">
+				<button type="submit" className="configuration-create-btn" disabled={isBusy}>
 					<Plus size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 					Crear
 				</button>
@@ -67,6 +70,7 @@ function GestorListaConfiguracion({
 							type="button"
 							className="configuration-delete-btn"
 							aria-label={`Eliminar ${item.name}`}
+							disabled={isBusy}
 							onClick={() => onDelete(listKey, item.id)}
 						>
 							<Trash2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />

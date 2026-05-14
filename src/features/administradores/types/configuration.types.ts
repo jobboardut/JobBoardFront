@@ -5,6 +5,15 @@ export type ConfigurationItem = {
   name: string
 }
 
+export type CatalogItemResponse = {
+  id: number
+  nombre: string
+}
+
+export type CatalogItemRequest = {
+  nombre: string
+}
+
 export type ConfigurationOverview = {
   programs: ConfigurationItem[]
   sectors: ConfigurationItem[]
