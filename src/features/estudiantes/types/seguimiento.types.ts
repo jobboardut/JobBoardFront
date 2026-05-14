@@ -12,6 +12,13 @@ export interface Application {
   company: string
   postulationDate: string
   status: ApplicationStatus
+  modality?: string
+  salary?: string
+  location?: string
+  schedule?: string
+  experience?: string
+  description?: string
+  responsibilities?: string[]
 }
 
 export interface StatusInfo {

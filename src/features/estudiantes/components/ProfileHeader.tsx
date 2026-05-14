@@ -8,6 +8,14 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
   const [isHoveringAvatar, setIsHoveringAvatar] = useState(false)
+  const birthDate = new Date(profile.birthDate)
+  const formattedBirthDate = Number.isNaN(birthDate.getTime())
+    ? 'No especificada'
+    : birthDate.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
 
   return (
     <div className="rounded-2xl border border-[#e6e0d7] bg-white p-6 shadow-[0_4px_15px_rgba(29,37,56,0.05)]">
@@ -49,11 +57,7 @@ export const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
           <div className="space-y-1 text-xs text-slate-600">
             <p>
               <span className="font-semibold text-slate-800">Fecha de nacimiento:</span>{' '}
-              {new Date(profile.birthDate).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formattedBirthDate}
             </p>
           </div>
         </div>

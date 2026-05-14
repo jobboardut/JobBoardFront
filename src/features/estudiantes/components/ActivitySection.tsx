@@ -26,8 +26,15 @@ export const ActivitySection = ({ columns }: ActivitySectionProps) => {
             <div className="my-4 h-px bg-[#e7e1d9]" />
 
             <div className="space-y-5">
-              <ActivityCard status={column.status} />
-              <ActivityCard status={column.status} />
+              {column.items.length ? (
+                column.items.map((item) => (
+                  <ActivityCard key={item.id} item={item} status={column.status} />
+                ))
+              ) : (
+                <p className="rounded-xl border border-dashed border-[#e6e0d7] px-4 py-6 text-sm text-slate-400">
+                  No hay postulaciones en este estado.
+                </p>
+              )}
             </div>
           </article>
         ))}

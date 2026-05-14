@@ -125,60 +125,68 @@ export const ApplicationsTable = ({ applications, onViewDetails }: ApplicationsT
             </tr>
           </thead>
           <tbody>
-            {applications.map((app, idx) => (
-              <tr
-                key={app.id}
-                className={`border-b border-[#e6e0d7] transition hover:bg-[#f8f7f4] ${
-                  idx === applications.length - 1 ? 'border-b-0' : ''
-                }`}
-              >
-                <td className="px-6 py-5">
-                  <div>
-                    <p className="font-semibold text-slate-900">{app.jobTitle}</p>
-                    <p className="text-sm text-slate-500">{app.company}</p>
-                    <div className="mt-2 flex max-w-68 items-center">
-                      {timelineSteps.map((step, stepIndex) => (
-                        <div key={step} className="flex items-center">
-                          <span
-                            className={`h-2.5 w-2.5 rounded-full ring-2 ring-white ${getTimelinePointClass(
-                              app.status,
-                              step,
-                              stepIndex
-                            )}`}
-                          />
-                          {stepIndex < timelineSteps.length - 1 && (
-                            <span className={`h-0.5 w-7 ${getTimelineSegmentClass(app.status, stepIndex)}`} />
-                          )}
-                        </div>
-                      ))}
+            {applications.length ? (
+              applications.map((app, idx) => (
+                <tr
+                  key={app.id}
+                  className={`border-b border-[#e6e0d7] transition hover:bg-[#f8f7f4] ${
+                    idx === applications.length - 1 ? 'border-b-0' : ''
+                  }`}
+                >
+                  <td className="px-6 py-5">
+                    <div>
+                      <p className="font-semibold text-slate-900">{app.jobTitle}</p>
+                      <p className="text-sm text-slate-500">{app.company}</p>
+                      <div className="mt-2 flex max-w-68 items-center">
+                        {timelineSteps.map((step, stepIndex) => (
+                          <div key={step} className="flex items-center">
+                            <span
+                              className={`h-2.5 w-2.5 rounded-full ring-2 ring-white ${getTimelinePointClass(
+                                app.status,
+                                step,
+                                stepIndex
+                              )}`}
+                            />
+                            {stepIndex < timelineSteps.length - 1 && (
+                              <span className={`h-0.5 w-7 ${getTimelineSegmentClass(app.status, stepIndex)}`} />
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-sm text-slate-600">{app.postulationDate}</td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-2">
-                    <div className={`h-2 w-2 rounded-full ${getStatusDotColor(app.status)}`} />
-                    <span
-                      className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyles(
-                        app.status
-                      )}`}
+                  </td>
+                  <td className="px-6 py-5 text-sm text-slate-600">{app.postulationDate}</td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${getStatusDotColor(app.status)}`} />
+                      <span
+                        className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyles(
+                          app.status
+                        )}`}
+                      >
+                        {app.status}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onViewDetails?.(app)}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-[#f0f0f0]"
+                      aria-label="Ver detalles"
                     >
-                      {app.status}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onViewDetails?.(app)}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-[#f0f0f0]"
-                    aria-label="Ver detalles"
-                  >
-                    <Eye size={18} strokeWidth={2} />
-                  </button>
+                      <Eye size={18} strokeWidth={2} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-400">
+                  No hay postulaciones para mostrar.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

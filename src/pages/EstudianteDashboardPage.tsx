@@ -18,6 +18,8 @@ export const EstudianteDashboardPage = () => {
     searchPublicationItems,
     selectedJobModal,
     isJobModalOpen,
+    isLoading,
+    isError,
     openSearchMode,
     closeSearchMode,
     setSearchText,
@@ -40,21 +42,39 @@ export const EstudianteDashboardPage = () => {
         {viewMode === 'detail' ? (
           <section className="overflow-y-auto">
             <div className="bg-white px-6 py-6">
-              <MetricsGrid metrics={metrics} />
-              <ActivitySection columns={activityColumns} />
+              {isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-sm text-slate-400">Cargando panel...</p>
+                </div>
+              ) : isError ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-sm text-red-400">Error al cargar el panel. Intenta de nuevo.</p>
+                </div>
+              ) : (
+                <>
+                  <MetricsGrid metrics={metrics} />
+                  <ActivitySection columns={activityColumns} />
+                </>
+              )}
             </div>
           </section>
         ) : (
           <section className="grid min-h-0 flex-1 gap-4 px-6 py-5 xl:grid-cols-[minmax(0,2fr)_minmax(260px,300px)]">
             <div className="publication-scroll h-full overflow-y-auto pr-1">
               <div className="space-y-5">
-                {searchPublicationItems.map((item) => (
-                  <DashboardSearchCard 
-                    key={item.id} 
-                    item={item}
-                    onJobClick={openJobModal}
-                  />
-                ))}
+                {searchPublicationItems.length ? (
+                  searchPublicationItems.map((item) => (
+                    <DashboardSearchCard 
+                      key={item.id} 
+                      item={item}
+                      onJobClick={openJobModal}
+                    />
+                  ))
+                ) : (
+                  <p className="rounded-xl border border-dashed border-[#e6e0d7] px-4 py-6 text-sm text-slate-400">
+                    No hay publicaciones para mostrar.
+                  </p>
+                )}
               </div>
             </div>
 

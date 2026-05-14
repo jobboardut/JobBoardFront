@@ -1,28 +1,62 @@
-import { useState } from 'react'
-import type { StudentProfile } from '../types/profile.types'
-import type { EditContactFormData } from '../types/profile.types'
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { estudianteService } from '../services/estudiante.service'
+import type { CurriculumData, EditContactFormData, StudentProfile } from '../types/profile.types'
+
+const getUserId = () => Number(localStorage.getItem('userId'))
+
+const EMPTY_PROFILE: StudentProfile = {
+  id: '',
+  firstName: 'Estudiante',
+  lastName: '',
+  email: '',
+  phone: '',
+  career: 'Programa no especificado',
+  institutionalEmail: '',
+  birthDate: '',
+  civilStatus: 'No especificado',
+  address: 'No especificado',
+  academicStatus: 'Estudiante',
+}
+
+const buildCurriculumData = (profile: StudentProfile): CurriculumData => {
+  if (!profile.cvUrl) {
+    return {
+      fileName: 'CV no disponible',
+      uploadDate: 'Sin archivo cargado',
+    }
+  }
+
+  const fileName = decodeURIComponent(profile.cvUrl.split('/').pop() || 'Curriculum del estudiante')
+
+  return {
+    fileName,
+    uploadDate: 'Disponible en perfil',
+    url: profile.cvUrl,
+  }
+}
 
 export const useProfile = () => {
-  const [isEditing] = useState(false)
+  const userId = getUserId()
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
-  const [studentProfile, setStudentProfile] = useState<StudentProfile>({
-    id: '1',
-    firstName: 'Jesus Daniel',
-    lastName: 'Gonzalez Ochoa',
-    email: 'jesus@uttecam.com',
-    phone: '2491163536',
-    career: 'Ingeniería en Desarrollo y Gestión de Software Multiplataforma',
-    institutionalEmail: 'jesus.gonzalez@uttecam.edu.mx',
-    birthDate: '1967-03-18',
-    bio: 'Estudiante apasionado por la tecnología y el desarrollo de software',
-    civilStatus: 'Soltero',
-    address: 'Calle Principal 123, Apt 4B, Ciudad de México',
+  const [contactOverrides, setContactOverrides] =
+    useState<Partial<Pick<StudentProfile, 'phone' | 'email' | 'civilStatus' | 'address'>>>({})
+
+  const profileQuery = useQuery({
+    queryKey: ['estudiante', 'perfil', userId],
+    queryFn: () => estudianteService.getPerfil(userId),
+    enabled: !!userId,
   })
 
-  const curriculumData = {
-    fileName: 'CV_Jesus_Daniel_Gonzalez.pdf',
-    uploadDate: 'Subido hace 2 meses',
-  }
+  const studentProfile = useMemo(
+    () => ({
+      ...(profileQuery.data ?? EMPTY_PROFILE),
+      ...contactOverrides,
+    }),
+    [contactOverrides, profileQuery.data]
+  )
+
+  const curriculumData = useMemo(() => buildCurriculumData(studentProfile), [studentProfile])
 
   const handleEditClick = () => {
     setIsContactModalOpen(true)
@@ -33,25 +67,28 @@ export const useProfile = () => {
   }
 
   const handleSaveContact = (data: EditContactFormData) => {
-    setStudentProfile((prev) => ({
-      ...prev,
+    setContactOverrides({
       phone: data.phone,
       email: data.email,
       civilStatus: data.civilStatus,
       address: data.address,
-    }))
+    })
     setIsContactModalOpen(false)
   }
 
   const handleDownloadCV = () => {
-    console.log('Descargando CV...')
+    if (curriculumData.url) {
+      window.open(curriculumData.url, '_blank', 'noopener,noreferrer')
+    }
   }
 
   return {
     studentProfile,
     curriculumData,
-    isEditing,
+    isEditing: false,
     isContactModalOpen,
+    isLoading: profileQuery.isLoading,
+    isError: profileQuery.isError,
     handleEditClick,
     handleCloseContactModal,
     handleSaveContact,

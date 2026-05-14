@@ -3,9 +3,13 @@ import { FileText, Eye } from 'lucide-react'
 interface CurriculumSectionProps {
   fileName: string
   uploadDate: string
+  url?: string
+  onPreview?: () => void
 }
 
-export const CurriculumSection = ({ fileName, uploadDate }: CurriculumSectionProps) => {
+export const CurriculumSection = ({ fileName, uploadDate, url, onPreview }: CurriculumSectionProps) => {
+  const canPreview = Boolean(url)
+
   return (
     <div className="rounded-2xl border border-[#e8d4ca] bg-white p-8 shadow-[0_4px_15px_rgba(29,37,56,0.05)]">
       <h2 className="text-3xl font-bold text-slate-900">Mi Curriculum</h2>
@@ -48,7 +52,9 @@ export const CurriculumSection = ({ fileName, uploadDate }: CurriculumSectionPro
             </div>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 rounded-lg border border-[#009A4D] bg-white py-2 px-4 font-medium text-[#009A4D] transition hover:bg-[#10B981] hover:text-white"
+              onClick={onPreview}
+              disabled={!canPreview}
+              className="flex items-center justify-center gap-2 rounded-lg border border-[#009A4D] bg-white py-2 px-4 font-medium text-[#009A4D] transition hover:bg-[#10B981] hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:hover:bg-white"
               aria-label="Visualizar CV"
             >
               <Eye size={18} strokeWidth={2} />

@@ -11,6 +11,10 @@ export interface StudentProfile {
   bio?: string
   civilStatus?: string
   address?: string
+  academicStatus?: string
+  validationStatus?: string
+  cvUrl?: string
+  documentUrl?: string
 }
 
 export interface ContactInfo {

@@ -19,6 +19,8 @@ export const EstudianteSeguimientoPage = () => {
     isJobModalOpen,
     applicationSearchText,
     applicationSearchInputRef,
+    isLoading,
+    isError,
     openSearchMode,
     closeSearchMode,
     setSearchText,
@@ -44,6 +46,15 @@ export const EstudianteSeguimientoPage = () => {
         {viewMode === 'detail' ? (
           <div className="flex-1 overflow-y-auto">
             <div className="mx-auto max-w-7xl px-6 py-8">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-sm text-slate-400">Cargando postulaciones...</p>
+                </div>
+              ) : isError ? (
+                <div className="flex items-center justify-center py-20">
+                  <p className="text-sm text-red-400">Error al cargar las postulaciones. Intenta de nuevo.</p>
+                </div>
+              ) : (
               <div className="grid gap-8 lg:grid-cols-4">
                 {/* Tabla de postulaciones - 3 columnas */}
                 <div className="lg:col-span-3">
@@ -66,19 +77,26 @@ export const EstudianteSeguimientoPage = () => {
                   <StatusSummary />
                 </div>
               </div>
+              )}
             </div>
           </div>
         ) : (
           <section className="grid min-h-0 flex-1 gap-4 px-6 py-5 xl:grid-cols-[minmax(0,2fr)_minmax(260px,300px)]">
             <div className="overflow-y-auto pr-1">
               <div className="space-y-5">
-                {applications.map((app) => (
-                  <SearchApplicationCard 
-                    key={app.id} 
-                    application={app}
-                    onApplicationClick={openJobModal}
-                  />
-                ))}
+                {applications.length ? (
+                  applications.map((app) => (
+                    <SearchApplicationCard 
+                      key={app.id} 
+                      application={app}
+                      onApplicationClick={openJobModal}
+                    />
+                  ))
+                ) : (
+                  <p className="rounded-xl border border-dashed border-[#e6e0d7] px-4 py-6 text-sm text-slate-400">
+                    No hay postulaciones para mostrar.
+                  </p>
+                )}
               </div>
             </div>
 
