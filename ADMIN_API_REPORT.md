@@ -1,8 +1,12 @@
-# Reporte de conexion de APIs de Administradores
+# Reporte de Conexión de APIs de Administradores
+
+## Descripción General
+
+Este reporte documenta la **conexión de las APIs de administradores** al frontend. Se realizó la integración de todos los endpoints de administración (estadísticas, validación de usuarios, gestión de publicaciones, catálogos) con el cliente HTTP centralizado del proyecto.
 
 ## Resumen
 
-Se conecto la feature de administradores usando el cliente Axios compartido `src/services/api.ts`, que ya era el patron usado por empresas. No fue necesario cambiar la logica global del proyecto ni introducir otro cliente HTTP.
+Se conectó la feature de administradores usando el cliente Axios compartido `src/services/api.ts`, que ya era el patrón usado por empresas. No fue necesario cambiar la lógica global del proyecto ni introducir otro cliente HTTP.
 
 ## Endpoints conectados
 
