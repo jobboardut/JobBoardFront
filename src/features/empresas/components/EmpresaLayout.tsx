@@ -20,7 +20,7 @@ export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { data: perfil } = useEmpresaPerfil()
-  const { logout } = useLogout()
+  const { logout, isLoggingOut } = useLogout()
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col">
@@ -45,10 +45,11 @@ export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {
           <button
             type="button"
             onClick={logout}
+            disabled={isLoggingOut}
             className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white px-3 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:border-emerald-200 hover:bg-emerald-50"
           >
             <LogOut size={16} />
-            Cerrar sesion
+            {isLoggingOut ? 'Cerrando...' : 'Cerrar sesion'}
           </button>
         </div>
       </header>

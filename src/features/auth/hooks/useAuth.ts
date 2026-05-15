@@ -28,10 +28,19 @@ export const useLogin = () => {
 export const useLogout = () => {
   const navigate = useNavigate()
 
+  const logoutMutation = useMutation({
+    mutationFn: () => authService.logout(),
+    onSettled: () => {
+      navigate(ROUTES.LOGIN)
+    },
+    onError: (error: Error) => {
+      console.error('Error de logout:', error.message)
+    },
+  })
+
   const logout = () => {
-    authService.logout()
-    navigate(ROUTES.LOGIN)
+    logoutMutation.mutate()
   }
 
-  return { logout }
+  return { logout, isLoggingOut: logoutMutation.isPending }
 }

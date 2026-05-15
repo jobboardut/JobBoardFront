@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react'
 import type { UserRole } from '@/features/auth/types/auth.types'
+import { useLogout } from '@/features/auth/hooks/useAuth'
 import { ROUTES } from '@/router/routes'
 
 interface SidebarProps {
@@ -49,6 +50,7 @@ const menuItems: Record<UserRole, MenuItem[]> = {
 
 export const Sidebar = ({ role }: SidebarProps) => {
   const items = menuItems[role]
+  const { logout, isLoggingOut } = useLogout()
 
   return (
     <aside className="flex min-h-screen w-64 flex-col border-r border-[#ece7df] bg-white">
@@ -82,13 +84,15 @@ export const Sidebar = ({ role }: SidebarProps) => {
       </nav>
 
       <div className="border-t border-[#ece7df] p-4">
-        <NavLink
-          to={ROUTES.LOGIN}
+        <button
+          type="button"
+          onClick={logout}
+          disabled={isLoggingOut}
           className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 font-semibold text-slate-500 transition-all duration-200 hover:bg-red-500 hover:text-white"
         >
           <LogOut size={20} strokeWidth={2} />
-          <span>Salir</span>
-        </NavLink>
+          <span>{isLoggingOut ? 'Saliendo...' : 'Salir'}</span>
+        </button>
       </div>
     </aside>
   )

@@ -36,6 +36,12 @@ const buildRegistroEmpresaFormData = (data: RegistroEmpresaRequest) => {
   return formData
 }
 
+const clearAuthSession = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('userId')
+  localStorage.removeItem('rol')
+}
+
 export const authService = {
 
   login: async (data: LoginRequest): Promise<LoginResponse> => {
@@ -48,10 +54,12 @@ export const authService = {
     return response
   },
 
-  logout: () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('userId')
-    localStorage.removeItem('rol')
+  logout: async (): Promise<void> => {
+    try {
+      await api.post('/auth/logout')
+    } finally {
+      clearAuthSession()
+    }
   },
 
   registroEmpresa: async (data: RegistroEmpresaRequest) => {

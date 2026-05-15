@@ -1,5 +1,6 @@
 import { BriefcaseBusiness, FileText, LayoutDashboard, LogOut, Send, Settings2, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useLogout } from '@/features/auth/hooks/useAuth'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../config/iconConfig'
 import { ROUTES } from '../../router/routes'
 
@@ -19,6 +20,8 @@ const navigationItems = [
 ] as const
 
 function AdminSidebar({ activeItem = 'dashboard' }: AdminSidebarProps) {
+  const { logout, isLoggingOut } = useLogout()
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -39,12 +42,12 @@ function AdminSidebar({ activeItem = 'dashboard' }: AdminSidebarProps) {
       </nav>
 
       <nav className="nav-footer">
-        <Link className="nav-item" to={ROUTES.LOGIN}>
+        <button type="button" className="nav-item" onClick={logout} disabled={isLoggingOut}>
           <span className="nav-icon">
             <LogOut size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
           </span>
-          Salir
-        </Link>
+          {isLoggingOut ? 'Saliendo...' : 'Salir'}
+        </button>
       </nav>
     </aside>
   )
