@@ -1,7 +1,9 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
+import { catalogService } from '@/services/catalog.service'
+import { authService } from '../services/auth.service'
 
 const pasos = [
   'Selección de tipo de cuenta',
@@ -10,7 +12,7 @@ const pasos = [
   'Validación de Perfil',
 ]
 
-const programas = [
+const DEFAULT_PROGRAMAS = [
   'Ingeniería en Tecnologías de la Información',
   'Ingeniería en Desarrollo de Software',
   'Ingeniería Industrial',
@@ -40,15 +42,37 @@ export const RegistroEstudiante = () => {
     fechaNacimiento: '',
     estadoCivil: '',
     correo: '',
+    password: '',
     programa: '',
   })
 
   const [foto, setFoto] = useState<string | null>(null)
   const [cvNombre, setCvNombre] = useState<string | null>(null)
   const [docNombre, setDocNombre] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [programas, setProgramas] = useState(DEFAULT_PROGRAMAS)
+
+  useEffect(() => {
+    let isMounted = true
+
+    catalogService.getCarreras()
+      .then((items) => {
+        if (!isMounted || !items.length) return
+        setProgramas(items.map((item) => item.nombre))
+      })
+      .catch(() => {
+        if (isMounted) setProgramas(DEFAULT_PROGRAMAS)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setErrorMsg(null)
   }
 
   const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,10 +90,30 @@ export const RegistroEstudiante = () => {
     if (file) setDocNombre(file.name)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault()
-  navigate('/registro/confirmacion?tipo=estudiante')
-}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMsg(null)
+    setIsSubmitting(true)
+
+    try {
+      await authService.registroEstudiante({
+        email: form.correo,
+        password: form.password,
+        nombres: form.nombre,
+        apellidos: form.apellidos,
+        direccion: form.direccion,
+        fechaNacimiento: form.fechaNacimiento,
+        estadoCivil: form.estadoCivil,
+        programaEducativo: form.programa,
+      })
+
+      navigate('/registro/confirmacion?tipo=estudiante')
+    } catch {
+      setErrorMsg('No se pudo registrar el estudiante. Verifica los datos e intenta de nuevo.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
@@ -140,6 +184,12 @@ export const RegistroEstudiante = () => {
                 Paso 2 de 4
               </span>
             </div>
+
+            {errorMsg && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                {errorMsg}
+              </div>
+            )}
 
             {/* Seccion informacion personal */}
             <div className="flex items-center gap-3 mb-4">
@@ -243,6 +293,22 @@ export const RegistroEstudiante = () => {
               </div>
             </div>
 
+            <div className="flex flex-col gap-1 mb-6">
+              <label className="text-sm text-gray-600">Contrasena</label>
+              <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white gap-2">
+                <Mail size={16} className="text-gray-400" />
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="flex-1 text-sm outline-none bg-transparent"
+                  required
+                  minLength={8}
+                />
+              </div>
+            </div>
+
             <hr className="border-gray-200 mb-6" />
 
             {/* Seccion informacion escolar */}
@@ -340,9 +406,10 @@ export const RegistroEstudiante = () => {
             {/* Boton continuar */}
             <button
               type="submit"
+              disabled={isSubmitting}
               className="bg-[#009A4D] hover:bg-[#10B981] text-white font-bold py-3 rounded-xl transition-colors"
             >
-              Continuar
+              {isSubmitting ? 'Registrando...' : 'Continuar'}
             </button>
 
           </div>

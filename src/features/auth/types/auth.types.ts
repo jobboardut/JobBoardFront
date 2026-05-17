@@ -19,6 +19,17 @@ export interface LoginResponse {
   usuario: AuthUser
 }
 
+export interface RegistroEstudianteRequest {
+  email: string
+  password: string
+  nombres: string
+  apellidos: string
+  direccion: string
+  fechaNacimiento: string
+  estadoCivil: string
+  programaEducativo: string
+}
+
 export interface RegistroEmpresaRequest {
   email: string
   password: string

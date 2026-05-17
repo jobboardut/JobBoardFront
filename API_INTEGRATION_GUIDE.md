@@ -1,43 +1,63 @@
-# Guia de integracion de APIs
+# Guia rapida de integracion de APIs
 
-Este proyecto deja preparada la UI y la capa de servicios para que, cuando el backend este listo, el cambio minimo sea reemplazar la fuente de datos dentro de cada service de feature.
+Este proyecto ya usa un cliente HTTP compartido con Axios:
 
-## Puntos que ya quedaron preparados
+```text
+src/services/api.ts
+```
 
-- `src/services/apiClient.ts`: cliente HTTP base con `API_BASE_URL` y helper `requestJson`.
-- `src/services/apiEndpoints.ts`: rutas base centralizadas por modulo.
-- `src/features/*/services`: cada feature expone su endpoint y su contrato de datos.
+Ese archivo es el punto principal para base URL, token, errores 401 y respuestas normalizadas.
+
+## Documentos principales
+
+- `API_COVERAGE_REPORT.md`: que endpoints estan conectados, cuales faltan y que debe confirmar backend.
+- `API_CONNECTION_TUTORIAL.md`: tutorial paso a paso para que cada companero conecte su feature siguiendo la misma estructura.
+- `FRONTEND_ARCHITECTURE.md`: estructura general recomendada del frontend.
+- `ADMIN_API_REPORT.md`: detalle historico de la conexion de administradores.
 
 ## Regla de cambio minimo
 
-Cuando llegue la API real, no deberias tocar:
+La UI no debe llamar endpoints directo. El flujo correcto es:
 
-- `src/pages`
-- `src/components/layout`
-- `src/features/*/components`
+```text
+component -> hook -> feature service -> src/services/api.ts -> backend
+```
 
-Normalmente solo se reemplaza:
+Normalmente solo se toca:
 
-1. El `return` mock dentro del service.
-2. La llamada a `requestJson` usando el endpoint correspondiente.
-3. Si hace falta, el mapeo de DTO a tipos internos del feature.
+1. `src/features/<feature>/types`: contratos TypeScript.
+2. `src/features/<feature>/services`: llamada HTTP y mapeo de respuesta.
+3. `src/features/<feature>/hooks`: carga, loading, errores y acciones.
 
-## Convencion de trabajo
+Los componentes solo deben recibir datos listos para pintar.
 
-- Mantener los endpoints en `src/services/apiEndpoints.ts`.
-- Mantener la logica HTTP en `src/services/apiClient.ts`.
-- Dejar la UI consumiendo hooks y services, nunca `fetch` directo desde las vistas.
+## Estructura por feature
 
-## Modulos preparados
+```text
+src/features/<feature>/
+  components/
+  hooks/
+  services/
+  types/
+```
 
-- Dashboard
-- Usuarios
-- Validacion
-- Gestion
-- Publicaciones
-- Seguimiento de postulaciones
-- Configuracion de listas maestras
+Cuando una API se comparte entre features, como carreras o sectores, debe ir en:
 
-## Nota
+```text
+src/services/
+```
 
-Los datos actuales son mock local. Estan organizados para que luego solo cambies la capa de service y no el resto de la aplicacion.
+Ejemplo actual:
+
+```text
+src/services/catalog.service.ts
+```
+
+## Validacion antes de subir
+
+```powershell
+npm run build
+git status --short --branch
+```
+
+La rama base del equipo debe ser `develop`.

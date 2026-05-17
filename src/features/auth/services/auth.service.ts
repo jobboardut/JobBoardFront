@@ -1,5 +1,5 @@
 import api from '@/services/api'
-import type { LoginRequest, LoginResponse, RegistroEmpresaRequest } from '../types/auth.types'
+import type { LoginRequest, LoginResponse, RegistroEmpresaRequest, RegistroEstudianteRequest } from '../types/auth.types'
 
 const appendFileOrEmpty = (formData: FormData, key: string, file?: File | null) => {
   if (file) {
@@ -65,6 +65,22 @@ export const authService = {
   registroEmpresa: async (data: RegistroEmpresaRequest) => {
     const formData = buildRegistroEmpresaFormData(data)
     return api.post('/registro/empresa', formData)
+  },
+
+  registroEstudiante: async (data: RegistroEstudianteRequest) => {
+    const payload = {
+      email: data.email,
+      password: data.password,
+      nombre: data.nombres,
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      direccion: data.direccion,
+      fechaNacimiento: data.fechaNacimiento,
+      estadoCivil: data.estadoCivil,
+      programaEducativo: data.programaEducativo,
+    }
+
+    return api.post('/registro/estudiante', payload)
   },
 
 }
