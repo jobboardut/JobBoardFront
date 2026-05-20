@@ -54,7 +54,7 @@ export interface CreateVacanteRequest {
 }
 
 export interface UpdateEstatusRequest {
-  estatus: 'Pausada' | 'Finalizada' | 'Baneada'
+  estatus: 'Pausada' | 'Finalizada' | 'Baneada' | 'Eliminada'
 }
 
 export interface Postulante {

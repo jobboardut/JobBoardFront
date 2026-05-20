@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
+import { catalogService } from '@/services/catalog.service'
 
 const pasos = [
   'Selección de tipo de cuenta',
@@ -10,7 +11,7 @@ const pasos = [
   'Validación de Perfil',
 ]
 
-const programas = [
+const DEFAULT_PROGRAMAS = [
   'Ingeniería en Tecnologías de la Información',
   'Ingeniería en Desarrollo de Software',
   'Ingeniería Industrial',
@@ -46,6 +47,24 @@ export const RegistroEstudiante = () => {
   const [foto, setFoto] = useState<string | null>(null)
   const [cvNombre, setCvNombre] = useState<string | null>(null)
   const [docNombre, setDocNombre] = useState<string | null>(null)
+  const [programas, setProgramas] = useState(DEFAULT_PROGRAMAS)
+
+  useEffect(() => {
+    let isMounted = true
+
+    catalogService.getCarreras()
+      .then((items) => {
+        if (!isMounted || !items.length) return
+        setProgramas(items.map((item) => item.nombre))
+      })
+      .catch(() => {
+        if (isMounted) setProgramas(DEFAULT_PROGRAMAS)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))

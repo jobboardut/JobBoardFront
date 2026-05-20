@@ -24,8 +24,8 @@ export const empresaService = {
   crearVacante: (empresaId: number, data: CreateVacanteRequest): Promise<Vacante> =>
     api.post(`/empresa/${empresaId}/vacantes`, data) as Promise<Vacante>,
 
-  actualizarEstatusVacante: (empresaId: number, publicacionId: number, data: UpdateEstatusRequest): Promise<void> =>
-    api.put(`/empresa/${empresaId}/vacantes/${publicacionId}/estatus`, data) as Promise<void>,
+  actualizarEstatusVacante: (publicacionId: number, data: UpdateEstatusRequest): Promise<void> =>
+    api.put(`/empresa/vacantes/${publicacionId}/estatus`, data) as Promise<void>,
 
   getPostulantes: (empresaId: number, publicacionId: number): Promise<Postulante[]> =>
     api.get(`/empresa/${empresaId}/vacantes/${publicacionId}/postulantes`) as Promise<Postulante[]>,

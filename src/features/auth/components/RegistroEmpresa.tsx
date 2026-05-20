@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Camera, CheckCircle2, Globe, Mail, MapPin, Phone, User } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
 import { defaultEmpresaProfile, markEmpresaProfileIncomplete, saveEmpresaProfileDraft } from '@/features/empresas/services/empresaProfile.storage'
+import { catalogService } from '@/services/catalog.service'
 import { authService } from '../services/auth.service'
 
 const pasos = [
@@ -12,7 +13,7 @@ const pasos = [
   'Validacion de perfil',
 ]
 
-const sectores = [
+const DEFAULT_SECTORES = [
   { id: '1', nombre: 'Tecnologia' },
   { id: '2', nombre: 'Manufactura' },
   { id: '3', nombre: 'Salud' },
@@ -50,6 +51,24 @@ export const RegistroEmpresa = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [sectores, setSectores] = useState(DEFAULT_SECTORES)
+
+  useEffect(() => {
+    let isMounted = true
+
+    catalogService.getSectores()
+      .then((items) => {
+        if (!isMounted || !items.length) return
+        setSectores(items.map((item) => ({ id: String(item.id), nombre: item.nombre })))
+      })
+      .catch(() => {
+        if (isMounted) setSectores(DEFAULT_SECTORES)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))

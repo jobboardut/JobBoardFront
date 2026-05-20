@@ -68,7 +68,7 @@ export const useActualizarEstatusVacante = () => {
 
   return useMutation({
     mutationFn: ({ publicacionId, data }: { publicacionId: number; data: UpdateEstatusRequest }) =>
-      empresaService.actualizarEstatusVacante(empresaId, publicacionId, data),
+      empresaService.actualizarEstatusVacante(publicacionId, data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['empresa', 'vacantes', empresaId] })
       queryClient.invalidateQueries({ queryKey: ['empresa', 'vacante', empresaId, variables.publicacionId] })

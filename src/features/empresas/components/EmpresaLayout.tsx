@@ -23,7 +23,7 @@ export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {
   const { logout } = useLogout()
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col">
+    <div className="h-screen overflow-hidden bg-transparent">
 
       {/* Header */}
       <header className="bg-white/90 backdrop-blur shadow-sm px-8 py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-20 border-b border-emerald-100">
@@ -53,10 +53,10 @@ export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {
         </div>
       </header>
 
-      <div className="flex pt-20">
+      <div className="pt-20">
 
         {/* Sidebar */}
-        <aside className="w-64 min-h-screen bg-white/95 backdrop-blur shadow-sm fixed left-0 top-20 bottom-0 flex flex-col justify-between py-6 px-4 border-r border-emerald-100">
+        <aside className="fixed bottom-0 left-0 top-20 flex w-64 flex-col justify-between overflow-y-auto border-r border-emerald-100 bg-white/95 px-4 py-6 shadow-sm backdrop-blur">
           <nav className="flex flex-col gap-2">
             {menuItems.map((item) => {
               const Icono = item.icon
@@ -93,7 +93,7 @@ export const EmpresaLayout = ({ children }: EmpresaLayoutProps) => {
         </aside>
 
         {/* Contenido */}
-        <main className="ml-64 flex-1 p-8">
+        <main className="ml-64 h-[calc(100vh-5rem)] overflow-y-auto p-8">
           {children}
         </main>
 

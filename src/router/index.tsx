@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ROUTES } from './routes'
 import { PrivateRoute } from './PrivateRoute'
 import { LoginPage } from '@/pages/LoginPage'
@@ -16,21 +16,27 @@ import { EditarPerfilEmpresa } from '@/features/empresas/components/EditarPerfil
 import FormularioVacante from '@/features/empresas/components/FormularioVacante'
 import { DetalleVacante } from '@/features/empresas/components/DetalleVacante'
 import { DetallePostulante } from '@/features/empresas/components/DetallePostulante'
-
+import AdministradorDashboardPage from '@/pages/AdministradorDashboardPage'
+import CentroGestionPage from '@/pages/CentroGestionPage'
+import CentroValidacionPage from '@/pages/CentroValidacionPage'
+import ConfiguracionPage from '@/pages/ConfiguracionPage'
+import PublicacionesPage from '@/pages/PublicacionesPage'
+import SeguimientoPostulacionesPage from '@/pages/SeguimientoPostulacionesPage'
 
 export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+        <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Navigate to={ROUTES.ADMIN_DASHBOARD} replace /></PrivateRoute>} />
 
-        {/* Rutas publicas */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SELECCION_CUENTA} element={<SeleccionCuenta />} />
         <Route path="/registro/estudiante" element={<RegistroEstudiante />} />
         <Route path="/registro/empresa" element={<RegistroEmpresa />} />
         <Route path="/registro/confirmacion" element={<RegistroCompletado />} />
-        <Route path={ROUTES.EMPRESA_DASHBOARD} element={<PrivateRoute><EmpresaLayout> <PanelControl /></EmpresaLayout></PrivateRoute>} />
+
+        <Route path={ROUTES.EMPRESA_DASHBOARD} element={<PrivateRoute><EmpresaLayout><PanelControl /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_PUBLICACIONES} element={<PrivateRoute><EmpresaLayout><MisPublicaciones /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_POSTULANTES} element={<PrivateRoute><EmpresaLayout><Postulantes /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_PERFIL} element={<PrivateRoute><EmpresaLayout><PerfilEmpresa /></EmpresaLayout></PrivateRoute>} />
@@ -41,12 +47,12 @@ export const AppRouter = () => {
         <Route path={ROUTES.EMPRESA_DETALLE_VACANTE} element={<PrivateRoute><EmpresaLayout><DetalleVacante /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_DETALLE_POSTULANTE} element={<PrivateRoute><EmpresaLayout><DetallePostulante /></EmpresaLayout></PrivateRoute>} />
 
-        {/* Rutas privadas */}
-        <Route path={ROUTES.DASHBOARD} element={
-          <PrivateRoute>
-            <div className="p-8">Dashboard — en construcción</div>
-          </PrivateRoute>
-        } />
+        <Route path={ROUTES.ADMIN_DASHBOARD} element={<PrivateRoute><AdministradorDashboardPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_VALIDACION} element={<PrivateRoute><CentroValidacionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_GESTION} element={<PrivateRoute><CentroGestionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_PUBLICACIONES} element={<PrivateRoute><PublicacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_SEGUIMIENTO} element={<PrivateRoute><SeguimientoPostulacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_CONFIGURACION} element={<PrivateRoute><ConfiguracionPage /></PrivateRoute>} />
 
         <Route path="*" element={<div className="p-8">404</div>} />
       </Routes>

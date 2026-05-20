@@ -1,11 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useCrearVacante, useVacante } from '../hooks/useEmpresa'
-import type { CreateVacanteRequest } from '../types/empresa.types'
+import type { CreateVacanteRequest, Vacante } from '../types/empresa.types'
 
 const modalidades = ['Presencial', 'Remota', 'Hibrida']
+
+const EMPTY_VACANTE_FORM: CreateVacanteRequest = {
+  titulo: '',
+  descripcion: '',
+  requisitos: '',
+  sueldoAprox: 0,
+  modalidad: '',
+}
+
+const toVacanteForm = (vacante?: Vacante): CreateVacanteRequest => ({
+  titulo: vacante?.titulo ?? '',
+  descripcion: vacante?.descripcion ?? '',
+  requisitos: vacante?.requisitos ?? '',
+  sueldoAprox: vacante?.sueldoAprox ?? 0,
+  modalidad: vacante?.modalidad ?? '',
+})
 
 interface FormularioVacanteProps {
   modo?: 'crear' | 'editar'
@@ -18,34 +34,30 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
   const isEditMode = modo === 'editar'
   const { mutate: crearVacante, isPending } = useCrearVacante()
   const { data: vacante, isLoading: isLoadingVacante } = useVacante(isEditMode ? publicacionId : 0)
+  const formKey = isEditMode ? publicacionId : 0
 
-  const [form, setForm] = useState<CreateVacanteRequest>({
-    titulo: '',
-    descripcion: '',
-    requisitos: '',
-    sueldoAprox: 0,
-    modalidad: '',
-  })
+  const baseForm = useMemo(
+    () => isEditMode ? toVacanteForm(vacante) : EMPTY_VACANTE_FORM,
+    [isEditMode, vacante]
+  )
+  const [draftState, setDraftState] = useState<{
+    key: number
+    values: Partial<CreateVacanteRequest>
+  }>({ key: formKey, values: {} })
 
-  useEffect(() => {
-    if (!vacante) return
-
-    setForm({
-      titulo: vacante.titulo ?? '',
-      descripcion: vacante.descripcion ?? '',
-      requisitos: vacante.requisitos ?? '',
-      sueldoAprox: vacante.sueldoAprox ?? 0,
-      modalidad: vacante.modalidad ?? '',
-    })
-  }, [vacante])
+  const draftValues = draftState.key === formKey ? draftState.values : {}
+  const form = { ...baseForm, ...draftValues }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setForm(prev => ({
-      ...prev,
-      [name]: name === 'sueldoAprox' ? Number(value) : value,
+    setDraftState(prev => ({
+      key: formKey,
+      values: {
+        ...(prev.key === formKey ? prev.values : {}),
+        [name]: name === 'sueldoAprox' ? Number(value) : value,
+      },
     }))
   }
 
