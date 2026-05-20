@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, LayoutGrid, List, UserCircle } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
@@ -22,7 +22,7 @@ const textEstatus: Record<string, string> = {
 
 export const Postulantes = () => {
   const [vista, setVista] = useState<'lista' | 'kanban'>('lista')
-  const [vacanteSeleccionada, setVacanteSeleccionada] = useState<number | null>(null)
+  const [vacanteSeleccionadaManual, setVacanteSeleccionadaManual] = useState<number | null>(null)
   const navigate = useNavigate()
 
   const {
@@ -31,17 +31,17 @@ export const Postulantes = () => {
     isError: isVacantesError,
   } = useVacantes()
 
-  useEffect(() => {
+  const vacanteSeleccionada = useMemo(() => {
     if (vacantes.length === 0) {
-      setVacanteSeleccionada(null)
-      return
+      return null
     }
 
-    setVacanteSeleccionada((current) => {
-      const exists = current ? vacantes.some((vacante) => vacante.id === current) : false
-      return exists ? current : vacantes[0].id
-    })
-  }, [vacantes])
+    const exists = vacanteSeleccionadaManual
+      ? vacantes.some((vacante) => vacante.id === vacanteSeleccionadaManual)
+      : false
+
+    return exists ? vacanteSeleccionadaManual : vacantes[0].id
+  }, [vacantes, vacanteSeleccionadaManual])
 
   const vacanteActual = useMemo(
     () => vacantes.find((vacante) => vacante.id === vacanteSeleccionada),
@@ -89,7 +89,7 @@ export const Postulantes = () => {
             {vacantes.length > 0 && (
               <select
                 value={vacanteSeleccionada ?? ''}
-                onChange={(event) => setVacanteSeleccionada(Number(event.target.value))}
+                onChange={(event) => setVacanteSeleccionadaManual(Number(event.target.value))}
                 className="rounded-full border border-white/40 bg-white px-4 py-2 text-sm font-semibold text-emerald-600 outline-none"
               >
                 {vacantes.map((vacante) => (

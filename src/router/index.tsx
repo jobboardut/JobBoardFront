@@ -32,7 +32,7 @@ export const AppRouter = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-        <Route path={ROUTES.DASHBOARD} element={<Navigate to={ROUTES.ADMIN_DASHBOARD} replace />} />
+        <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Navigate to={ROUTES.ADMIN_DASHBOARD} replace /></PrivateRoute>} />
 
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SELECCION_CUENTA} element={<SeleccionCuenta />} />
@@ -51,17 +51,17 @@ export const AppRouter = () => {
         <Route path={ROUTES.EMPRESA_DETALLE_VACANTE} element={<PrivateRoute><EmpresaLayout><DetalleVacante /></EmpresaLayout></PrivateRoute>} />
         <Route path={ROUTES.EMPRESA_DETALLE_POSTULANTE} element={<PrivateRoute><EmpresaLayout><DetallePostulante /></EmpresaLayout></PrivateRoute>} />
 
-        <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdministradorDashboardPage />} />
-        <Route path={ROUTES.ADMIN_VALIDACION} element={<CentroValidacionPage />} />
-        <Route path={ROUTES.ADMIN_GESTION} element={<CentroGestionPage />} />
-        <Route path={ROUTES.ADMIN_PUBLICACIONES} element={<PublicacionesPage />} />
-        <Route path={ROUTES.ADMIN_SEGUIMIENTO} element={<SeguimientoPostulacionesPage />} />
-        <Route path={ROUTES.ADMIN_CONFIGURACION} element={<ConfiguracionPage />} />
+        <Route path={ROUTES.ADMIN_DASHBOARD} element={<PrivateRoute><AdministradorDashboardPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_VALIDACION} element={<PrivateRoute><CentroValidacionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_GESTION} element={<PrivateRoute><CentroGestionPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_PUBLICACIONES} element={<PrivateRoute><PublicacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_SEGUIMIENTO} element={<PrivateRoute><SeguimientoPostulacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ADMIN_CONFIGURACION} element={<PrivateRoute><ConfiguracionPage /></PrivateRoute>} />
 
-        <Route path={ROUTES.ESTUDIANTE_DASHBOARD} element={<EstudianteDashboardPage />} />
-        <Route path={ROUTES.ESTUDIANTE_PUBLICACIONES} element={<EstudiantePublicacionesPage />} />
-        <Route path={ROUTES.ESTUDIANTE_PERFIL} element={<EstudiantePerfilPage />} />
-        <Route path={ROUTES.ESTUDIANTE_SEGUIMIENTO} element={<EstudianteSeguimientoPage />} />
+        <Route path={ROUTES.ESTUDIANTE_DASHBOARD} element={<PrivateRoute><EstudianteDashboardPage /></PrivateRoute>} />
+        <Route path={ROUTES.ESTUDIANTE_PUBLICACIONES} element={<PrivateRoute><EstudiantePublicacionesPage /></PrivateRoute>} />
+        <Route path={ROUTES.ESTUDIANTE_PERFIL} element={<PrivateRoute><EstudiantePerfilPage /></PrivateRoute>} />
+        <Route path={ROUTES.ESTUDIANTE_SEGUIMIENTO} element={<PrivateRoute><EstudianteSeguimientoPage /></PrivateRoute>} />
 
         <Route path="*" element={<div className="p-8">404</div>} />
       </Routes>

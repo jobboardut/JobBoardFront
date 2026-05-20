@@ -9,7 +9,7 @@ export type PublicationMetric = {
   tone: PublicationMetricTone
 }
 
-export type PublicationStatus = 'Activo' | 'Pausado'
+export type PublicationStatus = 'Activo' | 'Pausado' | 'Finalizada' | 'Baneada' | 'Eliminada'
 
 export type Publication = {
   id: string

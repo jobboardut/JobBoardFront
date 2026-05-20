@@ -4,12 +4,21 @@ import DetallePublicacionModal from '../features/administradores/components/Deta
 import PublicacionesGrid from '../features/administradores/components/PublicacionesGrid'
 import EstadisticasPublicaciones from '../features/administradores/components/EstadisticasPublicaciones'
 import PublicacionesToolbar from '../features/administradores/components/PublicacionesToolbar'
-import usePublicationsOverview from '../features/administradores/hooks/usePublicationsOverview'
+import usePublicationsOverview, { useActualizarEstatusPublicacion } from '../features/administradores/hooks/usePublicationsOverview'
+import type { PublicacionEstatusAdmin } from '../features/administradores/types/admin.types'
 import type { Publication } from '../features/administradores/types/publicaciones.types'
 
 function PublicacionesPage() {
   const { metrics, publications } = usePublicationsOverview()
+  const { mutate: actualizarEstatus, isPending: isUpdatingStatus } = useActualizarEstatusPublicacion()
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
+
+  const handleUpdateStatus = (publication: Publication, estatus: PublicacionEstatusAdmin) => {
+    actualizarEstatus(
+      { publicacionId: publication.id, estatus },
+      { onSuccess: () => setSelectedPublication(null) }
+    )
+  }
 
   return (
     <div className="app-shell">
@@ -28,7 +37,12 @@ function PublicacionesPage() {
         <PublicacionesGrid rows={publications} onSelect={setSelectedPublication} />
       </main>
 
-      <DetallePublicacionModal publication={selectedPublication} onClose={() => setSelectedPublication(null)} />
+      <DetallePublicacionModal
+        publication={selectedPublication}
+        onClose={() => setSelectedPublication(null)}
+        onUpdateStatus={handleUpdateStatus}
+        isUpdatingStatus={isUpdatingStatus}
+      />
     </div>
   )
 }

@@ -43,3 +43,9 @@ export type ValidarUsuarioAccion = 'aprobar' | 'rechazar'
 export interface ValidarUsuarioRequest {
   accion: ValidarUsuarioAccion
 }
+
+export type PublicacionEstatusAdmin = 'Pausada' | 'Finalizada' | 'Baneada' | 'Eliminada'
+
+export interface ActualizarPublicacionEstatusRequest {
+  estatus: PublicacionEstatusAdmin
+}

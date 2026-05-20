@@ -12,7 +12,11 @@ export type PublicationsOverview = {
 
 const toPublicationStatus = (estatus: string): PublicationStatus => {
   const normalized = estatus.toLowerCase()
-  return normalized.includes('paus') ? 'Pausado' : 'Activo'
+  if (normalized.includes('paus')) return 'Pausado'
+  if (normalized.includes('final')) return 'Finalizada'
+  if (normalized.includes('bane')) return 'Baneada'
+  if (normalized.includes('elimin')) return 'Eliminada'
+  return 'Activo'
 }
 
 const formatDate = (value?: string): string => {

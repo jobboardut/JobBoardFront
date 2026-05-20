@@ -1,13 +1,21 @@
 import { CircleOff, MapPin, Trash2, X } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import type { PublicacionEstatusAdmin } from '../types/admin.types'
 import type { Publication } from '../types/publicaciones.types'
 
 type PublicationDetailModalProps = {
 	publication: Publication | null
 	onClose: () => void
+	onUpdateStatus?: (publication: Publication, estatus: PublicacionEstatusAdmin) => void
+	isUpdatingStatus?: boolean
 }
 
-function DetallePublicacionModal({ publication, onClose }: PublicationDetailModalProps) {
+function DetallePublicacionModal({
+	publication,
+	onClose,
+	onUpdateStatus,
+	isUpdatingStatus = false,
+}: PublicationDetailModalProps) {
 	if (!publication) {
 		return null
 	}
@@ -72,11 +80,21 @@ function DetallePublicacionModal({ publication, onClose }: PublicationDetailModa
 				</section>
 
 				<footer className="publication-modal-actions">
-					<button type="button" className="btn-suspend-publication">
+					<button
+						type="button"
+						className="btn-suspend-publication"
+						disabled={isUpdatingStatus}
+						onClick={() => onUpdateStatus?.(publication, 'Pausada')}
+					>
 						<CircleOff size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
-						Suspender publicacion
+						{isUpdatingStatus ? 'Actualizando...' : 'Suspender publicacion'}
 					</button>
-					<button type="button" className="btn-delete-publication">
+					<button
+						type="button"
+						className="btn-delete-publication"
+						disabled={isUpdatingStatus}
+						onClick={() => onUpdateStatus?.(publication, 'Eliminada')}
+					>
 						<Trash2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 						Eliminar
 					</button>

@@ -2,6 +2,7 @@ import api from '@/services/api'
 import type {
   AdminPublicacionesResponse,
   AdminUsuariosResponse,
+  ActualizarPublicacionEstatusRequest,
   EstadisticasUsuarios,
   VacanteReciente,
   ValidarUsuarioRequest,
@@ -25,6 +26,12 @@ export const adminService = {
 
   getPublicaciones: (): Promise<AdminPublicacionesResponse> =>
     api.get('/admin/publicaciones') as Promise<AdminPublicacionesResponse>,
+
+  actualizarEstatusPublicacion: (
+    publicacionId: number | string,
+    data: ActualizarPublicacionEstatusRequest
+  ): Promise<void> =>
+    api.put(`/admin/publicaciones/${publicacionId}/estatus`, data) as Promise<void>,
 
   getPostulacionesRecientes: (): Promise<unknown[]> =>
     api.get('/admin/postulaciones/recientes') as Promise<unknown[]>,
