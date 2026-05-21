@@ -124,60 +124,61 @@ export const RegistroEmpresa = () => {
   }
 
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${campusImg})` }}
-    >
-      <div className="absolute inset-0 bg-black/20" />
+    <div className="h-screen w-full overflow-y-auto">
+      <div
+        className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
+        style={{ backgroundImage: `url(${campusImg})` }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
 
-      <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[90%] max-w-6xl p-8 my-8">
-        <button
-          type="button"
-          onClick={() => navigate('/registro')}
-          className="absolute top-5 left-5 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
-        >
-          <ArrowLeft size={18} />
-        </button>
+        <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[90%] max-w-6xl p-8 my-8">
+          <button
+            type="button"
+            onClick={() => navigate('/registro')}
+            className="absolute top-5 left-5 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
+          >
+            <ArrowLeft size={18} />
+          </button>
 
-        <div className="flex items-start justify-center gap-2 mb-8 px-8">
-          {pasos.map((paso, index) => (
-            <div key={paso} className="flex items-center gap-2">
-              <div className="flex flex-col items-center gap-1">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                  index === 0
-                    ? 'bg-emerald-500 text-white'
-                    : index === 1
-                    ? 'bg-orange-400 text-white'
-                    : 'bg-gray-200 text-gray-400'
-                }`}>
-                  {index === 0
-                    ? <CheckCircle2 size={20} />
-                    : <span className="text-sm font-bold">{index + 1}</span>
-                  }
+          <div className="flex items-start justify-center gap-2 mb-8 px-8">
+            {pasos.map((paso, index) => (
+              <div key={paso} className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-1">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                    index === 0
+                      ? 'bg-emerald-500 text-white'
+                      : index === 1
+                      ? 'bg-orange-400 text-white'
+                      : 'bg-gray-200 text-gray-400'
+                  }`}>
+                    {index === 0
+                      ? <CheckCircle2 size={20} />
+                      : <span className="text-sm font-bold">{index + 1}</span>
+                    }
+                  </div>
+                  <span className={`text-xs text-center w-24 leading-tight ${
+                    index === 0
+                      ? 'text-emerald-500 font-semibold'
+                      : index === 1
+                      ? 'text-orange-400 font-semibold'
+                      : 'text-gray-400'
+                  }`}>
+                    {paso}
+                  </span>
                 </div>
-                <span className={`text-xs text-center w-24 leading-tight ${
-                  index === 0
-                    ? 'text-emerald-500 font-semibold'
-                    : index === 1
-                    ? 'text-orange-400 font-semibold'
-                    : 'text-gray-400'
-                }`}>
-                  {paso}
-                </span>
+                {index < pasos.length - 1 && (
+                  <div className={`w-16 h-1 rounded mb-5 ${
+                    index === 0
+                      ? 'bg-gradient-to-r from-emerald-500 to-orange-400'
+                      : 'bg-gray-200'
+                  }`} />
+                )}
               </div>
-              {index < pasos.length - 1 && (
-                <div className={`w-16 h-1 rounded mb-5 ${
-                  index === 0
-                    ? 'bg-gradient-to-r from-emerald-500 to-orange-400'
-                    : 'bg-gray-200'
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 bg-gray-50 rounded-2xl p-6">
+          <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-6">
+            <div className="col-span-2 bg-gray-50 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-800">Registro de empresa</h2>
               <span className="bg-emerald-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
@@ -393,7 +394,7 @@ export const RegistroEmpresa = () => {
             )}
           </div>
 
-          <div className="col-span-1 flex flex-col gap-4">
+            <div className="col-span-1 flex flex-col gap-4">
             <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
               <div
                 onClick={() => logoRef.current?.click()}
@@ -417,8 +418,9 @@ export const RegistroEmpresa = () => {
             >
               {isSubmitting ? 'Registrando...' : 'Continuar'}
             </button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

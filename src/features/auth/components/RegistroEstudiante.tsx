@@ -115,67 +115,68 @@ export const RegistroEstudiante = () => {
     }
   }
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${campusImg})` }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20" />
+    <div className="h-screen w-full overflow-y-auto">
+      <div
+        className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
+        style={{ backgroundImage: `url(${campusImg})` }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/20" />
 
-      {/* Contenedor principal */}
-      <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[90%] max-w-6xl p-8 my-8">
+        {/* Contenedor principal */}
+        <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[90%] max-w-6xl p-8 my-8">
 
-        {/* Boton regresar */}
-        <button
-          onClick={() => navigate('/registro')}
-          className="absolute top-5 left-5 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
-        >
-          <ArrowLeft size={18} />
-        </button>
+          {/* Boton regresar */}
+          <button
+            onClick={() => navigate('/registro')}
+            className="absolute top-5 left-5 w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600"
+          >
+            <ArrowLeft size={18} />
+          </button>
 
-        {/* Stepper */}
-        <div className="flex items-start justify-center gap-2 mb-8 px-8">
-          {pasos.map((paso, index) => (
-            <div key={paso} className="flex items-center gap-2">
-              <div className="flex flex-col items-center gap-1">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                  index === 0
-                    ? 'bg-[#009A4D] text-white'
-                    : index === 1
-                    ? 'bg-[#EA580C] text-white'
-                    : 'bg-gray-200 text-gray-400'
-                }`}>
-                  {index === 0
-                    ? <CheckCircle2 size={20} />
-                    : <span className="text-sm font-bold">{index + 1}</span>
-                  }
+          {/* Stepper */}
+          <div className="flex items-start justify-center gap-2 mb-8 px-8">
+            {pasos.map((paso, index) => (
+              <div key={paso} className="flex items-center gap-2">
+                <div className="flex flex-col items-center gap-1">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                    index === 0
+                      ? 'bg-[#009A4D] text-white'
+                      : index === 1
+                      ? 'bg-[#EA580C] text-white'
+                      : 'bg-gray-200 text-gray-400'
+                  }`}>
+                    {index === 0
+                      ? <CheckCircle2 size={20} />
+                      : <span className="text-sm font-bold">{index + 1}</span>
+                    }
+                  </div>
+                  <span className={`text-xs text-center w-24 leading-tight ${
+                    index === 0
+                      ? 'text-[#009A4D] font-semibold'
+                      : index === 1
+                      ? 'text-[#EA580C] font-semibold'
+                      : 'text-gray-400'
+                  }`}>
+                    {paso}
+                  </span>
                 </div>
-                <span className={`text-xs text-center w-24 leading-tight ${
-                  index === 0
-                    ? 'text-[#009A4D] font-semibold'
-                    : index === 1
-                    ? 'text-[#EA580C] font-semibold'
-                    : 'text-gray-400'
-                }`}>
-                  {paso}
-                </span>
+                {index < pasos.length - 1 && (
+                  <div className={`w-16 h-1 rounded mb-5 ${
+                    index === 0
+                      ? 'bg-gradient-to-r from-[#009A4D] to-[#EA580C]'
+                      : 'bg-gray-200'
+                  }`} />
+                )}
               </div>
-              {index < pasos.length - 1 && (
-                <div className={`w-16 h-1 rounded mb-5 ${
-                  index === 0
-                    ? 'bg-gradient-to-r from-[#009A4D] to-[#EA580C]'
-                    : 'bg-gray-200'
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Contenido en dos columnas */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-6">
+          {/* Contenido en dos columnas */}
+          <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-6">
 
-          {/* Columna izquierda — formulario */}
-          <div className="col-span-2 bg-gray-50 rounded-2xl p-6">
+            {/* Columna izquierda — formulario */}
+            <div className="col-span-2 bg-gray-50 rounded-2xl p-6">
 
             {/* Titulo */}
             <div className="flex items-center justify-between mb-4">
@@ -352,7 +353,7 @@ export const RegistroEstudiante = () => {
           </div>
 
           {/* Columna derecha — archivos */}
-          <div className="col-span-1 flex flex-col gap-4">
+            <div className="col-span-1 flex flex-col gap-4">
 
             {/* Foto de perfil */}
             <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
@@ -412,8 +413,9 @@ export const RegistroEstudiante = () => {
               {isSubmitting ? 'Registrando...' : 'Continuar'}
             </button>
 
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

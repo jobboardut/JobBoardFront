@@ -18,15 +18,16 @@ export const RegistroCompletado = () => {
   const colorIcono = tipo === 'empresa' ? 'bg-blue-500' : 'bg-[#EA580C]'
 
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
-      style={{ backgroundImage: `url(${campusImg})` }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20" />
+    <div className="h-screen w-full overflow-y-auto">
+      <div
+        className="min-h-screen w-full flex items-center justify-center bg-cover bg-center relative"
+        style={{ backgroundImage: `url(${campusImg})` }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/20" />
 
-      {/* Contenedor principal */}
-      <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[85%] max-w-4xl p-10">
+        {/* Contenedor principal */}
+        <div className="relative z-10 bg-white rounded-3xl shadow-xl w-[85%] max-w-4xl p-10">
 
         {/* Stepper */}
         <div className="flex items-start justify-center gap-2 mb-10 px-8">
@@ -95,6 +96,7 @@ export const RegistroCompletado = () => {
           </button>
         </div>
 
+        </div>
       </div>
     </div>
   )
