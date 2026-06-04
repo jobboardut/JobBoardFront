@@ -13,4 +13,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    // En desarrollo el front (5173) reenvía las llamadas /api al backend (5269).
+    // El navegador solo habla con 5173 → no hay CORS.
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5269',
+        changeOrigin: true,
+      },
+    },
+  },
 })

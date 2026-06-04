@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { estudianteService } from '../services/estudiante.service'
+import { extractFileName, getPresignedUrl } from '@/services/filesService'
 import type { CurriculumData, EditContactFormData, StudentProfile } from '../types/profile.types'
 
 const getUserId = () => Number(localStorage.getItem('userId'))
@@ -27,10 +28,10 @@ const buildCurriculumData = (profile: StudentProfile): CurriculumData => {
     }
   }
 
-  const fileName = decodeURIComponent(profile.cvUrl.split('/').pop() || 'Curriculum del estudiante')
-
   return {
-    fileName,
+    // extractFileName descarta el query-string de la pre-signed URL antes de
+    // tomar el nombre del archivo, evitando "?X-Amz-..." en el texto visible.
+    fileName: extractFileName(profile.cvUrl) || 'Curriculum del estudiante',
     uploadDate: 'Disponible en perfil',
     url: profile.cvUrl,
   }
@@ -76,9 +77,21 @@ export const useProfile = () => {
     setIsContactModalOpen(false)
   }
 
-  const handleDownloadCV = () => {
-    if (curriculumData.url) {
-      window.open(curriculumData.url, '_blank', 'noopener,noreferrer')
+  const handleDownloadCV = async () => {
+    if (!studentProfile.cvUrl) return
+
+    // Abre la pestaña en el mismo gesto del usuario (evita bloqueador de pop-ups)
+    // y luego pide una Pre-signed URL fresca al backend, garantizando que
+    // el PDF sea accesible aunque la URL embebida en el perfil haya expirado.
+    const viewer = window.open('', '_blank')
+    if (!viewer) return
+    viewer.opener = null
+
+    try {
+      const freshUrl = await getPresignedUrl(studentProfile.cvUrl)
+      viewer.location.href = freshUrl
+    } catch {
+      viewer.close()
     }
   }
 

@@ -10,7 +10,7 @@ interface RecentApplicationsResult {
   recientes: Application[]
 }
 
-const asRecord = (value: unknown): ApiRecord =>
+const asRecord: any = (value: unknown): ApiRecord =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? value as ApiRecord : {}
 
 const pickValue = (records: ApiRecord[], keys: string[]) => {
