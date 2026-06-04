@@ -42,9 +42,9 @@ export const DetallePostulante = () => {
     )
   }
 
-  const estatusActual = estatusOverride?.postulanteId === postulante.id
-    ? estatusOverride.estatus
-    : postulante.estatus
+  const estatusActual = postulante.estatus
+  const aplicarEstatus = (estatus: string) =>
+    cambiarEstatus({ postulacionId: postulante.postulacionId, estatus })
 
   return (
     <div className="space-y-6">
@@ -75,24 +75,27 @@ export const DetallePostulante = () => {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setEstatusOverride({ postulanteId: postulante.id, estatus: 'Entrevista' })}
-              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-600"
+              onClick={() => aplicarEstatus('Entrevista')}
+              disabled={isUpdating}
+              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-600 disabled:opacity-60"
             >
               <CalendarCheck size={16} />
               Entrevista
             </button>
             <button
               type="button"
-              onClick={() => setEstatusOverride({ postulanteId: postulante.id, estatus: 'Aprobado' })}
-              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white"
+              onClick={() => aplicarEstatus('Aceptada')}
+              disabled={isUpdating}
+              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             >
               <CheckCircle2 size={16} />
               Aprobar
             </button>
             <button
               type="button"
-              onClick={() => setEstatusOverride({ postulanteId: postulante.id, estatus: 'Rechazado' })}
-              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white"
+              onClick={() => aplicarEstatus('Rechazada')}
+              disabled={isUpdating}
+              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
             >
               <XCircle size={16} />
               Rechazar
