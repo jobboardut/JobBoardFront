@@ -86,3 +86,16 @@ export const usePostulantes = (publicacionId: number) => {
     enabled: !!empresaId && !!publicacionId,
   })
 }
+
+export const useActualizarEstatusPostulante = (publicacionId: number) => {
+  const empresaId = getUserId()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ postulacionId, estatus }: { postulacionId: number; estatus: string }) =>
+      empresaService.actualizarEstatusPostulante(empresaId, postulacionId, estatus),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['empresa', 'postulantes', empresaId, publicacionId] })
+    },
+  })
+}

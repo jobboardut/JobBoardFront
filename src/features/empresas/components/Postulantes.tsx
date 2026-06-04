@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, LayoutGrid, List, UserCircle } from 'lucide-react'
+import { Eye, FileText, LayoutGrid, List, UserCircle } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { usePostulantes, useVacantes } from '../hooks/useEmpresa'
 import type { Postulante } from '../types/empresa.types'
@@ -149,7 +149,15 @@ export const Postulantes = () => {
                 <tr key={postulante.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <UserCircle size={36} className="text-gray-300" />
+                      {postulante.fotoUrl ? (
+                        <img
+                          src={postulante.fotoUrl}
+                          alt={postulante.nombre}
+                          className="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200"
+                        />
+                      ) : (
+                        <UserCircle size={36} className="text-gray-300" />
+                      )}
                       <div>
                         <p className="font-semibold text-sm text-gray-800">{postulante.nombre}</p>
                         <p className="text-xs text-gray-400">{postulante.email}</p>
@@ -157,7 +165,7 @@ export const Postulantes = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {postulante.tipoUsuario}
+                    {postulante.carrera || postulante.tipoUsuario}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -168,13 +176,29 @@ export const Postulantes = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      type="button"
-                      onClick={() => goToDetallePostulante(postulante.id)}
-                      className="hover:text-emerald-500 text-gray-400 transition-colors"
-                    >
-                      <Eye size={18} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => goToDetallePostulante(postulante.id)}
+                        className="hover:text-emerald-500 text-gray-400 transition-colors"
+                        title="Ver detalle"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      {postulante.cvUrl ? (
+                        <a
+                          href={postulante.cvUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-emerald-500 text-gray-400 transition-colors"
+                          title="Ver CV (PDF)"
+                        >
+                          <FileText size={18} />
+                        </a>
+                      ) : (
+                        <FileText size={18} className="text-gray-200" />
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

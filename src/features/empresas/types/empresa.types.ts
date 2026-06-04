@@ -58,13 +58,36 @@ export interface UpdateEstatusRequest {
 }
 
 export interface Postulante {
-  id: number
+  id: number              // = estudianteId
+  postulacionId: number
   nombre: string
   email: string
   telefono?: string
   ubicacion?: string
   carrera?: string
+  matricula?: string
+  estatusAcademico?: string
   tipoUsuario: string
   estatus: string
   descripcion: string
+  fotoUrl?: string | null // URL pública directa
+  cvUrl?: string | null   // Pre-signed URL temporal
+  urlExpirationSeconds?: number
+}
+
+/** Forma cruda que devuelve el backend (PostulanteEmpresaDto). */
+export interface PostulanteApi {
+  postulacionId: number
+  estudianteId: number
+  nombreCompleto: string
+  email: string
+  matricula: string
+  telefono: string
+  carrera: string
+  estatusAcademico: string
+  fotoUrl: string | null
+  cvUrl: string | null
+  urlExpirationSeconds: number
+  fechaPostulacion: string
+  estatusPostulacion: string
 }

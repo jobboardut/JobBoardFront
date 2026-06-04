@@ -1,8 +1,7 @@
-import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, CalendarCheck, CheckCircle2, Mail, MapPin, Phone, XCircle } from 'lucide-react'
+import { ArrowLeft, CalendarCheck, CheckCircle2, FileText, GraduationCap, Mail, MapPin, Phone, XCircle } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
-import { usePostulantes } from '../hooks/useEmpresa'
+import { useActualizarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
 
 export const DetallePostulante = () => {
   const navigate = useNavigate()
@@ -10,13 +9,14 @@ export const DetallePostulante = () => {
   const [searchParams] = useSearchParams()
   const postulanteId = Number(id)
   const vacanteId = Number(searchParams.get('vacanteId'))
-  const [estatusOverride, setEstatusOverride] = useState<{ postulanteId: number; estatus: string } | null>(null)
 
   const {
     data: postulantes = [],
     isLoading,
     isError,
   } = usePostulantes(vacanteId)
+
+  const { mutate: cambiarEstatus, isPending: isUpdating } = useActualizarEstatusPostulante(vacanteId)
 
   const postulante = postulantes.find((item) => item.id === postulanteId)
 
@@ -57,9 +57,19 @@ export const DetallePostulante = () => {
             >
               <ArrowLeft size={18} />
             </button>
+            {postulante.fotoUrl ? (
+              <img
+                src={postulante.fotoUrl}
+                alt={postulante.nombre}
+                className="h-14 w-14 rounded-full object-cover ring-2 ring-white/60"
+              />
+            ) : null}
             <div>
               <h1 className="text-2xl font-semibold">{postulante.nombre}</h1>
               <p className="text-sm text-white/80">Estatus: {estatusActual}</p>
+              {postulante.carrera ? (
+                <p className="text-sm text-white/70">{postulante.carrera}</p>
+              ) : null}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -115,9 +125,39 @@ export const DetallePostulante = () => {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">Resumen</h2>
-        <p className="text-sm text-gray-600">{postulante.descripcion || 'Sin descripcion adicional.'}</p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="flex items-center gap-2 text-emerald-500">
+            <GraduationCap size={16} />
+            <p className="text-xs font-semibold uppercase">Datos académicos</p>
+          </div>
+          <p className="mt-2 text-sm text-gray-700">
+            <span className="font-semibold">Matrícula:</span> {postulante.matricula || 'Sin dato'}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-semibold">Estatus:</span> {postulante.estatusAcademico || 'Estudiante'}
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="flex items-center gap-2 text-orange-500">
+            <FileText size={16} />
+            <p className="text-xs font-semibold uppercase">Currículum</p>
+          </div>
+          {postulante.cvUrl ? (
+            <a
+              href={postulante.cvUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-2 rounded-lg border border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-white"
+            >
+              <FileText size={16} />
+              Ver / Descargar CV
+            </a>
+          ) : (
+            <p className="mt-3 text-sm text-gray-400">El candidato no ha subido CV.</p>
+          )}
+        </div>
       </div>
     </div>
   )

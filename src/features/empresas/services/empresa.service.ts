@@ -5,7 +5,26 @@ import type {
   CreateVacanteRequest,
   UpdateEstatusRequest,
   Postulante,
+  PostulanteApi,
 } from '../types/empresa.types'
+
+// El backend (PostulanteEmpresaDto) usa otros nombres de campo; normalizamos aquí.
+const mapPostulante = (p: PostulanteApi): Postulante => ({
+  id: p.estudianteId,
+  postulacionId: p.postulacionId,
+  nombre: p.nombreCompleto,
+  email: p.email,
+  telefono: p.telefono,
+  carrera: p.carrera,
+  matricula: p.matricula,
+  estatusAcademico: p.estatusAcademico,
+  tipoUsuario: p.estatusAcademico || 'Estudiante',
+  estatus: p.estatusPostulacion,
+  descripcion: '',
+  fotoUrl: p.fotoUrl,
+  cvUrl: p.cvUrl,
+  urlExpirationSeconds: p.urlExpirationSeconds,
+})
 
 export const empresaService = {
 
@@ -27,7 +46,19 @@ export const empresaService = {
   actualizarEstatusVacante: (publicacionId: number, data: UpdateEstatusRequest): Promise<void> =>
     api.put(`/empresa/vacantes/${publicacionId}/estatus`, data) as Promise<void>,
 
-  getPostulantes: (empresaId: number, publicacionId: number): Promise<Postulante[]> =>
-    api.get(`/empresa/${empresaId}/vacantes/${publicacionId}/postulantes`) as Promise<Postulante[]>,
+  getPostulantes: async (empresaId: number, publicacionId: number): Promise<Postulante[]> => {
+    const data = (await api.get(
+      `/empresa/${empresaId}/vacantes/${publicacionId}/postulantes`
+    )) as unknown as PostulanteApi[]
+    return data.map(mapPostulante)
+  },
+
+  // Cambia el estatus de una postulación: Enviada | Revision | Entrevista | Aceptada | Rechazada
+  actualizarEstatusPostulante: (
+    empresaId: number,
+    postulacionId: number,
+    estatus: string
+  ): Promise<void> =>
+    api.put(`/empresa/${empresaId}/postulaciones/${postulacionId}/estatus`, { estatus }) as Promise<void>,
 
 }
