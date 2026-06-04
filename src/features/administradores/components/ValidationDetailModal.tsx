@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Building2, CheckCircle2, GraduationCap, Mail, Phone, XCircle, X } from 'lucide-react'
+import { Building2, CheckCircle2, FileText, GraduationCap, Mail, Phone, XCircle, X } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ValidationRequest } from '../types/validation.types'
 import ValidationRejectionModal from '../components/ValidationRejectionModal'
+import ValidationDocuments from './ValidationDocuments'
+import useValidationDocuments from '../hooks/useValidationDocuments'
 
 type ValidationDetailModalProps = {
 	request: ValidationRequest | null
@@ -12,17 +14,28 @@ type ValidationDetailModalProps = {
 }
 
 function ValidationDetailModal({ request, onClose, onValidate, isValidating = false }: ValidationDetailModalProps) {
-	const [isPhotoZoomOpen, setIsPhotoZoomOpen] = useState(false)
 	const [isAvatarZoomOpen, setIsAvatarZoomOpen] = useState(false)
 	const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
+
+	// Hook antes del early-return para respetar las reglas de hooks.
+	const { data: docsData, isLoading: isLoadingDocs, isError: isErrorDocs } =
+		useValidationDocuments(request?.id ?? null)
 
 	if (!request) {
 		return null
 	}
 
+	const documentos = docsData?.documentos ?? []
+	// Foto de perfil (estudiante) o logo (empresa) para el avatar de la cabecera.
+	const fotoDoc = documentos.find(
+		(doc) => doc.categoria === 'imagen' && doc.url &&
+			(doc.tipo.toLowerCase().includes('foto de perfil') || doc.tipo.toLowerCase() === 'logo'),
+	)
+	const avatarUrl = fotoDoc?.url ?? request.avatarPhoto
+	const hasDocs = documentos.some((doc) => Boolean(doc.url))
+
 	const handleClose = () => {
 		// Cierre centralizado para evitar overlays abiertos al cerrar el modal padre.
-		setIsPhotoZoomOpen(false)
 		setIsAvatarZoomOpen(false)
 		setIsRejectModalOpen(false)
 		onClose()
@@ -30,14 +43,13 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 
 	const initial = request.fullName.charAt(0).toUpperCase()
 	const isCompany = request.type === 'Empresa'
-	const hasAvatarPhoto = !isCompany && Boolean(request.avatarPhoto)
-	const hasProofPhoto = !isCompany && Boolean(request.evidencePhoto)
+	const hasAvatarPhoto = Boolean(avatarUrl)
 	const DetailIcon = isCompany ? Building2 : GraduationCap
 
 	return (
 		<div className="validation-modal-overlay" role="presentation" onClick={handleClose}>
 			<article
-				className={`validation-modal ${hasProofPhoto ? 'has-proof-photo' : ''}`}
+				className={`validation-modal ${hasDocs ? 'has-proof-photo' : ''}`}
 				role="dialog"
 				aria-modal="true"
 				onClick={(event) => event.stopPropagation()}
@@ -54,7 +66,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 							onClick={() => setIsAvatarZoomOpen(true)}
 							aria-label={`Abrir foto de perfil de ${request.fullName}`}
 						>
-							<img src={request.avatarPhoto} alt={`Foto de perfil de ${request.fullName}`} />
+							<img src={avatarUrl} alt={`Foto de perfil de ${request.fullName}`} />
 						</button>
 					) : (
 						<span className={`validation-modal-avatar ${isCompany ? 'is-company' : 'is-grad'}`}>{initial}</span>
@@ -98,24 +110,13 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 					</div>
 				</section>
 
-				{hasProofPhoto ? (
-					<section className="validation-modal-proof">
-						<header>
-							<h3>Documento probatorio</h3>
-							<span>Fotografia cargada por el usuario</span>
-						</header>
-						<button
-							type="button"
-							className="validation-modal-proof-trigger"
-							onClick={() => setIsPhotoZoomOpen(true)}
-							aria-label={`Abrir documento probatorio de ${request.fullName}`}
-						>
-							<figure>
-								<img src={request.evidencePhoto} alt={`Documento probatorio de ${request.fullName}`} loading="lazy" />
-							</figure>
-						</button>
-					</section>
-				) : null}
+				<section className={`validation-modal-data ${isCompany ? 'is-company' : 'is-grad'}`}>
+					<h3>
+						<FileText size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+						Documentos para verificar
+					</h3>
+					<ValidationDocuments documentos={documentos} isLoading={isLoadingDocs} isError={isErrorDocs} />
+				</section>
 
 				<footer className="validation-modal-actions">
 					<button
@@ -133,32 +134,6 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 					</button>
 				</footer>
 			</article>
-
-			{hasProofPhoto && isPhotoZoomOpen ? (
-				<div
-					className="validation-photo-zoom-overlay"
-					role="presentation"
-					onClick={(event) => {
-						event.stopPropagation()
-						setIsPhotoZoomOpen(false)
-					}}
-				>
-					<figure className="validation-photo-zoom" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-						<button
-							type="button"
-							className="validation-photo-zoom-close"
-							aria-label="Cerrar vista ampliada"
-							onClick={(event) => {
-								event.stopPropagation()
-								setIsPhotoZoomOpen(false)
-							}}
-						>
-							<X size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
-						</button>
-						<img src={request.evidencePhoto} alt={`Vista ampliada del documento probatorio de ${request.fullName}`} />
-					</figure>
-				</div>
-			) : null}
 
 			<ValidationRejectionModal
 				isOpen={isRejectModalOpen}
@@ -189,7 +164,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 						<X size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 					</button>
 					<figure className="validation-photo-zoom is-avatar" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-						<img src={request.avatarPhoto} alt={`Vista ampliada de la foto de perfil de ${request.fullName}`} />
+						<img src={avatarUrl} alt={`Vista ampliada de la foto de perfil de ${request.fullName}`} />
 					</figure>
 				</div>
 			) : null}

@@ -3,6 +3,7 @@ import type {
   AdminPublicacionesResponse,
   AdminUsuariosResponse,
   ActualizarPublicacionEstatusRequest,
+  DocumentosValidacionResponse,
   EstadisticasUsuarios,
   VacanteReciente,
   ValidarUsuarioRequest,
@@ -23,6 +24,9 @@ export const adminService = {
 
   validarUsuario: (id: number | string, data: ValidarUsuarioRequest): Promise<void> =>
     api.post(`/admin/usuarios/${id}/validar`, data) as Promise<void>,
+
+  getDocumentosUsuario: (id: number | string): Promise<DocumentosValidacionResponse> =>
+    api.get(`/admin/usuarios/${id}/documentos`) as Promise<DocumentosValidacionResponse>,
 
   getPublicaciones: (): Promise<AdminPublicacionesResponse> =>
     api.get('/admin/publicaciones') as Promise<AdminPublicacionesResponse>,
