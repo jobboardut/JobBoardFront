@@ -4,7 +4,6 @@ import campusImg from '@/assets/images/campus.png'
 import logoBlanco from '@/assets/images/logoblanco.png'
 import { ROUTES } from '@/router/routes'
 import {
-  getLengthHelp,
   limitText,
   SECURITY_LIMITS,
   validateEmailField,
@@ -86,9 +85,6 @@ export const LoginForm = () => {
                     className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
                   />
                 </span>
-                <span className="text-xs font-normal text-gray-400">
-                  {getLengthHelp(SECURITY_LIMITS.email, 'Usa un correo valido.')}
-                </span>
               </label>
 
               <label className="flex flex-col gap-1 text-sm font-medium text-gray-700">
@@ -104,9 +100,6 @@ export const LoginForm = () => {
                     required
                     className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
                   />
-                </span>
-                <span className="text-xs font-normal text-gray-400">
-                  Maximo {SECURITY_LIMITS.passwordMax} caracteres.
                 </span>
               </label>
 
