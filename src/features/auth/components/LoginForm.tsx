@@ -3,6 +3,13 @@ import { Link } from 'react-router-dom'
 import campusImg from '@/assets/images/campus.png'
 import logoBlanco from '@/assets/images/logoblanco.png'
 import { ROUTES } from '@/router/routes'
+import {
+  getLengthHelp,
+  limitText,
+  SECURITY_LIMITS,
+  validateEmailField,
+  validateLoginPasswordField,
+} from '@/shared/security/inputRules'
 import { getLoginErrorCopy, useLogin } from '../hooks/useAuth'
 import type { LoginRequest } from '../types/auth.types'
 import './auth-flow.css'
@@ -16,12 +23,22 @@ export const LoginForm = () => {
   })
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }))
+    const limit = event.target.name === 'email' ? SECURITY_LIMITS.email : SECURITY_LIMITS.passwordMax
+    setForm((prev) => ({ ...prev, [event.target.name]: limitText(event.target.value, limit) }))
+    setErrorMsg(null)
   }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     setErrorMsg(null)
+
+    const emailError = validateEmailField(form.email, 'Email')
+    const passwordError = validateLoginPasswordField(form.password)
+
+    if (emailError || passwordError) {
+      setErrorMsg(emailError ?? passwordError ?? null)
+      return
+    }
 
     login(form, {
       onError: (error) => {
@@ -64,9 +81,13 @@ export const LoginForm = () => {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="Ingresa tu Email"
+                    maxLength={SECURITY_LIMITS.email}
                     required
                     className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
                   />
+                </span>
+                <span className="text-xs font-normal text-gray-400">
+                  {getLengthHelp(SECURITY_LIMITS.email, 'Usa un correo valido.')}
                 </span>
               </label>
 
@@ -78,10 +99,14 @@ export const LoginForm = () => {
                     type="password"
                     value={form.password}
                     onChange={handleChange}
+                    maxLength={SECURITY_LIMITS.passwordMax}
                     placeholder="Ingresa tu contraseña"
                     required
                     className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
                   />
+                </span>
+                <span className="text-xs font-normal text-gray-400">
+                  Maximo {SECURITY_LIMITS.passwordMax} caracteres.
                 </span>
               </label>
 

@@ -2,6 +2,15 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, ArrowLeft, Camera, CheckCircle2, ImagePlus, Loader2, Save, X } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
+import {
+  limitText,
+  SECURITY_LIMITS,
+  validateOptionalEmailField,
+  validateOptionalPhoneField,
+  validateOptionalText,
+  validateOptionalUrlField,
+  validateRequiredText,
+} from '@/shared/security/inputRules'
 import { useEmpresaPerfil, useActualizarPerfil } from '../hooks/useEmpresa'
 import type { EmpresaPerfil } from '../types/empresa.types'
 
@@ -10,6 +19,24 @@ type ToastState = {
   title: string
   message: string
 }
+
+const EMPRESA_PROFILE_LIMITS = {
+  logoUrl: SECURITY_LIMITS.url,
+  nombreEmpresa: SECURITY_LIMITS.companyName,
+  direccion: SECURITY_LIMITS.address,
+  telefonoEmpresa: SECURITY_LIMITS.phone,
+  correoEmpresa: SECURITY_LIMITS.email,
+  sitioWeb: SECURITY_LIMITS.url,
+  descripcion: SECURITY_LIMITS.longText,
+  repNombre: SECURITY_LIMITS.name,
+  repApellidos: SECURITY_LIMITS.name,
+  repPuesto: SECURITY_LIMITS.shortText,
+  repTelefono: SECURITY_LIMITS.phone,
+  repCorreo: SECURITY_LIMITS.email,
+} as const
+
+const getEmpresaProfileLimit = (name: string): number =>
+  EMPRESA_PROFILE_LIMITS[name as keyof typeof EMPRESA_PROFILE_LIMITS] ?? SECURITY_LIMITS.shortText
 
 const PerfilToast = ({ toast, onClose }: { toast: ToastState; onClose: () => void }) => {
   const Icon = toast.type === 'success' ? CheckCircle2 : AlertCircle
@@ -75,7 +102,7 @@ export const EditarPerfilEmpresa = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    updateForm({ [name]: value } as Partial<EmpresaPerfil>)
+    updateForm({ [name]: limitText(value, getEmpresaProfileLimit(name)) } as Partial<EmpresaPerfil>)
   }
 
   const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +150,29 @@ export const EditarPerfilEmpresa = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!form) return
+
+    const validationError =
+      validateRequiredText(form.nombreEmpresa ?? '', 'Nombre de la empresa', SECURITY_LIMITS.companyName) ??
+      validateOptionalText(form.direccion ?? '', 'Direccion', SECURITY_LIMITS.address) ??
+      validateOptionalPhoneField(form.telefonoEmpresa ?? '', 'Telefono de la empresa') ??
+      validateOptionalEmailField(form.correoEmpresa ?? '', 'Correo empresarial') ??
+      validateOptionalUrlField(form.sitioWeb ?? '', 'Sitio web') ??
+      validateOptionalText(form.descripcion ?? '', 'Descripcion', SECURITY_LIMITS.longText) ??
+      validateOptionalText(form.repNombre ?? '', 'Nombre del representante', SECURITY_LIMITS.name) ??
+      validateOptionalText(form.repApellidos ?? '', 'Apellidos del representante', SECURITY_LIMITS.name) ??
+      validateOptionalText(form.repPuesto ?? '', 'Puesto', SECURITY_LIMITS.shortText) ??
+      validateOptionalPhoneField(form.repTelefono ?? '', 'Telefono del representante') ??
+      validateOptionalEmailField(form.repCorreo ?? '', 'Correo del representante')
+
+    if (validationError) {
+      setToast({
+        type: 'error',
+        title: 'Revisa los datos',
+        message: validationError,
+      })
+      return
+    }
+
     actualizarPerfil(form, {
       onSuccess: () => {
         navigate(ROUTES.EMPRESA_PERFIL, {
@@ -230,6 +280,7 @@ export const EditarPerfilEmpresa = () => {
                     value={form.logoUrl ?? ''}
                     onChange={handleChange}
                     placeholder="https://..."
+                    maxLength={SECURITY_LIMITS.url}
                     className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                   />
                 </label>
@@ -248,6 +299,7 @@ export const EditarPerfilEmpresa = () => {
                   value={form.nombreEmpresa ?? ''}
                   onChange={handleChange}
                   required
+                  maxLength={SECURITY_LIMITS.companyName}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -258,6 +310,7 @@ export const EditarPerfilEmpresa = () => {
                   name="direccion"
                   value={form.direccion ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.address}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -268,6 +321,7 @@ export const EditarPerfilEmpresa = () => {
                   name="telefonoEmpresa"
                   value={form.telefonoEmpresa ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.phone}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -278,6 +332,7 @@ export const EditarPerfilEmpresa = () => {
                   name="correoEmpresa"
                   value={form.correoEmpresa ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.email}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -288,6 +343,7 @@ export const EditarPerfilEmpresa = () => {
                   name="sitioWeb"
                   value={form.sitioWeb ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.url}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -299,6 +355,7 @@ export const EditarPerfilEmpresa = () => {
                   value={form.descripcion ?? ''}
                   onChange={handleChange}
                   rows={4}
+                  maxLength={SECURITY_LIMITS.longText}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
                 />
               </div>
@@ -321,6 +378,7 @@ export const EditarPerfilEmpresa = () => {
                   name="repNombre"
                   value={form.repNombre ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.name}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -331,6 +389,7 @@ export const EditarPerfilEmpresa = () => {
                   name="repApellidos"
                   value={form.repApellidos ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.name}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -341,6 +400,7 @@ export const EditarPerfilEmpresa = () => {
                   name="repPuesto"
                   value={form.repPuesto ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.shortText}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -351,6 +411,7 @@ export const EditarPerfilEmpresa = () => {
                   name="repTelefono"
                   value={form.repTelefono ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.phone}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
@@ -361,6 +422,7 @@ export const EditarPerfilEmpresa = () => {
                   name="repCorreo"
                   value={form.repCorreo ?? ''}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.email}
                   className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>

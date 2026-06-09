@@ -9,15 +9,35 @@ export type ValidationOverview = {
 }
 
 const toValidationType = (rol: string): ValidationType => {
-  if (rol === 'Empresa') {
+  const normalizedRole = rol
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+  if (normalizedRole === 'empresa') {
     return 'Empresa'
   }
 
-  if (rol === 'Egresado') {
+  if (normalizedRole === 'egresado') {
     return 'Egresado'
   }
 
+  if (normalizedRole === 'estudiante' || normalizedRole === 'alumno') {
+    return 'Alumno'
+  }
+
   return 'Alumno'
+}
+
+const isValidableRole = (rol: string): boolean => {
+  const normalizedRole = rol
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+  return ['empresa', 'estudiante', 'alumno', 'egresado'].includes(normalizedRole)
 }
 
 const toRelativeDate = (value: string): string => {
@@ -61,7 +81,7 @@ const mapUserToRequest = (user: AdminUsuario): ValidationRequest => {
 export async function getValidationOverview(): Promise<ValidationOverview> {
   const response = await adminService.getUsuarios()
   const requests = response.usuarios
-    .filter((user) => user.estatusValidacion === 'Pendiente')
+    .filter((user) => user.estatusValidacion === 'Pendiente' && isValidableRole(user.rol))
     .map(mapUserToRequest)
 
   const companyCount = requests.filter((request) => request.type === 'Empresa').length

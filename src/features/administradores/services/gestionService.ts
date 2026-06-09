@@ -21,14 +21,29 @@ const formatDate = (value: string): string => {
   }).format(date)
 }
 
-const toUserType = (rol: string): ManagementUserType => {
-  if (rol === 'Empresa') return 'Empresa'
-  if (rol === 'Egresado') return 'Egresado'
-  return 'Alumno'
+const normalizeRole = (rol: string): string =>
+  rol
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+const toUserType = (rol: string): ManagementUserType | null => {
+  const normalizedRole = normalizeRole(rol)
+
+  if (normalizedRole === 'empresa') return 'Empresa'
+  if (normalizedRole === 'egresado') return 'Egresado'
+  if (normalizedRole === 'estudiante' || normalizedRole === 'alumno') return 'Alumno'
+
+  return null
 }
 
-const toManagementUser = (user: AdminUsuario): ManagementUser => {
+const isManageableRole = (rol: string): boolean => toUserType(rol) !== null
+
+const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
   const type = toUserType(user.rol)
+  if (!type) return null
+
   const fullName = user.nombreCompleto ?? user.email
 
   return {
@@ -53,15 +68,21 @@ const toManagementUser = (user: AdminUsuario): ManagementUser => {
 
 export async function getManagementOverview(): Promise<ManagementOverview> {
   const response = await adminService.getUsuarios()
-  const users = response.usuarios.map(toManagementUser)
-  const graduateCount = response.usuarios.filter((user) => user.rol === 'Egresado').length
-  const studentCount = response.usuarios.filter((user) => user.rol === 'Estudiante').length
-  const companyCount = response.usuarios.filter((user) => user.rol === 'Empresa').length
+  const users = response.usuarios
+    .filter((user) => isManageableRole(user.rol))
+    .map(toManagementUser)
+    .filter((user): user is ManagementUser => Boolean(user))
+
+  const activeCount = users.filter((user) => user.state === 'Activo').length
+  const inactiveCount = users.filter((user) => user.state === 'Inactivo').length
+  const graduateCount = users.filter((user) => user.type === 'Egresado').length
+  const studentCount = users.filter((user) => user.type === 'Alumno').length
+  const companyCount = users.filter((user) => user.type === 'Empresa').length
 
   return {
     metrics: [
-      { label: 'Activos', value: response.totalActivos, Icon: CheckCircle2, tone: 'active' },
-      { label: 'Inactivos', value: response.totalInactivos, Icon: XCircle, tone: 'inactive' },
+      { label: 'Activos', value: activeCount, Icon: CheckCircle2, tone: 'active' },
+      { label: 'Inactivos', value: inactiveCount, Icon: XCircle, tone: 'inactive' },
       { label: 'Egresados', value: graduateCount, Icon: GraduationCap, tone: 'graduate' },
       { label: 'Empresas', value: companyCount, Icon: Building2, tone: 'company' },
       { label: 'Estudiantes', value: studentCount, Icon: UserSquare2, tone: 'student' },

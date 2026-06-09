@@ -6,6 +6,7 @@ import { ROUTES } from '@/router/routes'
 import { AppButton } from '@/shared/components/AppButton'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { useAppToast } from '@/shared/components/appToastContext'
+import { limitText, SECURITY_LIMITS, validateEmailField } from '@/shared/security/inputRules'
 import { PasswordRecoveryShell } from './PasswordRecoveryShell'
 
 const SAFE_RESPONSE = 'Si el correo existe, recibirás el enlace para restablecer tu contraseña.'
@@ -18,6 +19,13 @@ export const RecuperarPassword = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    const emailError = validateEmailField(email, 'Correo electronico')
+    if (emailError) {
+      toast.error('Correo no valido', emailError)
+      return
+    }
+
     setIsSending(true)
 
     await new Promise((resolve) => window.setTimeout(resolve, 650))
@@ -62,9 +70,10 @@ export const RecuperarPassword = () => {
                 id="recovery-email"
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => setEmail(limitText(event.target.value, SECURITY_LIMITS.email))}
                 autoComplete="email"
                 placeholder="correo@ejemplo.com"
+                maxLength={SECURITY_LIMITS.email}
                 required
                 className={`${FORM_FIELD_CLASS} auth-login-input`}
               />

@@ -20,6 +20,20 @@ import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { defaultEmpresaProfile, markEmpresaProfileIncomplete, saveEmpresaProfileDraft } from '@/features/empresas/services/empresaProfile.storage'
 import { catalogService } from '@/services/catalog.service'
 import { ROUTES } from '@/router/routes'
+import {
+  FILE_LIMITS,
+  getLengthHelp,
+  limitText,
+  SECURITY_LIMITS,
+  validateEmailField,
+  validateFile,
+  validateOptionalEmailField,
+  validateOptionalPhoneField,
+  validateOptionalText,
+  validateOptionalUrlField,
+  validatePasswordField,
+  validateRequiredText,
+} from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
 import './auth-flow.css'
 
@@ -44,6 +58,26 @@ const DEFAULT_SECTORES = [
 ]
 
 type DocumentoKey = 'situacionFiscal' | 'docExistencia' | 'repDocCargo' | 'repFotoIne'
+
+const EMPRESA_FIELD_LIMITS = {
+  email: SECURITY_LIMITS.email,
+  password: SECURITY_LIMITS.passwordMax,
+  nombreEmpresa: SECURITY_LIMITS.companyName,
+  telefonoEmpresa: SECURITY_LIMITS.phone,
+  direccion: SECURITY_LIMITS.address,
+  correoEmpresa: SECURITY_LIMITS.email,
+  sectorId: 12,
+  sitioWeb: SECURITY_LIMITS.url,
+  descripcion: SECURITY_LIMITS.longText,
+  nombreContacto: SECURITY_LIMITS.name,
+  apellidosContacto: SECURITY_LIMITS.name,
+  puesto: SECURITY_LIMITS.shortText,
+  telefonoContacto: SECURITY_LIMITS.phone,
+  correoContacto: SECURITY_LIMITS.email,
+} as const
+
+const getEmpresaFieldLimit = (name: string): number =>
+  EMPRESA_FIELD_LIMITS[name as keyof typeof EMPRESA_FIELD_LIMITS] ?? SECURITY_LIMITS.shortText
 
 const DOCUMENTOS: Array<{
   key: DocumentoKey
@@ -193,18 +227,47 @@ export const RegistroEmpresa = () => {
   }, [logoPreview])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({ ...prev, [event.target.name]: event.target.value }))
+    setForm((prev) => ({
+      ...prev,
+      [event.target.name]: limitText(event.target.value, getEmpresaFieldLimit(event.target.name)),
+    }))
     setErrorMsg(null)
   }
 
   const handleLogo = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
+
+    const fileError = validateFile(file, {
+      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      label: 'El logotipo',
+      maxBytes: FILE_LIMITS.imageBytes,
+    })
+
+    if (fileError) {
+      setErrorMsg(fileError)
+      event.target.value = ''
+      return
+    }
+
     setLogoFile(file)
     setLogoPreview(URL.createObjectURL(file))
   }
 
   const handleDocumento = (key: DocumentoKey, file: File | null) => {
+    if (file) {
+      const fileError = validateFile(file, {
+        allowedTypes: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
+        label: 'El documento',
+        maxBytes: FILE_LIMITS.documentBytes,
+      })
+
+      if (fileError) {
+        setErrorMsg(fileError)
+        return
+      }
+    }
+
     setDocumentos((prev) => ({ ...prev, [key]: file }))
     setErrorMsg(null)
   }
@@ -217,10 +280,36 @@ export const RegistroEmpresa = () => {
     return false
   }
 
+  const validateForm = () => {
+    const validations = [
+      validateEmailField(form.email, 'Email de acceso'),
+      validatePasswordField(form.password),
+      validateRequiredText(form.nombreEmpresa, 'Nombre de la empresa', SECURITY_LIMITS.companyName),
+      validateOptionalPhoneField(form.telefonoEmpresa, 'Telefono de la empresa'),
+      validateOptionalEmailField(form.correoEmpresa, 'Correo de la empresa'),
+      validateOptionalText(form.direccion, 'Direccion', SECURITY_LIMITS.address),
+      validateOptionalUrlField(form.sitioWeb, 'Sitio web'),
+      validateOptionalText(form.descripcion, 'Descripcion', SECURITY_LIMITS.longText),
+      validateRequiredText(form.nombreContacto, 'Nombre del representante', SECURITY_LIMITS.name),
+      validateRequiredText(form.apellidosContacto, 'Apellidos del representante', SECURITY_LIMITS.name),
+      validateOptionalText(form.puesto, 'Puesto o cargo', SECURITY_LIMITS.shortText),
+      validateOptionalPhoneField(form.telefonoContacto, 'Telefono del representante'),
+      validateOptionalEmailField(form.correoContacto, 'Correo del representante'),
+    ].filter(Boolean)
+
+    if (validations.length > 0) {
+      setErrorMsg(String(validations[0]))
+      return false
+    }
+
+    return true
+  }
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setErrorMsg(null)
 
+    if (!validateForm()) return
     if (!validateDocuments()) return
 
     setIsSubmitting(true)
@@ -319,7 +408,7 @@ export const RegistroEmpresa = () => {
                   description="Credenciales que usara la empresa despues de la validacion."
                 />
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormControl label="Email de acceso">
+                  <FormControl label="Email de acceso" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
                     <input
                       type="email"
                       name="email"
@@ -327,10 +416,11 @@ export const RegistroEmpresa = () => {
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="empresa@correo.com"
+                      maxLength={SECURITY_LIMITS.email}
                       required
                     />
                   </FormControl>
-                  <FormControl label="Password">
+                  <FormControl label="Password" help="Minimo 8 caracteres, mayuscula, minuscula, numero y maximo 72 caracteres.">
                     <input
                       type="password"
                       name="password"
@@ -338,7 +428,8 @@ export const RegistroEmpresa = () => {
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="Minimo 6 caracteres"
-                      minLength={6}
+                      minLength={SECURITY_LIMITS.passwordMin}
+                      maxLength={SECURITY_LIMITS.passwordMax}
                       required
                     />
                   </FormControl>
@@ -352,13 +443,14 @@ export const RegistroEmpresa = () => {
                   description="Informacion publica y fiscal para identificar a la organizacion."
                 />
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormControl label="Nombre de la empresa">
+                  <FormControl label="Nombre de la empresa" help={getLengthHelp(SECURITY_LIMITS.companyName)}>
                     <input
                       name="nombreEmpresa"
                       value={form.nombreEmpresa}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="Nombre comercial o razon social"
+                      maxLength={SECURITY_LIMITS.companyName}
                       required
                     />
                   </FormControl>
@@ -378,16 +470,17 @@ export const RegistroEmpresa = () => {
                       ))}
                     </select>
                   </FormControl>
-                  <FormControl label="Telefono de la empresa">
+                  <FormControl label="Telefono de la empresa" help="De 7 a 18 caracteres. Solo numeros, espacios, +, - o parentesis.">
                     <input
                       name="telefonoEmpresa"
                       value={form.telefonoEmpresa}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="222 000 0000"
+                      maxLength={SECURITY_LIMITS.phone}
                     />
                   </FormControl>
-                  <FormControl label="Correo de la empresa">
+                  <FormControl label="Correo de la empresa" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
                     <input
                       type="email"
                       name="correoEmpresa"
@@ -395,28 +488,31 @@ export const RegistroEmpresa = () => {
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="contacto@empresa.com"
+                      maxLength={SECURITY_LIMITS.email}
                     />
                   </FormControl>
-                  <FormControl label="Direccion">
+                  <FormControl label="Direccion" help={getLengthHelp(SECURITY_LIMITS.address)}>
                     <input
                       name="direccion"
                       value={form.direccion}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="Calle, numero, ciudad"
+                      maxLength={SECURITY_LIMITS.address}
                     />
                   </FormControl>
-                  <FormControl label="Sitio web">
+                  <FormControl label="Sitio web" help={getLengthHelp(SECURITY_LIMITS.url, 'Debe iniciar con http:// o https://.')}>
                     <input
                       name="sitioWeb"
                       value={form.sitioWeb}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="https://empresa.com"
+                      maxLength={SECURITY_LIMITS.url}
                     />
                   </FormControl>
                   <div className="md:col-span-2">
-                    <FormControl label="Descripcion">
+                    <FormControl label="Descripcion" help={getLengthHelp(SECURITY_LIMITS.longText)}>
                       <textarea
                         name="descripcion"
                         value={form.descripcion}
@@ -424,6 +520,7 @@ export const RegistroEmpresa = () => {
                         rows={4}
                         className={`${FORM_FIELD_CLASS} resize-none`}
                         placeholder="Describe brevemente la actividad de la empresa"
+                        maxLength={SECURITY_LIMITS.longText}
                       />
                     </FormControl>
                   </div>
@@ -437,44 +534,48 @@ export const RegistroEmpresa = () => {
                   description="Persona que administracion contactara para validar el registro."
                 />
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormControl label="Nombre(s)">
+                  <FormControl label="Nombre(s)" help={getLengthHelp(SECURITY_LIMITS.name)}>
                     <input
                       name="nombreContacto"
                       value={form.nombreContacto}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
+                      maxLength={SECURITY_LIMITS.name}
                       required
                     />
                   </FormControl>
-                  <FormControl label="Apellidos">
+                  <FormControl label="Apellidos" help={getLengthHelp(SECURITY_LIMITS.name)}>
                     <input
                       name="apellidosContacto"
                       value={form.apellidosContacto}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
+                      maxLength={SECURITY_LIMITS.name}
                       required
                     />
                   </FormControl>
-                  <FormControl label="Puesto o cargo">
+                  <FormControl label="Puesto o cargo" help={getLengthHelp(SECURITY_LIMITS.shortText)}>
                     <input
                       name="puesto"
                       value={form.puesto}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="Representante legal, RH, direccion..."
+                      maxLength={SECURITY_LIMITS.shortText}
                     />
                   </FormControl>
-                  <FormControl label="Telefono">
+                  <FormControl label="Telefono" help="De 7 a 18 caracteres. Solo numeros, espacios, +, - o parentesis.">
                     <input
                       name="telefonoContacto"
                       value={form.telefonoContacto}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
                       placeholder="222 000 0000"
+                      maxLength={SECURITY_LIMITS.phone}
                     />
                   </FormControl>
                   <div className="md:col-span-2">
-                    <FormControl label="Correo del representante">
+                    <FormControl label="Correo del representante" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
                       <input
                         type="email"
                         name="correoContacto"
@@ -482,6 +583,7 @@ export const RegistroEmpresa = () => {
                         onChange={handleChange}
                         className={FORM_FIELD_CLASS}
                         placeholder="representante@empresa.com"
+                        maxLength={SECURITY_LIMITS.email}
                       />
                     </FormControl>
                   </div>

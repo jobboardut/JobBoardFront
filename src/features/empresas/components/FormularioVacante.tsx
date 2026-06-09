@@ -6,6 +6,12 @@ import { AppButton } from '@/shared/components/AppButton'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { LoadingState } from '@/shared/components/StateFeedback'
 import { useAppToast } from '@/shared/components/appToastContext'
+import {
+  getLengthHelp,
+  limitText,
+  SECURITY_LIMITS,
+  validateRequiredText,
+} from '@/shared/security/inputRules'
 import { useCrearVacante, useVacante } from '../hooks/useEmpresa'
 import type { CreateVacanteRequest, Vacante } from '../types/empresa.types'
 
@@ -18,6 +24,15 @@ const EMPTY_VACANTE_FORM: CreateVacanteRequest = {
   sueldoAprox: 0,
   modalidad: '',
 }
+
+const VACANTE_FIELD_LIMITS = {
+  titulo: SECURITY_LIMITS.shortText,
+  descripcion: SECURITY_LIMITS.vacancyText,
+  requisitos: SECURITY_LIMITS.vacancyText,
+} as const
+
+const getVacanteFieldLimit = (name: string): number =>
+  VACANTE_FIELD_LIMITS[name as keyof typeof VACANTE_FIELD_LIMITS] ?? SECURITY_LIMITS.shortText
 
 const toVacanteForm = (vacante?: Vacante): CreateVacanteRequest => ({
   titulo: vacante?.titulo ?? '',
@@ -57,11 +72,15 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
+    const nextValue = name === 'sueldoAprox'
+      ? Math.min(Number(value), SECURITY_LIMITS.moneyMax)
+      : limitText(value, getVacanteFieldLimit(name))
+
     setDraftState(prev => ({
       key: formKey,
       values: {
         ...(prev.key === formKey ? prev.values : {}),
-        [name]: name === 'sueldoAprox' ? Number(value) : value,
+        [name]: nextValue,
       },
     }))
   }
@@ -74,6 +93,21 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
         'Edicion no disponible',
         'El backend actual no incluye un endpoint para editar los datos completos de la vacante.'
       )
+      return
+    }
+
+    const validationError =
+      validateRequiredText(form.titulo, 'Titulo del puesto', SECURITY_LIMITS.shortText) ??
+      validateRequiredText(form.descripcion, 'Descripcion del puesto', SECURITY_LIMITS.vacancyText) ??
+      validateRequiredText(form.requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText)
+
+    if (validationError) {
+      toast.warning('Revisa los datos', validationError)
+      return
+    }
+
+    if (!form.sueldoAprox || form.sueldoAprox < 0 || form.sueldoAprox > SECURITY_LIMITS.moneyMax) {
+      toast.warning('Sueldo no valido', `El sueldo debe estar entre 0 y ${SECURITY_LIMITS.moneyMax.toLocaleString('es-MX')} MXN.`)
       return
     }
 
@@ -132,12 +166,13 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
             <h2 className="text-lg font-bold text-gray-800 mb-4">Informacion general</h2>
             <div className="flex flex-col gap-4">
 
-              <FormControl label="Titulo del puesto">
+              <FormControl label="Titulo del puesto" help={getLengthHelp(SECURITY_LIMITS.shortText)}>
                 <input
                   name="titulo"
                   value={form.titulo}
                   onChange={handleChange}
                   placeholder="Ej: Desarrollador frontend"
+                  maxLength={SECURITY_LIMITS.shortText}
                   required
                   className={FORM_FIELD_CLASS}
                 />
@@ -165,6 +200,8 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
                   value={form.sueldoAprox}
                   onChange={handleChange}
                   placeholder="Ej: 15000"
+                  min={0}
+                  max={SECURITY_LIMITS.moneyMax}
                   required
                   className={FORM_FIELD_CLASS}
                 />
@@ -181,9 +218,11 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
               onChange={handleChange}
               placeholder="Describe el puesto..."
               rows={5}
+              maxLength={SECURITY_LIMITS.vacancyText}
               required
               className={`${FORM_FIELD_CLASS} resize-none`}
             />
+            <p className="mt-2 text-xs text-slate-500">{getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
           </div>
 
         </div>
@@ -198,9 +237,11 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
               onChange={handleChange}
               placeholder="Lista los requisitos del puesto..."
               rows={8}
+              maxLength={SECURITY_LIMITS.vacancyText}
               required
               className={`${FORM_FIELD_CLASS} resize-none`}
             />
+            <p className="mt-2 text-xs text-slate-500">{getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

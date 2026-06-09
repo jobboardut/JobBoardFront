@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { SECURITY_LIMITS } from '@/shared/security/inputRules'
 import type { EditContactModalProps } from '../types/profile.types'
 import { useEditContact } from '../hooks/useEditContact'
 
@@ -60,6 +61,7 @@ export const EditContactModal = ({
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="Ej: 2491163536"
+                maxLength={SECURITY_LIMITS.phone}
                 className="w-full rounded-lg border border-[#ddd8d0] bg-white px-4 py-2 text-slate-900 placeholder-slate-400 transition focus:border-[#009A4D] focus:outline-none focus:ring-1 focus:ring-[#009A4D]"
               />
             </div>
@@ -74,6 +76,7 @@ export const EditContactModal = ({
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="Ej: tu@email.com"
+                maxLength={SECURITY_LIMITS.email}
                 className="w-full rounded-lg border border-[#ddd8d0] bg-white px-4 py-2 text-slate-900 placeholder-slate-400 transition focus:border-[#009A4D] focus:outline-none focus:ring-1 focus:ring-[#009A4D]"
               />
             </div>
@@ -105,6 +108,7 @@ export const EditContactModal = ({
                 onChange={(e) => handleInputChange('address', e.target.value)}
                 placeholder="Ej: Calle Principal 123, Apt 4B"
                 rows={3}
+                maxLength={SECURITY_LIMITS.address}
                 className="w-full rounded-lg border border-[#ddd8d0] bg-white px-4 py-2 text-slate-900 placeholder-slate-400 transition focus:border-[#009A4D] focus:outline-none focus:ring-1 focus:ring-[#009A4D] resize-none"
               />
             </div>

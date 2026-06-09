@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
 import { catalogService } from '@/services/catalog.service'
+import {
+  FILE_LIMITS,
+  limitText,
+  SECURITY_LIMITS,
+  validateEmailField,
+  validateFile,
+  validateOptionalText,
+  validatePasswordField,
+  validateRequiredText,
+} from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
 
 const pasos = [
@@ -28,6 +38,20 @@ const estadosCiviles = [
   'Viudo(a)',
   'Unión libre',
 ]
+
+const ESTUDIANTE_FIELD_LIMITS = {
+  nombre: SECURITY_LIMITS.name,
+  apellidos: SECURITY_LIMITS.name,
+  direccion: SECURITY_LIMITS.address,
+  fechaNacimiento: 10,
+  estadoCivil: SECURITY_LIMITS.shortText,
+  correo: SECURITY_LIMITS.email,
+  password: SECURITY_LIMITS.passwordMax,
+  programa: SECURITY_LIMITS.shortText,
+} as const
+
+const getEstudianteFieldLimit = (name: string): number =>
+  ESTUDIANTE_FIELD_LIMITS[name as keyof typeof ESTUDIANTE_FIELD_LIMITS] ?? SECURITY_LIMITS.shortText
 
 export const RegistroEstudiante = () => {
   const navigate = useNavigate()
@@ -71,28 +95,89 @@ export const RegistroEstudiante = () => {
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setForm(prev => ({ ...prev, [e.target.name]: limitText(e.target.value, getEstudianteFieldLimit(e.target.name)) }))
     setErrorMsg(null)
   }
 
   const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setFoto(URL.createObjectURL(file))
+    if (!file) return
+
+    const fileError = validateFile(file, {
+      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      label: 'La foto de perfil',
+      maxBytes: FILE_LIMITS.imageBytes,
+    })
+
+    if (fileError) {
+      setErrorMsg(fileError)
+      e.target.value = ''
+      return
+    }
+
+    setFoto(URL.createObjectURL(file))
   }
 
   const handleCV = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setCvNombre(file.name)
+    if (!file) return
+
+    const fileError = validateFile(file, {
+      allowedTypes: ['application/pdf'],
+      label: 'El curriculum',
+      maxBytes: FILE_LIMITS.documentBytes,
+    })
+
+    if (fileError) {
+      setErrorMsg(fileError)
+      e.target.value = ''
+      return
+    }
+
+    setCvNombre(file.name)
   }
 
   const handleDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) setDocNombre(file.name)
+    if (!file) return
+
+    const fileError = validateFile(file, {
+      allowedTypes: ['application/pdf', 'image/png', 'image/jpeg'],
+      label: 'El documento avalatorio',
+      maxBytes: FILE_LIMITS.documentBytes,
+    })
+
+    if (fileError) {
+      setErrorMsg(fileError)
+      e.target.value = ''
+      return
+    }
+
+    setDocNombre(file.name)
+  }
+
+  const validateForm = () => {
+    const validations = [
+      validateRequiredText(form.nombre, 'Nombre', SECURITY_LIMITS.name),
+      validateRequiredText(form.apellidos, 'Apellidos', SECURITY_LIMITS.name),
+      validateRequiredText(form.direccion, 'Direccion', SECURITY_LIMITS.address),
+      validateEmailField(form.correo, 'Correo electronico'),
+      validatePasswordField(form.password),
+      validateOptionalText(form.programa, 'Programa educativo', SECURITY_LIMITS.shortText),
+    ].filter(Boolean)
+
+    if (validations.length > 0) {
+      setErrorMsg(String(validations[0]))
+      return false
+    }
+
+    return true
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg(null)
+    if (!validateForm()) return
     setIsSubmitting(true)
 
     try {
@@ -213,6 +298,7 @@ export const RegistroEstudiante = () => {
                     name="nombre"
                     value={form.nombre}
                     onChange={handleChange}
+                    maxLength={SECURITY_LIMITS.name}
                     className="flex-1 text-sm outline-none bg-transparent"
                     required
                   />
@@ -226,6 +312,7 @@ export const RegistroEstudiante = () => {
                     name="apellidos"
                     value={form.apellidos}
                     onChange={handleChange}
+                    maxLength={SECURITY_LIMITS.name}
                     className="flex-1 text-sm outline-none bg-transparent"
                     required
                   />
@@ -242,6 +329,7 @@ export const RegistroEstudiante = () => {
                   name="direccion"
                   value={form.direccion}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.address}
                   className="flex-1 text-sm outline-none bg-transparent"
                   required
                 />
@@ -288,6 +376,7 @@ export const RegistroEstudiante = () => {
                   name="correo"
                   value={form.correo}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.email}
                   className="flex-1 text-sm outline-none bg-transparent"
                   required
                 />
@@ -303,6 +392,7 @@ export const RegistroEstudiante = () => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
+                  maxLength={SECURITY_LIMITS.passwordMax}
                   className="flex-1 text-sm outline-none bg-transparent"
                   required
                   minLength={8}

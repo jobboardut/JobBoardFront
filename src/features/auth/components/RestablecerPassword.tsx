@@ -6,6 +6,7 @@ import { ROUTES } from '@/router/routes'
 import { AppButton } from '@/shared/components/AppButton'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { useAppToast } from '@/shared/components/appToastContext'
+import { limitText, SECURITY_LIMITS } from '@/shared/security/inputRules'
 import { PasswordRecoveryShell } from './PasswordRecoveryShell'
 
 type PasswordErrors = {
@@ -31,6 +32,7 @@ export const RestablecerPassword = () => {
     { label: 'Una letra mayúscula', met: /[A-Z]/.test(password) },
     { label: 'Una letra minúscula', met: /[a-z]/.test(password) },
     { label: 'Un número', met: /\d/.test(password) },
+    { label: `Maximo ${SECURITY_LIMITS.passwordMax} caracteres`, met: password.length <= SECURITY_LIMITS.passwordMax },
   ], [password])
 
   const isStrongPassword = requirements.every((requirement) => requirement.met)
@@ -114,8 +116,9 @@ export const RestablecerPassword = () => {
               id="new-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
+              maxLength={SECURITY_LIMITS.passwordMax}
               onChange={(event) => {
-                setPassword(event.target.value)
+                setPassword(limitText(event.target.value, SECURITY_LIMITS.passwordMax))
                 setErrors((current) => ({ ...current, password: undefined }))
               }}
               autoComplete="new-password"
@@ -152,8 +155,9 @@ export const RestablecerPassword = () => {
               id="confirm-password"
               type={showConfirmation ? 'text' : 'password'}
               value={confirmation}
+              maxLength={SECURITY_LIMITS.passwordMax}
               onChange={(event) => {
-                setConfirmation(event.target.value)
+                setConfirmation(limitText(event.target.value, SECURITY_LIMITS.passwordMax))
                 setErrors((current) => ({ ...current, confirmation: undefined }))
               }}
               autoComplete="new-password"

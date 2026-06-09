@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { LoadingState } from '@/shared/components/StateFeedback'
+import { RouteLoadingFallback, RouteTransition } from '@/shared/components/RouteTransition'
 import { PrivateRoute } from './PrivateRoute'
 import { ROUTES } from './routes'
 
@@ -36,16 +36,11 @@ const EstudiantePublicacionesPage = lazy(() => import('@/pages/EstudiantePublica
 const EstudiantePerfilPage = lazy(() => import('@/pages/EstudiantePerfilPage').then((module) => ({ default: module.EstudiantePerfilPage })))
 const EstudianteSeguimientoPage = lazy(() => import('@/pages/EstudianteSeguimientoPage').then((module) => ({ default: module.EstudianteSeguimientoPage })))
 
-const RouteFallback = () => (
-  <div className="p-6">
-    <LoadingState compact title="Cargando vista" message="Preparando la pantalla solicitada." />
-  </div>
-)
-
 export const AppRouter = () => {
   return (
     <BrowserRouter>
-      <Suspense fallback={<RouteFallback />}>
+      <RouteTransition />
+      <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path={ROUTES.DASHBOARD} element={<PrivateRoute><Navigate to={ROUTES.ADMIN_DASHBOARD} replace /></PrivateRoute>} />
