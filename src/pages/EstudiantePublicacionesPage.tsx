@@ -16,6 +16,7 @@ export const EstudiantePublicacionesPage = () => {
     searchText,
     searchInputRef,
     listItems,
+    appliedListItems,
     searchPublicationItems,
     selectedVacante,
     isLoading,
@@ -79,19 +80,58 @@ export const EstudiantePublicacionesPage = () => {
             />
 
             <aside className="publication-scroll h-full overflow-y-auto pr-1">
-              <div className="space-y-3">
-                {listItems.length === 0 ? (
-                  <EmptyState title="No hay vacantes disponibles" message="Cuando una empresa publique una vacante activa aparecera aqui." />
-                ) : (
-                  listItems.map((item) => (
-                    <JobListCard
-                      key={item.id}
-                      item={item}
-                      isActive={selectedVacante?.id === item.id}
-                      onSelect={selectVacante}
-                    />
-                  ))
-                )}
+              <div className="space-y-5">
+                <section className="space-y-3">
+                  <div className="flex items-end justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-600">
+                        Disponibles
+                      </p>
+                      <h2 className="text-lg font-bold text-slate-900">Vacantes para postular</h2>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
+                      {listItems.length}
+                    </span>
+                  </div>
+
+                  {listItems.length === 0 ? (
+                    <EmptyState title="No hay vacantes disponibles" message="Las vacantes donde ya postulaste se muestran mas abajo." />
+                  ) : (
+                    listItems.map((item) => (
+                      <JobListCard
+                        key={item.id}
+                        item={item}
+                        isActive={selectedVacante?.id === item.id}
+                        onSelect={selectVacante}
+                      />
+                    ))
+                  )}
+                </section>
+
+                {appliedListItems.length > 0 ? (
+                  <section className="space-y-3 border-t border-slate-100 pt-5">
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                          Seguimiento
+                        </p>
+                        <h2 className="text-lg font-bold text-slate-900">Ya postuladas</h2>
+                      </div>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                        {appliedListItems.length}
+                      </span>
+                    </div>
+
+                    {appliedListItems.map((item) => (
+                      <JobListCard
+                        key={item.id}
+                        item={item}
+                        isActive={selectedVacante?.id === item.id}
+                        onSelect={selectVacante}
+                      />
+                    ))}
+                  </section>
+                ) : null}
               </div>
             </aside>
           </section>

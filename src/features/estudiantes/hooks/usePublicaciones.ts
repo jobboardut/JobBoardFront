@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { publicacionesService } from '../services/publicaciones.service'
+import { estudianteService } from '../services/estudiante.service'
+import type { Application } from '../types/seguimiento.types'
 import type { JobCardItem, SearchPublicationItem, Vacante } from '../types/publicaciones.types'
 
 const getUserId = () => Number(localStorage.getItem('userId'))
@@ -20,23 +22,41 @@ const formatDate = (iso: string): string => {
   }).format(date)
 }
 
-const toJobCardItem = (vacante: Vacante): JobCardItem => ({
+const normalizeText = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+const getVacanteKey = (vacante: Pick<Vacante, 'titulo' | 'nombreEmpresa'>): string =>
+  `${normalizeText(vacante.titulo)}|${normalizeText(vacante.nombreEmpresa)}`
+
+const getApplicationKey = (application: Pick<Application, 'jobTitle' | 'company'>): string =>
+  `${normalizeText(application.jobTitle)}|${normalizeText(application.company)}`
+
+const toJobCardItem = (vacante: Vacante, isApplied = false): JobCardItem => ({
   id: vacante.id,
   title: vacante.titulo,
   company: vacante.nombreEmpresa,
-  location: vacante.modalidad,
   salary: formatSalary(vacante.sueldoAprox),
   modality: vacante.modalidad,
+  dateLabel: formatDate(vacante.fechaPublicacion),
+  applicantCount: vacante.totalPostulantes,
+  logoUrl: vacante.empresaLogoUrl,
+  isApplied,
 })
 
-const toSearchItem = (vacante: Vacante): SearchPublicationItem => ({
+const toSearchItem = (vacante: Vacante, isApplied = false): SearchPublicationItem => ({
   id: vacante.id,
   title: vacante.titulo,
-  location: vacante.nombreEmpresa,
+  company: vacante.nombreEmpresa,
   description: vacante.descripcion,
   typeTag: vacante.modalidad,
   salaryTag: formatSalary(vacante.sueldoAprox),
   timeAgo: formatDate(vacante.fechaPublicacion),
+  logoUrl: vacante.empresaLogoUrl,
+  isApplied,
 })
 
 export type ApplyFeedback = {
@@ -64,6 +84,38 @@ export const usePublicaciones = () => {
     queryFn: () => publicacionesService.getVacantes(),
   })
 
+  const postulacionesQuery = useQuery({
+    queryKey: ['estudiante', 'postulaciones', userId],
+    queryFn: () => estudianteService.getPostulaciones(userId),
+    enabled: !!userId,
+  })
+
+  const appliedVacanteIds = useMemo(() => {
+    const ids = new Set(appliedIds)
+    const applicationKeys = new Set<string>()
+
+    for (const application of postulacionesQuery.data ?? []) {
+      if (application.vacancyId) {
+        ids.add(application.vacancyId)
+      }
+
+      applicationKeys.add(getApplicationKey(application))
+    }
+
+    for (const vacante of vacantes) {
+      if (applicationKeys.has(getVacanteKey(vacante))) {
+        ids.add(vacante.id)
+      }
+    }
+
+    return ids
+  }, [appliedIds, postulacionesQuery.data, vacantes])
+
+  const isVacanteApplied = useCallback(
+    (vacante: Vacante) => appliedVacanteIds.has(vacante.id),
+    [appliedVacanteIds]
+  )
+
   const vacantesFiltradas = useMemo(() => {
     const term = searchText.trim().toLowerCase()
 
@@ -76,14 +128,42 @@ export const usePublicaciones = () => {
     )
   }, [vacantes, searchText])
 
+  const vacantesDisponibles = useMemo(
+    () => vacantesFiltradas.filter((vacante) => !isVacanteApplied(vacante)),
+    [isVacanteApplied, vacantesFiltradas]
+  )
+
+  const vacantesPostuladas = useMemo(
+    () => vacantesFiltradas.filter((vacante) => isVacanteApplied(vacante)),
+    [isVacanteApplied, vacantesFiltradas]
+  )
+
+  const orderedSearchVacantes = useMemo(
+    () => [...vacantesDisponibles, ...vacantesPostuladas],
+    [vacantesDisponibles, vacantesPostuladas]
+  )
+
   const selectedVacante = useMemo<Vacante | null>(() => {
     if (vacantes.length === 0) return null
 
-    return vacantes.find((vacante) => vacante.id === selectedId) ?? vacantes[0]
-  }, [vacantes, selectedId])
+    return vacantes.find((vacante) => vacante.id === selectedId) ??
+      vacantesDisponibles[0] ??
+      vacantesPostuladas[0] ??
+      null
+  }, [selectedId, vacantes, vacantesDisponibles, vacantesPostuladas])
 
-  const listItems = useMemo(() => vacantesFiltradas.map(toJobCardItem), [vacantesFiltradas])
-  const searchPublicationItems = useMemo(() => vacantesFiltradas.map(toSearchItem), [vacantesFiltradas])
+  const listItems = useMemo(
+    () => vacantesDisponibles.map((vacante) => toJobCardItem(vacante)),
+    [vacantesDisponibles]
+  )
+  const appliedListItems = useMemo(
+    () => vacantesPostuladas.map((vacante) => toJobCardItem(vacante, true)),
+    [vacantesPostuladas]
+  )
+  const searchPublicationItems = useMemo(
+    () => orderedSearchVacantes.map((vacante) => toSearchItem(vacante, isVacanteApplied(vacante))),
+    [isVacanteApplied, orderedSearchVacantes]
+  )
 
   const postularMutation = useMutation({
     mutationFn: (publicacionId: number) => {
@@ -132,7 +212,8 @@ export const usePublicaciones = () => {
     isLoading,
     isError,
     isApplying: postularMutation.isPending,
-    appliedIds,
+    appliedIds: [...appliedVacanteIds],
+    appliedListItems,
     feedback,
     openSearchMode,
     closeSearchMode,

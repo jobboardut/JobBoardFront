@@ -16,17 +16,22 @@ export interface JobCardItem {
   id: number
   title: string
   company: string
-  location: string
   salary: string
   modality: string
+  dateLabel: string
+  applicantCount: number
+  logoUrl?: string | null
+  isApplied?: boolean
 }
 
 export interface SearchPublicationItem {
   id: number
   title: string
-  location: string
+  company: string
   description: string
   typeTag: string
   salaryTag: string
   timeAgo: string
+  logoUrl?: string | null
+  isApplied?: boolean
 }
