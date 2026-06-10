@@ -2,26 +2,25 @@ import { CircleCheck, Clock, XCircle } from 'lucide-react'
 
 const statuses = [
   {
-    status: 'EN REVISIÓN',
+    status: 'PENDIENTE',
+    color: 'bg-[#EA580C]',
+    lightBg: 'bg-[rgba(234,88,12,0.12)]',
+    icon: Clock,
+    description: 'Tu postulacion fue recibida y esta esperando revision de la empresa.',
+  },
+  {
+    status: 'ENTREVISTA',
     color: 'bg-[#EAB308]',
     lightBg: 'bg-[rgba(234,179,8,0.14)]',
     icon: Clock,
-    description: 'Tu CV se encuentra en revisión por parte de la empresa, revisa más tarde para conocer su respuesta',
+    description: 'La empresa quiere avanzar contigo. Revisa tus medios de contacto para coordinar la entrevista.',
   },
   {
-    status: 'ACEPTADO',
-    color: 'bg-[#009A4D]',
-    lightBg: 'bg-[#009A4D]',
-    icon: CircleCheck,
-   
-    description: 'Tu perfil cumple con los requisitados solicitados en la vacante, revisa tu correo, la empresa se comunica contigo',
-  },
-  {
-    status: 'APRUEBA',
+    status: 'APROBADO',
     color: 'bg-[#10B981]',
     lightBg: 'bg-[rgba(16,185,129,0.12)]',
     icon: CircleCheck,
-    description: 'Has aprobado el proceso de evaluación inicial. Mantente atento a los siguientes pasos.',
+    description: 'Tu perfil fue aprobado para continuar con los ultimos pasos del proceso.',
   },
   {
     status: 'CONTRATADO',
@@ -35,7 +34,7 @@ const statuses = [
     color: 'bg-red-500',
     lightBg: 'bg-red-50',
     icon: XCircle,
-    description: 'Tu perfil no cumple con los requisitos solicitados, no la desanimes, intenta con otra vacante',
+    description: 'La empresa cerro tu proceso para esta vacante. Puedes seguir postulando a otras oportunidades.',
   },
 ]
 

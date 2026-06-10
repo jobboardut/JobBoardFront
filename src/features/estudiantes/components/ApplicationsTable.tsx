@@ -7,20 +7,18 @@ interface ApplicationsTableProps {
   onViewDetails?: (application: Application) => void
 }
 
-const timelineSteps = ['EN REVISIÓN', 'PENDIENTE', 'APRUEBA', 'ACEPTADO', 'CONTRATADO', 'RECHAZADO'] as const
+const timelineSteps = ['PENDIENTE', 'ENTREVISTA', 'APROBADO', 'CONTRATADO', 'RECHAZADO'] as const
 
 const getStatusStyles = (status: string) => {
   switch (status) {
-    case 'EN REVISIÓN':
-      return 'bg-[rgba(234,179,8,0.14)] text-[#CA8A04] border-[#EAB308]'
-    case 'ACEPTADO':
-      return 'bg-[rgba(0,154,77,0.12)] text-[#009A4D] border-[#009A4D]'
-    case 'APRUEBA':
-      return 'bg-[rgba(16,185,129,0.12)] text-[#10B981] border-[#10B981]'
-    case 'CONTRATADO':
-      return 'bg-[rgba(16,185,129,0.12)] text-[#10B981] border-[#10B981]'
     case 'PENDIENTE':
       return 'bg-[rgba(234,88,12,0.12)] text-[#EA580C] border-[#EA580C]'
+    case 'ENTREVISTA':
+      return 'bg-[rgba(234,179,8,0.14)] text-[#CA8A04] border-[#EAB308]'
+    case 'APROBADO':
+      return 'bg-[rgba(0,154,77,0.12)] text-[#009A4D] border-[#009A4D]'
+    case 'CONTRATADO':
+      return 'bg-[rgba(16,185,129,0.12)] text-[#10B981] border-[#10B981]'
     case 'RECHAZADO':
       return 'bg-red-100 text-red-700 border-red-300'
     default:
@@ -30,16 +28,14 @@ const getStatusStyles = (status: string) => {
 
 const getStatusDotColor = (status: string) => {
   switch (status) {
-    case 'EN REVISIÓN':
-      return 'bg-[#EAB308]'
-    case 'ACEPTADO':
-      return 'bg-[#009A4D]'
-    case 'APRUEBA':
-      return 'bg-[#10B981]'
-    case 'CONTRATADO':
-      return 'bg-[#10B981]'
     case 'PENDIENTE':
       return 'bg-[#EA580C]'
+    case 'ENTREVISTA':
+      return 'bg-[#EAB308]'
+    case 'APROBADO':
+      return 'bg-[#009A4D]'
+    case 'CONTRATADO':
+      return 'bg-[#10B981]'
     case 'RECHAZADO':
       return 'bg-red-500'
     default:
@@ -48,66 +44,32 @@ const getStatusDotColor = (status: string) => {
 }
 
 const getTimelinePointClass = (status: string, step: (typeof timelineSteps)[number], stepIndex: number) => {
-  if (status === 'CONTRATADO') {
-    return 'bg-[#10B981]'
-  }
-
   if (status === 'RECHAZADO') {
-    return 'bg-red-500'
-  }
-
-  if (status === 'PENDIENTE') {
-    if (step === 'PENDIENTE') return 'bg-[#EA580C]'
-    if (stepIndex === 0) return 'bg-[#EAB308]'
-    return 'bg-slate-300'
+    return step === 'RECHAZADO' ? 'bg-red-500' : 'bg-slate-300'
   }
 
   const currentIndex = timelineSteps.indexOf(status as (typeof timelineSteps)[number])
   if (currentIndex === -1) return 'bg-slate-300'
-  if (stepIndex < currentIndex) {
-    if (stepIndex === 0) return 'bg-[#EAB308]'
-    if (stepIndex === 1 && currentIndex > 1) return 'bg-[#EA580C]'
-    if (stepIndex === 2 && currentIndex > 2) return 'bg-[#10B981]'
-    return 'bg-[#009A4D]'
-  }
-  if (stepIndex === currentIndex) {
-    if (status === 'APRUEBA') return 'bg-[#10B981]'
-    if (status === 'EN REVISIÓN') return 'bg-[#EAB308]'
-    return 'bg-[#009A4D]'
-  }
+  if (stepIndex > currentIndex) return 'bg-slate-300'
+  if (step === 'PENDIENTE') return 'bg-[#EA580C]'
+  if (step === 'ENTREVISTA') return 'bg-[#EAB308]'
+  if (step === 'APROBADO') return 'bg-[#009A4D]'
+  if (step === 'CONTRATADO') return 'bg-[#10B981]'
   return 'bg-slate-300'
 }
 
 const getTimelineSegmentClass = (status: string, stepIndex: number) => {
-  if (status === 'CONTRATADO') {
-    return 'bg-[#10B981]'
-  }
-
   if (status === 'RECHAZADO') {
-    return 'bg-red-500'
-  }
-
-  if (status === 'PENDIENTE') {
-    if (stepIndex === 0) return 'bg-[#EAB308]'
-    if (stepIndex === 1) return 'bg-[#EA580C]'
     return 'bg-slate-300'
   }
 
   const currentIndex = timelineSteps.indexOf(status as (typeof timelineSteps)[number])
   if (currentIndex <= 0) return 'bg-slate-300'
-  if (stepIndex < currentIndex - 1) {
-    if (stepIndex === 0) return 'bg-[#EAB308]'
-    if (stepIndex === 1 && currentIndex > 2) return 'bg-[#EA580C]'
-    if (stepIndex === 2 && currentIndex > 3) return 'bg-[#10B981]'
-    return 'bg-[#009A4D]'
-  }
-  if (stepIndex === currentIndex - 1) {
-    if (status === 'EN REVISIÓN') return 'bg-[#EAB308]'
-    if (status === 'PENDIENTE') return 'bg-[#EA580C]'
-    if (status === 'APRUEBA') return 'bg-[#10B981]'
-    return 'bg-[#009A4D]'
-  }
-  return 'bg-slate-300'
+  if (stepIndex >= currentIndex) return 'bg-slate-300'
+  if (stepIndex === 0) return 'bg-[#EA580C]'
+  if (stepIndex === 1) return 'bg-[#EAB308]'
+  if (stepIndex === 2) return 'bg-[#009A4D]'
+  return 'bg-[#10B981]'
 }
 
 export const ApplicationsTable = ({ applications, onViewDetails }: ApplicationsTableProps) => {

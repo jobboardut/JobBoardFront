@@ -1,8 +1,11 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, CalendarCheck, CheckCircle2, FileText, GraduationCap, Mail, MapPin, Phone, XCircle } from 'lucide-react'
+import { ArrowLeft, FileText, GraduationCap, Mail, MapPin, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
+import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { useActualizarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
+import type { PostulanteEstatus } from '../types/empresa.types'
+import { POSTULANTE_STATUS_FLOW, getPostulanteStatusMeta } from '../utils/postulanteStatus'
 
 export const DetallePostulante = () => {
   const navigate = useNavigate()
@@ -11,6 +14,7 @@ export const DetallePostulante = () => {
   const postulanteId = Number(id)
   const vacanteId = Number(searchParams.get('vacanteId'))
   const toast = useAppToast()
+  const { confirm } = useConfirmDialog()
 
   const {
     data: postulantes = [],
@@ -45,18 +49,30 @@ export const DetallePostulante = () => {
   }
 
   const estatusActual = postulante.estatus
+  const currentStatus = getPostulanteStatusMeta(estatusActual)
 
-  const aplicarEstatus = (estatus: string) => {
+  const aplicarEstatus = async (estatus: PostulanteEstatus) => {
     if (!postulante.postulacionId) {
       toast.warning('No se encontro la postulacion', 'Abre el postulante desde una vacante publicada.')
       return
     }
 
+    const nextStatus = getPostulanteStatusMeta(estatus)
+    const accepted = await confirm({
+      title: `Marcar como ${nextStatus.label}`,
+      message: `Este cambio actualizara el seguimiento para empresa, estudiante/egresado y administracion.`,
+      confirmLabel: 'Actualizar estatus',
+      cancelLabel: 'Cancelar',
+      tone: nextStatus.key === 'rechazada' ? 'danger' : 'info',
+    })
+
+    if (!accepted) return
+
     cambiarEstatus(
       { postulacionId: postulante.postulacionId, estatus },
       {
         onSuccess: () => {
-          toast.success('Estatus actualizado', `El postulante paso a ${estatus}.`)
+          toast.success('Estatus actualizado', `${postulante.nombre} ahora aparece como ${nextStatus.label}.`)
         },
         onError: (error: unknown) => {
           const message = (error as { message?: string })?.message ?? 'Intenta de nuevo en unos segundos.'
@@ -86,42 +102,43 @@ export const DetallePostulante = () => {
             ) : null}
             <div>
               <h1 className="text-2xl font-semibold">{postulante.nombre}</h1>
-              <p className="text-sm text-white/80">Estatus: {estatusActual}</p>
+              <p className="text-sm text-white/80">Estatus: {currentStatus.label}</p>
               {postulante.carrera ? (
                 <p className="text-sm text-white/70">{postulante.carrera}</p>
               ) : null}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => aplicarEstatus('Entrevista')}
-              disabled={isUpdating}
-              className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-600 disabled:opacity-60"
-            >
-              <CalendarCheck size={16} />
-              Entrevista
-            </button>
-            <button
-              type="button"
-              onClick={() => aplicarEstatus('Aceptada')}
-              disabled={isUpdating}
-              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              <CheckCircle2 size={16} />
-              Aprobar
-            </button>
-            <button
-              type="button"
-              onClick={() => aplicarEstatus('Rechazada')}
-              disabled={isUpdating}
-              className="flex items-center gap-2 rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              <XCircle size={16} />
-              Rechazar
-            </button>
+            {POSTULANTE_STATUS_FLOW.filter((status) => status.key !== 'pendiente').map((status) => {
+              const Icon = status.Icon
+              const isActive = status.key === currentStatus.key
+
+              return (
+                <button
+                  type="button"
+                  key={status.key}
+                  onClick={() => void aplicarEstatus(status.apiValue)}
+                  disabled={isUpdating || isActive}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
+                    isActive
+                      ? 'bg-white/25 text-white'
+                      : status.key === 'aceptada'
+                        ? 'bg-white text-emerald-600'
+                        : 'border border-white/40 text-white hover:bg-white/15'
+                  }`}
+                >
+                  <Icon size={16} />
+                  {status.label}
+                </button>
+              )
+            })}
           </div>
         </div>
+      </div>
+
+      <div className={`rounded-2xl border px-5 py-4 ${currentStatus.pillClass}`}>
+        <p className="text-sm font-black">Estado actual: {currentStatus.label}</p>
+        <p className="mt-1 text-sm">{currentStatus.description}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

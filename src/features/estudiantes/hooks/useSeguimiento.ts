@@ -82,11 +82,10 @@ export const useSeguimiento = () => {
   const displayApplications = viewMode === 'detail' ? filteredApplications : applicationsData
 
   const applicationsByStatus = {
-    'EN REVISIÓN': applicationsData.filter((app) => app.status === 'EN REVISIÓN').length,
-    ACEPTADO: applicationsData.filter((app) => app.status === 'ACEPTADO').length,
-    APRUEBA: applicationsData.filter((app) => app.status === 'APRUEBA').length,
-    CONTRATADO: applicationsData.filter((app) => app.status === 'CONTRATADO').length,
     PENDIENTE: applicationsData.filter((app) => app.status === 'PENDIENTE').length,
+    ENTREVISTA: applicationsData.filter((app) => app.status === 'ENTREVISTA').length,
+    APROBADO: applicationsData.filter((app) => app.status === 'APROBADO').length,
+    CONTRATADO: applicationsData.filter((app) => app.status === 'CONTRATADO').length,
     RECHAZADO: applicationsData.filter((app) => app.status === 'RECHAZADO').length,
   }
 

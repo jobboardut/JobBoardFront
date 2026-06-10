@@ -18,20 +18,20 @@ const statusInfoItems = [
     Icon: Clock3,
   },
   {
-    title: 'EN REVISION',
-    description: 'La empresa se encuentra evaluando el perfil y los documentos del candidato.',
-    tone: 'is-orange',
-    Icon: Clock3,
-  },
-  {
     title: 'ENTREVISTA',
     description: 'El candidato avanzo a una etapa de contacto o entrevista con la empresa.',
     tone: 'is-green',
     Icon: CheckCircle2,
   },
   {
-    title: 'ACEPTADO',
-    description: 'La empresa marco al candidato como aceptado dentro del proceso.',
+    title: 'APROBADO',
+    description: 'La empresa aprobo al candidato para continuar con los pasos finales.',
+    tone: 'is-green',
+    Icon: CheckCircle2,
+  },
+  {
+    title: 'CONTRATADO',
+    description: 'La empresa marco que el candidato ya fue contratado para la vacante.',
     tone: 'is-green',
     Icon: CheckCircle2,
   },

@@ -22,16 +22,16 @@ const asStatus = (value: unknown): TrackingStatus => {
     return 'Entrevista'
   }
 
-  if (normalized.includes('acept')) {
-    return 'Aceptado'
+  if (normalized.includes('contrat')) {
+    return 'Contratado'
+  }
+
+  if (normalized.includes('acept') || normalized.includes('aprob') || normalized.includes('aprue')) {
+    return 'Aprobado'
   }
 
   if (normalized.includes('rechaz')) {
     return 'Rechazado'
-  }
-
-  if (normalized.includes('revision') || normalized.includes('revisi')) {
-    return 'En revisión'
   }
 
   return 'Pendiente'
@@ -92,9 +92,9 @@ export async function getTrackingOverview(): Promise<TrackingOverview> {
     metrics: [
       { label: 'Total', value: rows.length, Icon: Users, tone: 'blue' },
       { label: 'Pendientes', value: countByStatus('Pendiente'), Icon: Clock3, tone: 'gray' },
-      { label: 'En revisión', value: countByStatus('En revisión'), Icon: FileCheck2, tone: 'blue' },
       { label: 'Entrevistas', value: countByStatus('Entrevista'), Icon: MessagesSquare, tone: 'orange' },
-      { label: 'Aceptados', value: countByStatus('Aceptado'), Icon: CircleCheckBig, tone: 'green' },
+      { label: 'Aprobados', value: countByStatus('Aprobado'), Icon: CircleCheckBig, tone: 'green' },
+      { label: 'Contratados', value: countByStatus('Contratado'), Icon: FileCheck2, tone: 'green' },
       { label: 'Rechazados', value: countByStatus('Rechazado'), Icon: CircleX, tone: 'red' },
     ],
     rows,

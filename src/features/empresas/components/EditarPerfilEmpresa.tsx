@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, ArrowLeft, Camera, CheckCircle2, ImagePlus, Loader2, Save, X } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
@@ -84,9 +84,18 @@ export const EditarPerfilEmpresa = () => {
     values: Partial<EmpresaPerfil>
   }>({ key: profileKey, values: {} })
   const [toast, setToast] = useState<ToastState | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const draftValues = draftState.key === profileKey ? draftState.values : {}
   const form = perfil ? { ...perfil, ...draftValues } : null
+  const logoDisplayUrl = logoPreview ?? form?.logoUrl ?? ''
+
+  useEffect(() => {
+    return () => {
+      if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
+    }
+  }, [logoPreview])
 
   const updateForm = (values: Partial<EmpresaPerfil>) => {
     setDraftState(prev => ({
@@ -127,24 +136,21 @@ export const EditarPerfilEmpresa = () => {
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const logoUrl = String(reader.result ?? '')
-      updateForm({ logoUrl })
-      setToast({
-        type: 'success',
-        title: 'Vista previa lista',
-        message: 'La imagen se guardara cuando confirmes los cambios.',
-      })
-    }
-    reader.onerror = () => {
-      setToast({
-        type: 'error',
-        title: 'No se pudo leer la imagen',
-        message: 'Intenta con otro archivo.',
-      })
-    }
-    reader.readAsDataURL(file)
+    if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
+    setLogoFile(file)
+    setLogoPreview(URL.createObjectURL(file))
+    setToast({
+      type: 'success',
+      title: 'Vista previa lista',
+      message: 'La imagen se guardara cuando confirmes los cambios.',
+    })
+  }
+
+  const handleRemoveLogo = () => {
+    if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
+    setLogoFile(null)
+    setLogoPreview(null)
+    updateForm({ logoUrl: '' })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -173,7 +179,7 @@ export const EditarPerfilEmpresa = () => {
       return
     }
 
-    actualizarPerfil(form, {
+    actualizarPerfil({ ...form, logoFile }, {
       onSuccess: () => {
         navigate(ROUTES.EMPRESA_PERFIL, {
           state: {
@@ -185,11 +191,14 @@ export const EditarPerfilEmpresa = () => {
           },
         })
       },
-      onError: () => {
+      onError: (error: unknown) => {
+        const message = (error as { message?: string; detalle?: string })?.detalle ||
+          (error as { message?: string })?.message ||
+          'Revisa los datos e intenta de nuevo.'
         setToast({
           type: 'error',
           title: 'No se pudo guardar',
-          message: 'Revisa los datos e intenta de nuevo.',
+          message,
         })
       },
     })
@@ -236,8 +245,8 @@ export const EditarPerfilEmpresa = () => {
             <h2 className="text-lg font-bold text-gray-800 mb-4">Foto de perfil</h2>
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
               <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-orange-100 ring-1 ring-emerald-100">
-                {form.logoUrl ? (
-                  <img src={form.logoUrl} alt={form.nombreEmpresa ?? 'Empresa'} className="h-full w-full object-cover" />
+                {logoDisplayUrl ? (
+                  <img src={logoDisplayUrl} alt={form.nombreEmpresa ?? 'Empresa'} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-3xl font-bold text-emerald-600">
                     {form.nombreEmpresa?.charAt(0) ?? 'E'}
@@ -262,10 +271,10 @@ export const EditarPerfilEmpresa = () => {
                     <ImagePlus size={16} />
                     Subir imagen
                   </button>
-                  {form.logoUrl && (
+                  {logoDisplayUrl && (
                     <button
                       type="button"
-                      onClick={() => updateForm({ logoUrl: '' })}
+                      onClick={handleRemoveLogo}
                       className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition-colors hover:border-orange-200 hover:text-orange-500"
                     >
                       Quitar
@@ -280,9 +289,15 @@ export const EditarPerfilEmpresa = () => {
                     value={form.logoUrl ?? ''}
                     onChange={handleChange}
                     placeholder="https://..."
+                    disabled={Boolean(logoFile)}
                     maxLength={SECURITY_LIMITS.url}
-                    className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400 disabled:bg-slate-100 disabled:text-slate-400"
                   />
+                  {logoFile ? (
+                    <span className="text-xs font-semibold text-emerald-600">
+                      Nueva imagen seleccionada: {logoFile.name}
+                    </span>
+                  ) : null}
                 </label>
               </div>
             </div>

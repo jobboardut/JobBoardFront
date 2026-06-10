@@ -9,7 +9,7 @@ export type TrackingMetric = {
   tone: TrackingMetricTone
 }
 
-export type TrackingStatus = 'Entrevista' | 'Pendiente' | 'En revisión' | 'Rechazado' | 'Aceptado'
+export type TrackingStatus = 'Pendiente' | 'Entrevista' | 'Aprobado' | 'Contratado' | 'Rechazado'
 
 export type TrackingRow = {
   id: string

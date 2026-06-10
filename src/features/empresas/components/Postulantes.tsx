@@ -5,28 +5,18 @@ import { ROUTES } from '@/router/routes'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
 import { usePostulantes, useVacantes } from '../hooks/useEmpresa'
 import type { Postulante } from '../types/empresa.types'
+import { getPostulanteStatusMeta } from '../utils/postulanteStatus'
 import { KanbanPostulaciones } from './KanbanPostulaciones'
 
-const dotEstatus: Record<string, string> = {
-  pendiente: 'bg-orange-400',
-  revision: 'bg-gray-300',
-  entrevista: 'bg-blue-500',
-  aceptada: 'bg-emerald-500',
-  aprobado: 'bg-emerald-500',
-  aprobada: 'bg-emerald-500',
-  rechazado: 'bg-red-400',
-  rechazada: 'bg-red-400',
-}
+const StatusPill = ({ status }: { status?: string }) => {
+  const meta = getPostulanteStatusMeta(status)
 
-const textEstatus: Record<string, string> = {
-  pendiente: 'text-orange-400',
-  revision: 'text-gray-500',
-  entrevista: 'text-blue-500',
-  aceptada: 'text-emerald-500',
-  aprobado: 'text-emerald-500',
-  aprobada: 'text-emerald-500',
-  rechazado: 'text-red-400',
-  rechazada: 'text-red-400',
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold ${meta.pillClass}`}>
+      <span className={`h-2 w-2 rounded-full ${meta.dotClass}`} />
+      {meta.label}
+    </span>
+  )
 }
 
 export const Postulantes = () => {
@@ -182,10 +172,7 @@ export const Postulantes = () => {
                   <span className="font-semibold text-slate-500">
                     {postulante.matricula ? `Matricula ${postulante.matricula}` : postulante.estatusAcademico ?? 'Sin matricula'}
                   </span>
-                  <span className={`inline-flex items-center gap-2 font-bold ${textEstatus[postulante.estatus?.toLowerCase()] ?? 'text-gray-400'}`}>
-                    <span className={`h-2 w-2 rounded-full ${dotEstatus[postulante.estatus?.toLowerCase()] ?? 'bg-gray-300'}`} />
-                    {postulante.estatus}
-                  </span>
+                  <StatusPill status={postulante.estatus} />
                 </div>
               </article>
             ))}
@@ -224,12 +211,7 @@ export const Postulantes = () => {
                     {postulante.carrera || postulante.tipoUsuario}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${dotEstatus[postulante.estatus?.toLowerCase()] ?? 'bg-gray-300'}`} />
-                      <span className={`text-sm font-semibold ${textEstatus[postulante.estatus?.toLowerCase()] ?? 'text-gray-400'}`}>
-                        {postulante.estatus}
-                      </span>
-                    </div>
+                    <StatusPill status={postulante.estatus} />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -264,7 +246,7 @@ export const Postulantes = () => {
       ) : (
         <KanbanPostulaciones
           data={postulantes.reduce((acc, item) => {
-            const key = item.estatus?.toLowerCase() ?? 'pendiente'
+            const key = getPostulanteStatusMeta(item.estatus).key
             acc[key] = acc[key] ? [...acc[key], item] : [item]
             return acc
           }, {} as Record<string, Postulante[]>)}

@@ -1,13 +1,13 @@
 export type ApplicationStatus =
-  | 'EN REVISIÓN'
-  | 'ACEPTADO'
   | 'PENDIENTE'
-  | 'RECHAZADO'
+  | 'ENTREVISTA'
+  | 'APROBADO'
   | 'CONTRATADO'
-  | 'APRUEBA'
+  | 'RECHAZADO'
 
 export interface Application {
   id: string
+  vacancyId?: number
   jobTitle: string
   company: string
   postulationDate: string

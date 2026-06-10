@@ -92,9 +92,8 @@ const normalizeStatus = (value: string): ApplicationStatus => {
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
 
-  if (normalized.includes('REVISION')) return 'EN REVISIÓN'
-  if (normalized.includes('ACEPT')) return 'ACEPTADO'
-  if (normalized.includes('APRUE')) return 'APRUEBA'
+  if (normalized.includes('ENTREV')) return 'ENTREVISTA'
+  if (normalized.includes('ACEPT') || normalized.includes('APROB') || normalized.includes('APRUE')) return 'APROBADO'
   if (normalized.includes('CONTRAT')) return 'CONTRATADO'
   if (normalized.includes('RECHAZ')) return 'RECHAZADO'
 
@@ -137,6 +136,10 @@ const mapApplication = (payload: unknown, index: number): Application => {
 
   return {
     id: pickString(records, ['id', 'postulacionId', 'publicacionId', 'vacanteId'], String(index + 1)),
+    vacancyId:
+      pickNumber([application], ['publicacionId', 'vacanteId']) ||
+      pickNumber([vacancy], ['id', 'publicacionId', 'vacanteId']) ||
+      undefined,
     jobTitle: pickString(records, ['titulo', 'tituloVacante', 'jobTitle', 'title'], 'Vacante sin titulo'),
     company: pickString(records, ['nombreEmpresa', 'empresaNombre', 'companyName', 'company', 'nombre'], 'Empresa no especificada'),
     postulationDate: formatDate(pickValue(records, ['fechaPostulacion', 'fechaAplicacion', 'fecha', 'createdAt', 'fechaPublicacion'])),

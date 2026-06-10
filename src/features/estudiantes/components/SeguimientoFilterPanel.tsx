@@ -7,21 +7,21 @@ interface SeguimientoFilterPanelProps {
 
 const statuses = [
   {
-    status: 'EN REVISIÓN',
+    status: 'PENDIENTE',
+    color: 'text-[#EA580C]',
+    bgColor: 'bg-[rgba(234,88,12,0.12)]',
+    icon: AlertCircle,
+  },
+  {
+    status: 'ENTREVISTA',
     color: 'text-[#CA8A04]',
     bgColor: 'bg-[rgba(234,179,8,0.14)]',
     icon: Clock,
   },
   {
-    status: 'ACEPTADO',
+    status: 'APROBADO',
     color: 'text-[#009A4D]',
-    bgColor: 'bg-[#009A4D]',
-    icon: CircleCheck,
-  },
-  {
-    status: 'APRUEBA',
-    color: 'text-[#10B981]',
-    bgColor: 'bg-[rgba(16,185,129,0.12)]',
+    bgColor: 'bg-[rgba(0,154,77,0.12)]',
     icon: CircleCheck,
   },
   {
@@ -29,12 +29,6 @@ const statuses = [
     color: 'text-[#10B981]',
     bgColor: 'bg-[rgba(16,185,129,0.12)]',
     icon: CircleCheck,
-  },
-  {
-    status: 'PENDIENTE',
-    color: 'text-[#EA580C]',
-    bgColor: 'bg-[rgba(234,88,12,0.12)]',
-    icon: AlertCircle,
   },
   {
     status: 'RECHAZADO',

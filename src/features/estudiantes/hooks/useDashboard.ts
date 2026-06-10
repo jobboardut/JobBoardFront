@@ -29,9 +29,9 @@ const buildMetrics = (applications: Application[], totalPostulaciones: number): 
 }
 
 const buildActivityColumns = (applications: Application[]): ActivityColumn[] => {
-  const inReview = applications.filter((application) => application.status === 'EN REVISIÓN')
+  const inReview = applications.filter((application) => application.status === 'PENDIENTE')
   const inProgress = applications.filter((application) =>
-    ['PENDIENTE', 'APRUEBA', 'ACEPTADO'].includes(application.status)
+    ['ENTREVISTA', 'APROBADO'].includes(application.status)
   )
   const finished = applications.filter((application) =>
     ['CONTRATADO', 'RECHAZADO'].includes(application.status)
@@ -39,7 +39,7 @@ const buildActivityColumns = (applications: Application[]): ActivityColumn[] => 
 
   return [
     {
-      title: 'En revision',
+      title: 'Pendientes',
       count: inReview.length,
       status: 'En revision',
       items: inReview.slice(0, 2).map(mapApplicationToJobItem),
