@@ -54,7 +54,7 @@ export const SeleccionCuenta = () => {
 
   const handleContinuar = () => {
     if (!seleccionado) return
-    navigate(seleccionado === 'empresa' ? '/registro/empresa' : '/registro/estudiante')
+    navigate(seleccionado === 'empresa' ? '/registro/empresa' : `/registro/estudiante?tipo=${seleccionado}`)
   }
 
   return (

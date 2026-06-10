@@ -27,7 +27,13 @@ export interface RegistroEstudianteRequest {
   direccion: string
   fechaNacimiento: string
   estadoCivil: string
+  matricula: string
+  programaEducativoId: string
   programaEducativo: string
+  estatusAcademico?: 'Estudiante' | 'Egresado'
+  fotoPerfil?: File | null
+  cv?: File | null
+  docProbatorio?: File | null
 }
 
 export interface RegistroEmpresaRequest {

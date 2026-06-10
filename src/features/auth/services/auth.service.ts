@@ -36,6 +36,29 @@ const buildRegistroEmpresaFormData = (data: RegistroEmpresaRequest) => {
   return formData
 }
 
+const buildRegistroEstudianteFormData = (data: RegistroEstudianteRequest) => {
+  const formData = new FormData()
+
+  formData.append('Email', data.email)
+  formData.append('Password', data.password)
+  formData.append('Nombre', data.nombres)
+  formData.append('Nombres', data.nombres)
+  formData.append('Apellidos', data.apellidos)
+  formData.append('Direccion', data.direccion)
+  formData.append('FechaNacimiento', data.fechaNacimiento)
+  formData.append('EstadoCivil', data.estadoCivil)
+  formData.append('Matricula', data.matricula)
+  formData.append('ProgramaEducativoId', data.programaEducativoId)
+  formData.append('CarreraId', data.programaEducativoId)
+  formData.append('ProgramaEducativo', data.programaEducativo)
+  formData.append('EstatusAcademico', data.estatusAcademico ?? 'Estudiante')
+  appendFileOrEmpty(formData, 'FotoPerfil', data.fotoPerfil)
+  appendFileOrEmpty(formData, 'Cv', data.cv)
+  appendFileOrEmpty(formData, 'DocProbatorio', data.docProbatorio)
+
+  return formData
+}
+
 const clearAuthSession = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('userId')
@@ -68,19 +91,8 @@ export const authService = {
   },
 
   registroEstudiante: async (data: RegistroEstudianteRequest) => {
-    const payload = {
-      email: data.email,
-      password: data.password,
-      nombre: data.nombres,
-      nombres: data.nombres,
-      apellidos: data.apellidos,
-      direccion: data.direccion,
-      fechaNacimiento: data.fechaNacimiento,
-      estadoCivil: data.estadoCivil,
-      programaEducativo: data.programaEducativo,
-    }
-
-    return api.post('/registro/estudiante', payload)
+    const formData = buildRegistroEstudianteFormData(data)
+    return api.post('/registro/estudiante', formData)
   },
 
 }

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
 import { AppButton } from '@/shared/components/AppButton'
+import { useAppToast } from '@/shared/components/appToastContext'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { defaultEmpresaProfile, markEmpresaProfileIncomplete, saveEmpresaProfileDraft } from '@/features/empresas/services/empresaProfile.storage'
 import { catalogService } from '@/services/catalog.service'
@@ -35,6 +36,7 @@ import {
   validateRequiredText,
 } from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
+import { RegistroResumenDialog, type RegistroResumenSection } from './RegistroResumenDialog'
 import './auth-flow.css'
 
 const pasos = [
@@ -42,19 +44,6 @@ const pasos = [
   'Registro de datos',
   'Confirmacion',
   'Validacion de perfil',
-]
-
-const DEFAULT_SECTORES = [
-  { id: '1', nombre: 'Tecnologia' },
-  { id: '2', nombre: 'Manufactura' },
-  { id: '3', nombre: 'Salud' },
-  { id: '4', nombre: 'Educacion' },
-  { id: '5', nombre: 'Construccion' },
-  { id: '6', nombre: 'Comercio' },
-  { id: '7', nombre: 'Servicios' },
-  { id: '8', nombre: 'Agricultura' },
-  { id: '9', nombre: 'Transporte' },
-  { id: '10', nombre: 'Otro' },
 ]
 
 type DocumentoKey = 'situacionFiscal' | 'docExistencia' | 'repDocCargo' | 'repFotoIne'
@@ -172,6 +161,7 @@ const DocumentUploadCard = ({ item, file, onChange }: DocumentUploadCardProps) =
 
 export const RegistroEmpresa = () => {
   const navigate = useNavigate()
+  const toast = useAppToast()
   const logoRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -201,18 +191,29 @@ export const RegistroEmpresa = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [sectores, setSectores] = useState(DEFAULT_SECTORES)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [isReviewOpen, setIsReviewOpen] = useState(false)
+  const [sectores, setSectores] = useState<{ id: string; nombre: string }[]>([])
+  const [isLoadingSectores, setIsLoadingSectores] = useState(true)
+  const [sectoresError, setSectoresError] = useState<string | null>(null)
+  const sectorSeleccionado = sectores.find((sector) => sector.id === form.sectorId)
 
   useEffect(() => {
     let isMounted = true
 
     catalogService.getSectores()
       .then((items) => {
-        if (!isMounted || !items.length) return
+        if (!isMounted) return
         setSectores(items.map((item) => ({ id: String(item.id), nombre: item.nombre })))
+        setSectoresError(items.length ? null : 'No hay sectores disponibles.')
       })
       .catch(() => {
-        if (isMounted) setSectores(DEFAULT_SECTORES)
+        if (!isMounted) return
+        setSectores([])
+        setSectoresError('No se pudieron cargar los sectores.')
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSectores(false)
       })
 
     return () => {
@@ -232,6 +233,7 @@ export const RegistroEmpresa = () => {
       [event.target.name]: limitText(event.target.value, getEmpresaFieldLimit(event.target.name)),
     }))
     setErrorMsg(null)
+    setSuccessMsg(null)
   }
 
   const handleLogo = (event: ChangeEvent<HTMLInputElement>) => {
@@ -285,6 +287,7 @@ export const RegistroEmpresa = () => {
       validateEmailField(form.email, 'Email de acceso'),
       validatePasswordField(form.password),
       validateRequiredText(form.nombreEmpresa, 'Nombre de la empresa', SECURITY_LIMITS.companyName),
+      validateRequiredText(form.sectorId, 'Sector', 12),
       validateOptionalPhoneField(form.telefonoEmpresa, 'Telefono de la empresa'),
       validateOptionalEmailField(form.correoEmpresa, 'Correo de la empresa'),
       validateOptionalText(form.direccion, 'Direccion', SECURITY_LIMITS.address),
@@ -308,9 +311,31 @@ export const RegistroEmpresa = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setErrorMsg(null)
+    setSuccessMsg(null)
 
     if (!validateForm()) return
     if (!validateDocuments()) return
+
+    if (!sectorSeleccionado) {
+      setErrorMsg('Selecciona un sector valido.')
+      return
+    }
+
+    setIsReviewOpen(true)
+  }
+
+  const handleConfirmSubmit = async () => {
+    setErrorMsg(null)
+    setSuccessMsg(null)
+
+    if (!validateForm()) return
+    if (!validateDocuments()) return
+
+    if (!sectorSeleccionado) {
+      setErrorMsg('Selecciona un sector valido.')
+      setIsReviewOpen(false)
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -337,22 +362,66 @@ export const RegistroEmpresa = () => {
         repFotoIne: documentos.repFotoIne,
       })
 
-      const sectorNombre = sectores.find((sector) => sector.id === form.sectorId)?.nombre
       saveEmpresaProfileDraft({
         nombre: form.nombreEmpresa || defaultEmpresaProfile.nombre,
-        giro: sectorNombre || defaultEmpresaProfile.giro,
+        giro: sectorSeleccionado.nombre || defaultEmpresaProfile.giro,
         direccion: form.direccion || defaultEmpresaProfile.direccion,
         correo: form.correoEmpresa || defaultEmpresaProfile.correo,
-        industria: sectorNombre || defaultEmpresaProfile.industria,
+        industria: sectorSeleccionado.nombre || defaultEmpresaProfile.industria,
       })
       markEmpresaProfileIncomplete()
-      navigate('/registro/confirmacion?tipo=empresa')
-    } catch {
-      setErrorMsg('No se pudo registrar la empresa. Verifica los datos e intenta de nuevo.')
+      const message = 'Registro de empresa enviado correctamente. Te avisaremos por correo cuando sea validado.'
+      setSuccessMsg(message)
+      toast.success('Registro enviado', message)
+      window.setTimeout(() => {
+        navigate('/registro/confirmacion?tipo=empresa')
+      }, 1200)
+    } catch (error) {
+      const apiError = error as { message?: string; detalle?: string }
+      setIsReviewOpen(false)
+      setErrorMsg(apiError.detalle || apiError.message || 'No se pudo registrar la empresa. Verifica los datos e intenta de nuevo.')
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  const resumenSections: RegistroResumenSection[] = [
+    {
+      title: 'Cuenta de acceso',
+      items: [
+        { label: 'Email', value: form.email },
+        { label: 'Password', value: form.password ? 'Configurada' : '' },
+      ],
+    },
+    {
+      title: 'Datos de la empresa',
+      items: [
+        { label: 'Nombre', value: form.nombreEmpresa },
+        { label: 'Sector', value: sectorSeleccionado?.nombre },
+        { label: 'Telefono', value: form.telefonoEmpresa },
+        { label: 'Correo', value: form.correoEmpresa },
+        { label: 'Direccion', value: form.direccion },
+        { label: 'Sitio web', value: form.sitioWeb },
+      ],
+    },
+    {
+      title: 'Representante',
+      items: [
+        { label: 'Nombre', value: `${form.nombreContacto} ${form.apellidosContacto}`.trim() },
+        { label: 'Puesto', value: form.puesto },
+        { label: 'Telefono', value: form.telefonoContacto },
+        { label: 'Correo', value: form.correoContacto },
+      ],
+    },
+  ]
+
+  const resumenFiles = [
+    { label: 'Logotipo', value: logoFile?.name ?? 'No adjunto' },
+    ...DOCUMENTOS.map((item) => ({
+      label: item.label,
+      value: documentos[item.key]?.name ?? 'No adjunto',
+    })),
+  ]
 
   return (
     <main className="auth-page" style={{ backgroundImage: `url(${campusImg})` }}>
@@ -460,15 +529,21 @@ export const RegistroEmpresa = () => {
                       value={form.sectorId}
                       onChange={handleChange}
                       className={FORM_FIELD_CLASS}
+                      disabled={isLoadingSectores || sectores.length === 0}
                       required
                     >
-                      <option value="">Seleccione una opcion</option>
+                      <option value="">
+                        {isLoadingSectores ? 'Cargando sectores...' : 'Seleccione una opcion'}
+                      </option>
                       {sectores.map((sector) => (
                         <option key={sector.id} value={sector.id}>
                           {sector.nombre}
                         </option>
                       ))}
                     </select>
+                    {sectoresError && (
+                      <p className="text-xs font-semibold text-red-500">{sectoresError}</p>
+                    )}
                   </FormControl>
                   <FormControl label="Telefono de la empresa" help="De 7 a 18 caracteres. Solo numeros, espacios, +, - o parentesis.">
                     <input
@@ -643,8 +718,8 @@ export const RegistroEmpresa = () => {
               ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <AppButton type="submit" isLoading={isSubmitting} fullWidth>
-                  Continuar
+                <AppButton type="submit" isLoading={isSubmitting} disabled={isLoadingSectores} fullWidth>
+                  Revisar registro
                 </AppButton>
                 <AppButton type="button" variant="secondary" onClick={() => navigate(ROUTES.SELECCION_CUENTA)} fullWidth>
                   Cambiar tipo de cuenta
@@ -652,6 +727,22 @@ export const RegistroEmpresa = () => {
               </div>
             </aside>
           </form>
+          {isReviewOpen ? (
+            <RegistroResumenDialog
+              title="Revisa el registro de empresa"
+              description="Confirma que los datos fiscales, el representante y los documentos sean correctos antes de enviarlos a validacion."
+              sections={resumenSections}
+              files={resumenFiles}
+              successMessage={successMsg}
+              errorMessage={errorMsg}
+              isSubmitting={isSubmitting}
+              onEdit={() => {
+                setIsReviewOpen(false)
+                setSuccessMsg(null)
+              }}
+              onConfirm={handleConfirmSubmit}
+            />
+          ) : null}
         </section>
       </div>
     </main>

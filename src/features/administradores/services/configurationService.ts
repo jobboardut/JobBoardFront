@@ -1,4 +1,5 @@
 import api from '@/services/api'
+import { normalizeCatalogItems } from '@/services/catalog.service'
 import type {
   CatalogItemRequest,
   CatalogItemResponse,
@@ -22,8 +23,8 @@ const toCatalogPayload = (name: string): CatalogItemRequest => ({
 })
 
 export const configurationService = {
-  getCarreras: (): Promise<CatalogItemResponse[]> =>
-    api.get(CATALOG_ENDPOINTS.programs) as Promise<CatalogItemResponse[]>,
+  getCarreras: async (): Promise<CatalogItemResponse[]> =>
+    normalizeCatalogItems(await api.get(CATALOG_ENDPOINTS.programs) as CatalogItemResponse[]),
 
   getCarrera: (id: string | number): Promise<CatalogItemResponse> =>
     api.get(`${CATALOG_ENDPOINTS.programs}/${id}`) as Promise<CatalogItemResponse>,
@@ -37,8 +38,8 @@ export const configurationService = {
   deleteCarrera: (id: string | number): Promise<void> =>
     api.delete(`${CATALOG_ENDPOINTS.programs}/${id}`) as Promise<void>,
 
-  getSectores: (): Promise<CatalogItemResponse[]> =>
-    api.get(CATALOG_ENDPOINTS.sectors) as Promise<CatalogItemResponse[]>,
+  getSectores: async (): Promise<CatalogItemResponse[]> =>
+    normalizeCatalogItems(await api.get(CATALOG_ENDPOINTS.sectors) as CatalogItemResponse[]),
 
   getSector: (id: string | number): Promise<CatalogItemResponse> =>
     api.get(`${CATALOG_ENDPOINTS.sectors}/${id}`) as Promise<CatalogItemResponse>,
