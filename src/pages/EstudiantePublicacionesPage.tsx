@@ -52,7 +52,7 @@ export const EstudiantePublicacionesPage = () => {
 
   return (
     <PageWrapper role="Estudiante">
-      <div className="flex min-h-full flex-col bg-white text-[#1d2538]">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f8fafc] text-[#1d2538]">
         <PublicacionesSearchHeader
           isSearchOpen={isSearchOpen}
           searchText={searchText}
@@ -71,7 +71,7 @@ export const EstudiantePublicacionesPage = () => {
             <ErrorState title="No se pudieron cargar las vacantes" message="Intenta actualizar la pagina en unos segundos." />
           </div>
         ) : viewMode === 'detail' ? (
-          <section className="grid min-h-0 flex-1 gap-4 px-6 py-5 xl:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
+          <section className="grid min-h-0 flex-1 gap-4 overflow-hidden px-4 py-4 lg:px-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
             <PublicationDetail
               vacante={selectedVacante}
               onApply={postular}
@@ -79,7 +79,7 @@ export const EstudiantePublicacionesPage = () => {
               hasApplied={selectedVacante ? appliedIds.includes(selectedVacante.id) : false}
             />
 
-            <aside className="publication-scroll h-full overflow-y-auto pr-1">
+            <aside className="publication-scroll h-full overflow-y-auto rounded-2xl border border-slate-100 bg-white/80 p-4 pr-2 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
               <div className="space-y-5">
                 <section className="space-y-3">
                   <div className="flex items-end justify-between gap-3">
@@ -95,7 +95,7 @@ export const EstudiantePublicacionesPage = () => {
                   </div>
 
                   {listItems.length === 0 ? (
-                    <EmptyState title="No hay vacantes disponibles" message="Las vacantes donde ya postulaste se muestran mas abajo." />
+                    <EmptyState title="No hay vacantes disponibles" message="Las vacantes donde ya postulaste se muestran mas abajo." compact />
                   ) : (
                     listItems.map((item) => (
                       <JobListCard
@@ -136,7 +136,7 @@ export const EstudiantePublicacionesPage = () => {
             </aside>
           </section>
         ) : (
-          <section className="grid min-h-0 flex-1 gap-4 px-6 py-5 xl:grid-cols-[minmax(0,2fr)_minmax(260px,300px)]">
+          <section className="grid min-h-0 flex-1 gap-4 overflow-hidden px-4 py-4 lg:px-6 xl:grid-cols-[minmax(0,1fr)_300px]">
             <div className="publication-scroll h-full overflow-y-auto pr-1">
               <div className="space-y-5">
                 {searchPublicationItems.length === 0 ? (

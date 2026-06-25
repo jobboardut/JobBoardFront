@@ -3,6 +3,7 @@ import {
   createConfigurationItem,
   deleteConfigurationItem,
   getConfigurationOverview,
+  updateConfigurationItem,
 } from '../services/configurationService'
 import type { ConfigurationListKey } from '../types/configuration.types'
 
@@ -16,6 +17,14 @@ function useConfigurationOverview() {
   const createMutation = useMutation({
     mutationFn: ({ listKey, value }: { listKey: ConfigurationListKey; value: string }) =>
       createConfigurationItem(listKey, value),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'configuration'] })
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: ({ listKey, itemId, value }: { listKey: ConfigurationListKey; itemId: string; value: string }) =>
+      updateConfigurationItem(listKey, itemId, value),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'configuration'] })
     },
@@ -37,8 +46,9 @@ function useConfigurationOverview() {
     error,
     refetch,
     createItem: createMutation.mutateAsync,
+    updateItem: updateMutation.mutateAsync,
     deleteItem: deleteMutation.mutateAsync,
-    isSaving: createMutation.isPending || deleteMutation.isPending,
+    isSaving: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
   }
 }
 

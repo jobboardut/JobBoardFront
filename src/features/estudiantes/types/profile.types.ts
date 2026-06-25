@@ -15,6 +15,7 @@ export interface StudentProfile {
   validationStatus?: string
   cvUrl?: string
   documentUrl?: string
+  raw?: Record<string, unknown>
 }
 
 export interface ContactInfo {

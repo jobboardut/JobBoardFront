@@ -10,6 +10,12 @@ interface RecentApplicationsResult {
   recientes: Application[]
 }
 
+export interface EstudianteArchivos {
+  fotoPerfil?: File | null
+  cv?: File | null
+  docProbatorio?: File | null
+}
+
 const asRecord = (value: unknown): ApiRecord =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? value as ApiRecord : {}
 
@@ -121,8 +127,33 @@ const mapStudentProfile = (payload: unknown): StudentProfile => {
     validationStatus: pickString([profile], ['estatusValidacion', 'validationStatus']),
     cvUrl: pickString([profile], ['cvUrl', 'curriculumUrl']),
     documentUrl: pickString([profile], ['docProbatorioUrl', 'documentUrl']),
+    raw: profile,
   }
 }
+
+const buildProfileUpdatePayload = (
+  userId: number,
+  profile: StudentProfile,
+  fotoUrl: string
+): Record<string, unknown> => ({
+  ...(profile.raw ?? {}),
+  id: Number(profile.id) || profile.raw?.id,
+  userId,
+  email: profile.email,
+  nombres: profile.firstName,
+  apellidos: profile.lastName,
+  telefono: profile.phone,
+  programaEducativo: profile.career,
+  correoInstitucional: profile.institutionalEmail,
+  fechaNacimiento: profile.birthDate,
+  fotoUrl: fotoUrl || null,
+  estadoCivil: profile.civilStatus,
+  direccion: profile.address,
+  estatusAcademico: profile.academicStatus,
+  estatusValidacion: profile.validationStatus,
+  cvUrl: profile.cvUrl,
+  docProbatorioUrl: profile.documentUrl,
+})
 
 const getNestedRecord = (record: ApiRecord, keys: string[]) => asRecord(pickValue([record], keys))
 
@@ -168,6 +199,31 @@ export const mapApplicationToJobItem = (application: Application): JobItem => ({
 export const estudianteService = {
   getPerfil: async (userId: number): Promise<StudentProfile> => {
     const response = await api.get(`/estudiante/${userId}/perfil`) as unknown
+
+    return mapStudentProfile(response)
+  },
+
+  actualizarFotoPerfil: async (
+    userId: number,
+    profile: StudentProfile,
+    fotoUrl: string
+  ): Promise<StudentProfile> => {
+    const payload = buildProfileUpdatePayload(userId, profile, fotoUrl)
+    const response = await api.put(`/estudiante/${userId}/perfil`, payload) as unknown
+
+    return mapStudentProfile(response ?? payload)
+  },
+
+  actualizarArchivos: async (
+    userId: number,
+    archivos: EstudianteArchivos
+  ): Promise<StudentProfile> => {
+    const formData = new FormData()
+    if (archivos.fotoPerfil) formData.append('FotoPerfil', archivos.fotoPerfil)
+    if (archivos.cv) formData.append('Cv', archivos.cv)
+    if (archivos.docProbatorio) formData.append('DocProbatorio', archivos.docProbatorio)
+
+    const response = await api.patch(`/estudiante/${userId}/archivos`, formData) as unknown
 
     return mapStudentProfile(response)
   },

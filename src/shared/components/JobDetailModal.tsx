@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, MapPin, X } from 'lucide-react'
+import { BriefcaseBusiness, Building2, CalendarDays, Clock3, FileText, MapPin, WalletCards, X } from 'lucide-react'
 import type { JobDetailData } from '@/shared/types/job.types'
 
 interface JobDetailModalProps {
@@ -12,83 +12,119 @@ export const JobDetailModal = ({ job, isOpen, onClose, showApplyButton = true }:
   if (!isOpen || !job) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="job-detail-scroll h-screen max-h-screen w-full max-w-2xl overflow-y-auto rounded-2xl bg-white">
-        {/* Header con botón cerrar */}
-        <div className="sticky top-0 flex items-center justify-between border-b border-[#ece8e1] bg-white px-6 py-4">
-          <h2 className="text-xl font-semibold text-slate-900">Detalles de la Vacante</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-[2px]">
+      <div
+        className="job-detail-scroll max-h-[88vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-white/70 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.28)]"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Detalles de la vacante"
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#ece8e1] bg-white/95 px-5 py-3 backdrop-blur">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-emerald-600">Vacante</p>
+            <h2 className="text-lg font-bold text-slate-950">Detalles de la vacante</h2>
+          </div>
           <button
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100"
+            className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Cerrar detalle"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Contenido */}
-        <div className="p-6">
-          <div className="flex flex-col gap-4 border-b border-[#ece8e1] pb-4">
-            <div className="flex items-start gap-4">
-              <div className="grid h-18 w-18 place-items-center rounded-xl border border-[#ded8cf] bg-[#f7f6f4] text-[#009A4D] shrink-0">
-                <BriefcaseBusiness size={34} strokeWidth={1.7} />
-              </div>
+        <div className="p-5">
+          <section className="rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-orange-50/60 p-5 ring-1 ring-emerald-100">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex min-w-0 items-start gap-4">
+                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-emerald-100 bg-white text-[#009A4D] shadow-sm">
+                  <BriefcaseBusiness size={30} strokeWidth={1.7} />
+                </div>
 
-              <div className="flex-1 min-w-0">
-                <h1 className="text-4xl font-semibold tracking-tight text-slate-900">{job.title}</h1>
-                <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <span className="inline-flex items-center gap-1.5 text-2xl text-slate-500">
-                    <Building2 size={18} />
-                    {job.company}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-2xl text-slate-500">
-                    <MapPin size={18} />
-                    {job.location}
-                  </span>
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-950 md:text-3xl">
+                    {job.title}
+                  </h1>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
+                      <Building2 size={15} />
+                      {job.company}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-slate-200">
+                      <MapPin size={15} />
+                      {job.location}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <p className="text-sm text-slate-400">{job.timeAgo}</p>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-500 ring-1 ring-slate-200">
+                <CalendarDays size={15} />
+                {job.timeAgo || 'Sin fecha'}
+              </div>
+            </div>
+          </section>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl bg-[#f7f5f1] p-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                <WalletCards size={15} className="text-emerald-600" />
+                Salario
+              </div>
+              <p className="mt-2 text-base font-bold text-[#009A4D]">{job.salary}</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f5f1] p-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                <Clock3 size={15} className="text-orange-500" />
+                Horario
+              </div>
+              <p className="mt-2 text-base font-bold text-slate-800">{job.schedule}</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f5f1] p-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                <BriefcaseBusiness size={15} className="text-emerald-600" />
+                Tipo
+              </div>
+              <p className="mt-2 text-base font-bold text-slate-800">{job.type}</p>
+            </div>
+            <div className="rounded-2xl bg-[#f7f5f1] p-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                <FileText size={15} className="text-slate-500" />
+                Experiencia
+              </div>
+              <p className="mt-2 text-base font-bold text-slate-800">{job.experience}</p>
+            </div>
           </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl bg-[#f4f3f2] p-3">
-              <p className="text-sm text-slate-400">Rango de Salario</p>
-              <p className="mt-1 text-lg font-semibold text-[#009A4D]">{job.salary}</p>
-            </div>
-            <div className="rounded-xl bg-[#f4f3f2] p-3">
-              <p className="text-sm text-slate-400">Turno y horario</p>
-              <p className="mt-1 text-lg font-semibold text-slate-700">{job.schedule}</p>
-            </div>
-            <div className="rounded-xl bg-[#f4f3f2] p-3">
-              <p className="text-sm text-slate-400">Tipo de Trabajo</p>
-              <p className="mt-1 text-lg font-semibold text-slate-700">{job.type}</p>
-            </div>
-            <div className="rounded-xl bg-[#f4f3f2] p-3">
-              <p className="text-sm text-slate-400">Experiencia</p>
-              <p className="mt-1 text-lg font-semibold text-slate-700">{job.experience}</p>
-            </div>
-          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <section className="rounded-2xl border border-slate-100 bg-white p-5">
+              <div className="flex items-center gap-2">
+                <FileText size={18} className="text-emerald-600" />
+                <h2 className="text-xl font-bold text-slate-950">Descripcion del empleo</h2>
+              </div>
+              <p className="mt-3 break-words text-base leading-7 text-slate-600">{job.description}</p>
+            </section>
 
-          <div className="mt-5 text-slate-600">
-            <h2 className="text-3xl font-semibold text-slate-900">Descripcion completa del empleo</h2>
-            <p className="mt-2 text-xl leading-relaxed">{job.description}</p>
-
-            <h3 className="mt-4 text-2xl font-semibold text-slate-800">Responsabilidades principales</h3>
-            <ul className="mt-2 list-disc space-y-1 pl-6 text-lg leading-relaxed">
-              {job.responsibilities.map((resp, idx) => (
-                <li key={idx}>{resp}</li>
-              ))}
-            </ul>
+            <section className="rounded-2xl border border-slate-100 bg-slate-50/80 p-5">
+              <h3 className="text-base font-bold text-slate-900">Responsabilidades principales</h3>
+              <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+                {job.responsibilities.map((resp, idx) => (
+                  <li key={idx} className="flex gap-2">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                    <span className="break-words">{resp}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
 
           {showApplyButton && (
-            <div className="mt-6 flex justify-end pb-4">
+            <div className="sticky bottom-0 mt-5 flex justify-end border-t border-slate-100 bg-white/95 pt-4">
               <button
                 type="button"
-                className="rounded-lg bg-[#009A4D] px-7 py-2.5 text-lg font-semibold text-white transition hover:bg-[#10B981]"
+                className="rounded-xl bg-[#009A4D] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_24px_rgba(0,154,77,0.18)] transition hover:bg-[#10B981]"
               >
-                Postularse
+                Postularme
               </button>
             </div>
           )}

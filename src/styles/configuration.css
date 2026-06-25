@@ -201,6 +201,60 @@
   flex: 0 0 auto;
 }
 
+.configuration-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.configuration-edit-btn,
+.configuration-save-btn,
+.configuration-cancel-btn {
+  width: 40px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.configuration-edit-btn {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.configuration-save-btn {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.configuration-cancel-btn {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+}
+
+.configuration-edit-btn:disabled,
+.configuration-save-btn:disabled,
+.configuration-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.configuration-edit-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 14px;
+  outline: none;
+  color: var(--ink-soft);
+  background: #ffffff;
+}
+
 @media (max-width: 1024px) {
   .configuration-grid {
     grid-template-columns: 1fr;

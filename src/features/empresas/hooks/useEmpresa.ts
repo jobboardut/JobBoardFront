@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { empresaService } from '../services/empresa.service'
 import type {
   CreateVacanteRequest,
+  EmpresaArchivos,
   EmpresaPerfilUpdateRequest,
   PostulanteEstatus,
   UpdateEstatusRequest,
@@ -25,6 +26,18 @@ export const useActualizarPerfil = () => {
 
   return useMutation({
     mutationFn: (data: EmpresaPerfilUpdateRequest) => empresaService.actualizarPerfil(userId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['empresa', 'perfil', userId] })
+    },
+  })
+}
+
+export const useActualizarArchivosEmpresa = () => {
+  const userId = getUserId()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (archivos: EmpresaArchivos) => empresaService.actualizarArchivos(userId, archivos),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['empresa', 'perfil', userId] })
     },

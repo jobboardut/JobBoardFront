@@ -72,6 +72,16 @@ export function createConfigurationItem(listKey: ConfigurationListKey, name: str
     : configurationService.createSector(name)
 }
 
+export function updateConfigurationItem(
+  listKey: ConfigurationListKey,
+  id: string,
+  name: string,
+): Promise<CatalogItemResponse> {
+  return listKey === 'programs'
+    ? configurationService.updateCarrera(id, name)
+    : configurationService.updateSector(id, name)
+}
+
 export function deleteConfigurationItem(listKey: ConfigurationListKey, id: string): Promise<void> {
   return listKey === 'programs'
     ? configurationService.deleteCarrera(id)

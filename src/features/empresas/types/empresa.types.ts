@@ -57,8 +57,14 @@ export interface UpdateEstatusRequest {
   estatus: 'Pausada' | 'Finalizada' | 'Baneada' | 'Eliminada'
 }
 
-export type EmpresaPerfilUpdateRequest = Partial<EmpresaPerfil> & {
-  logoFile?: File | null
+export type EmpresaPerfilUpdateRequest = Partial<EmpresaPerfil>
+
+export interface EmpresaArchivos {
+  logo?: File | null
+  situacionFiscal?: File | null
+  docExistencia?: File | null
+  repDocCargo?: File | null
+  repFotoIne?: File | null
 }
 
 export type PostulanteEstatus =

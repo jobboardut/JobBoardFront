@@ -2,6 +2,7 @@ import { PageWrapper } from '@/components/layout/PageWrapper'
 import { ContactSection } from '@/features/estudiantes/components/ContactSection'
 import { CurriculumSection } from '@/features/estudiantes/components/CurriculumSection'
 import { ProfileHeader } from '@/features/estudiantes/components/ProfileHeader'
+import { ProfileImageModal } from '@/features/estudiantes/components/ProfileImageModal'
 import { ProfileHeaderBar } from '@/features/estudiantes/components/ProfileHeaderBar'
 import { StatusBadge } from '@/features/estudiantes/components/StatusBadge'
 import { EditContactModal } from '@/features/estudiantes/components/EditContactModal'
@@ -13,10 +14,17 @@ export const EstudiantePerfilPage = () => {
     studentProfile,
     curriculumData,
     isContactModalOpen,
+    isImageModalOpen,
+    isSavingImage,
+    isUploadingCV,
     isLoading,
     isError,
     handleEditClick,
     handleCloseContactModal,
+    handleOpenImageModal,
+    handleCloseImageModal,
+    handleSaveProfileImage,
+    handleUploadCV,
     handleSaveContact,
     handleDownloadCV,
   } = useProfile()
@@ -34,6 +42,14 @@ export const EstudiantePerfilPage = () => {
           address: studentProfile.address || '',
         }}
       />
+      {isImageModalOpen && (
+        <ProfileImageModal
+          initialUrl={studentProfile.profileImage}
+          isSaving={isSavingImage}
+          onClose={handleCloseImageModal}
+          onSave={handleSaveProfileImage}
+        />
+      )}
 
       <PageWrapper role="Estudiante">
         <div className="flex min-h-full flex-col bg-white text-[#1d2538]">
@@ -54,7 +70,7 @@ export const EstudiantePerfilPage = () => {
               {/* Columna izquierda: Perfil y Contacto */}
               <div className="space-y-8 lg:col-span-3">
                 {/* Tarjeta de Perfil */}
-                <ProfileHeader profile={studentProfile} />
+                <ProfileHeader profile={studentProfile} onEditImage={handleOpenImageModal} />
 
                 {/* Tarjeta de Contacto */}
                 <ContactSection
@@ -77,6 +93,8 @@ export const EstudiantePerfilPage = () => {
                   uploadDate={curriculumData.uploadDate}
                   url={curriculumData.url}
                   onPreview={handleDownloadCV}
+                  onUpload={handleUploadCV}
+                  isUploading={isUploadingCV}
                 />
               </div>
             </div>

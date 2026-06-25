@@ -1,14 +1,31 @@
-import { FileText, Eye } from 'lucide-react'
+import { useRef } from 'react'
+import { Eye, FileText, Loader2, Upload } from 'lucide-react'
 
 interface CurriculumSectionProps {
   fileName: string
   uploadDate: string
   url?: string
   onPreview?: () => void
+  onUpload?: (file: File) => void
+  isUploading?: boolean
 }
 
-export const CurriculumSection = ({ fileName, uploadDate, url, onPreview }: CurriculumSectionProps) => {
+export const CurriculumSection = ({
+  fileName,
+  uploadDate,
+  url,
+  onPreview,
+  onUpload,
+  isUploading = false,
+}: CurriculumSectionProps) => {
   const canPreview = Boolean(url)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file && onUpload) onUpload(file)
+  }
 
   return (
     <div className="rounded-2xl border border-[#e8d4ca] bg-white p-8 shadow-[0_4px_15px_rgba(29,37,56,0.05)]">
@@ -43,23 +60,48 @@ export const CurriculumSection = ({ fileName, uploadDate, url, onPreview }: Curr
             </div>
           </div>
 
-          {/* Info y botón de vista previa */}
-          <div className="flex flex-1 flex-col justify-between">
+          {/* Info y acciones del CV */}
+          <div className="flex flex-1 flex-col justify-between gap-3">
             <div>
               <p className="text-sm text-slate-600">
                 Documento PDF con tus datos académicos, experiencia profesional y habilidades técnicas
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onPreview}
-              disabled={!canPreview}
-              className="flex items-center justify-center gap-2 rounded-lg border border-[#009A4D] bg-white py-2 px-4 font-medium text-[#009A4D] transition hover:bg-[#10B981] hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:hover:bg-white"
-              aria-label="Visualizar CV"
-            >
-              <Eye size={18} strokeWidth={2} />
-              Visualizar CV
-            </button>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={onPreview}
+                disabled={!canPreview}
+                className="flex items-center justify-center gap-2 rounded-lg border border-[#009A4D] bg-white py-2 px-4 font-medium text-[#009A4D] transition hover:bg-[#10B981] hover:text-white disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:hover:bg-white"
+                aria-label="Visualizar CV"
+              >
+                <Eye size={18} strokeWidth={2} />
+                Visualizar CV
+              </button>
+
+              {onUpload && (
+                <>
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    onChange={handleSelectFile}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    disabled={isUploading}
+                    className="flex items-center justify-center gap-2 rounded-lg bg-[#009A4D] py-2 px-4 font-medium text-white transition hover:bg-[#10B981] disabled:cursor-not-allowed disabled:opacity-50"
+                    aria-label="Subir o reemplazar CV"
+                  >
+                    {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} strokeWidth={2} />}
+                    {isUploading ? 'Subiendo...' : canPreview ? 'Reemplazar CV' : 'Subir CV'}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>

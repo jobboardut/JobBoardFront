@@ -11,7 +11,7 @@ import { useAppToast } from '../shared/components/appToastContext'
 import type { ConfigurationListKey } from '../features/administradores/types/configuration.types'
 
 function ConfiguracionPage() {
-  const { programs, sectors, isLoading, isError, refetch, createItem, deleteItem, isSaving } = useConfigurationOverview()
+  const { programs, sectors, isLoading, isError, refetch, createItem, updateItem, deleteItem, isSaving } = useConfigurationOverview()
   const toast = useAppToast()
   const { confirm } = useConfirmDialog()
 
@@ -30,6 +30,16 @@ function ConfiguracionPage() {
     } catch {
       toast.error('No se pudo crear', 'Revisa el dato e intenta nuevamente.')
       throw new Error('No se pudo crear el elemento')
+    }
+  }
+
+  const handleUpdate = async (listKey: ConfigurationListKey, itemId: string, value: string) => {
+    try {
+      await updateItem({ listKey, itemId, value })
+      toast.success('Elemento actualizado', 'La lista de registro se actualizo correctamente.')
+    } catch {
+      toast.error('No se pudo actualizar', 'Revisa el dato e intenta nuevamente.')
+      throw new Error('No se pudo actualizar el elemento')
     }
   }
 
@@ -78,6 +88,7 @@ function ConfiguracionPage() {
               items={programs}
               listKey="programs"
               onCreate={handleCreate}
+              onUpdate={handleUpdate}
               onDelete={handleDelete}
               isBusy={isSaving}
             />
@@ -89,6 +100,7 @@ function ConfiguracionPage() {
               items={sectors}
               listKey="sectors"
               onCreate={handleCreate}
+              onUpdate={handleUpdate}
               onDelete={handleDelete}
               isBusy={isSaving}
             />

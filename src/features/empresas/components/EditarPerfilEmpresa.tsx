@@ -1,18 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, ArrowLeft, Camera, CheckCircle2, ImagePlus, Loader2, Save, X } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CheckCircle2, Link2, Loader2, Save, Upload, X } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import {
+  FILE_LIMITS,
   limitText,
   SECURITY_LIMITS,
+  validateFile,
   validateOptionalEmailField,
   validateOptionalPhoneField,
   validateOptionalText,
   validateOptionalUrlField,
   validateRequiredText,
 } from '@/shared/security/inputRules'
-import { useEmpresaPerfil, useActualizarPerfil } from '../hooks/useEmpresa'
+import { useActualizarArchivosEmpresa, useEmpresaPerfil, useActualizarPerfil } from '../hooks/useEmpresa'
 import type { EmpresaPerfil } from '../types/empresa.types'
+import { DocumentosEmpresa } from './DocumentosEmpresa'
 
 type ToastState = {
   type: 'success' | 'error'
@@ -74,9 +77,10 @@ const PerfilLoading = ({ label }: { label: string }) => (
 
 export const EditarPerfilEmpresa = () => {
   const navigate = useNavigate()
+  const logoInputRef = useRef<HTMLInputElement>(null)
   const { data: perfil, isLoading } = useEmpresaPerfil()
   const { mutate: actualizarPerfil, isPending } = useActualizarPerfil()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { mutateAsync: actualizarArchivos, isPending: isUploadingLogo } = useActualizarArchivosEmpresa()
 
   const profileKey = perfil?.id ?? perfil?.userId ?? 0
   const [draftState, setDraftState] = useState<{
@@ -84,18 +88,10 @@ export const EditarPerfilEmpresa = () => {
     values: Partial<EmpresaPerfil>
   }>({ key: profileKey, values: {} })
   const [toast, setToast] = useState<ToastState | null>(null)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const draftValues = draftState.key === profileKey ? draftState.values : {}
   const form = perfil ? { ...perfil, ...draftValues } : null
-  const logoDisplayUrl = logoPreview ?? form?.logoUrl ?? ''
-
-  useEffect(() => {
-    return () => {
-      if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
-    }
-  }, [logoPreview])
+  const logoDisplayUrl = form?.logoUrl ?? ''
 
   const updateForm = (values: Partial<EmpresaPerfil>) => {
     setDraftState(prev => ({
@@ -114,43 +110,32 @@ export const EditarPerfilEmpresa = () => {
     updateForm({ [name]: limitText(value, getEmpresaProfileLimit(name)) } as Partial<EmpresaPerfil>)
   }
 
-  const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      setToast({
-        type: 'error',
-        title: 'Archivo no valido',
-        message: 'Selecciona una imagen en formato PNG, JPG o WebP.',
-      })
-      return
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      setToast({
-        type: 'error',
-        title: 'Imagen muy pesada',
-        message: 'Usa una imagen menor a 2 MB para mantener rapido el perfil.',
-      })
-      return
-    }
-
-    if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
-    setLogoFile(file)
-    setLogoPreview(URL.createObjectURL(file))
-    setToast({
-      type: 'success',
-      title: 'Vista previa lista',
-      message: 'La imagen se guardara cuando confirmes los cambios.',
-    })
+  const handleRemoveLogo = () => {
+    updateForm({ logoUrl: '' })
   }
 
-  const handleRemoveLogo = () => {
-    if (logoPreview?.startsWith('blob:')) URL.revokeObjectURL(logoPreview)
-    setLogoFile(null)
-    setLogoPreview(null)
-    updateForm({ logoUrl: '' })
+  const handleSelectLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    const fileError = validateFile(file, {
+      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      label: 'El logo',
+      maxBytes: FILE_LIMITS.imageBytes,
+    })
+
+    if (fileError) {
+      setToast({ type: 'error', title: 'Archivo no valido', message: fileError })
+      return
+    }
+
+    try {
+      await actualizarArchivos({ logo: file })
+      setToast({ type: 'success', title: 'Logo actualizado', message: 'El logo de tu empresa se guardo correctamente.' })
+    } catch {
+      setToast({ type: 'error', title: 'No se pudo subir', message: 'La API rechazo el archivo. Intenta nuevamente.' })
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -162,6 +147,7 @@ export const EditarPerfilEmpresa = () => {
       validateOptionalText(form.direccion ?? '', 'Direccion', SECURITY_LIMITS.address) ??
       validateOptionalPhoneField(form.telefonoEmpresa ?? '', 'Telefono de la empresa') ??
       validateOptionalEmailField(form.correoEmpresa ?? '', 'Correo empresarial') ??
+      validateOptionalUrlField(form.logoUrl ?? '', 'URL de imagen') ??
       validateOptionalUrlField(form.sitioWeb ?? '', 'Sitio web') ??
       validateOptionalText(form.descripcion ?? '', 'Descripcion', SECURITY_LIMITS.longText) ??
       validateOptionalText(form.repNombre ?? '', 'Nombre del representante', SECURITY_LIMITS.name) ??
@@ -179,7 +165,7 @@ export const EditarPerfilEmpresa = () => {
       return
     }
 
-    actualizarPerfil({ ...form, logoFile }, {
+    actualizarPerfil(form, {
       onSuccess: () => {
         navigate(ROUTES.EMPRESA_PERFIL, {
           state: {
@@ -192,9 +178,20 @@ export const EditarPerfilEmpresa = () => {
         })
       },
       onError: (error: unknown) => {
-        const message = (error as { message?: string; detalle?: string })?.detalle ||
-          (error as { message?: string })?.message ||
-          'Revisa los datos e intenta de nuevo.'
+        const apiError = error as {
+          status?: number
+          title?: string
+          detail?: string
+          message?: string
+          detalle?: string
+        }
+        const message = apiError.status === 415
+          ? 'La API publicada no esta aceptando su contrato JSON de perfil. El equipo de backend debe revisar el endpoint.'
+          : apiError.detalle ||
+            apiError.detail ||
+            apiError.message ||
+            apiError.title ||
+            'Revisa los datos e intenta de nuevo.'
         setToast({
           type: 'error',
           title: 'No se pudo guardar',
@@ -206,10 +203,12 @@ export const EditarPerfilEmpresa = () => {
 
   if (isLoading || !form) return <PerfilLoading label="Cargando perfil..." />
 
+  const isSaving = isPending
+
   return (
     <div>
       {toast && <PerfilToast toast={toast} onClose={() => setToast(null)} />}
-      {isPending && (
+      {isSaving && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/20 backdrop-blur-[2px]">
           <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-white px-5 py-4 shadow-2xl">
             <Loader2 className="animate-spin text-emerald-500" size={22} />
@@ -252,53 +251,53 @@ export const EditarPerfilEmpresa = () => {
                     {form.nombreEmpresa?.charAt(0) ?? 'E'}
                   </div>
                 )}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-emerald-600 shadow-lg transition-colors hover:bg-emerald-50"
-                >
-                  <Camera size={17} />
-                </button>
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-2">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleSelectLogo}
+                />
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={isUploadingLogo}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/60 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-50"
+                >
+                  {isUploadingLogo ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
+                  {isUploadingLogo ? 'Subiendo...' : 'Subir logo desde tu equipo'}
+                </button>
+
+                <label className="mt-4 grid gap-1 text-sm font-medium text-gray-600">
+                  O pega un enlace de imagen
+                  <div className="relative">
+                    <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
+                    <input
+                      name="logoUrl"
+                      value={form.logoUrl ?? ''}
+                      onChange={handleChange}
+                      placeholder="https://..."
+                      maxLength={SECURITY_LIMITS.url}
+                      className="w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-emerald-400"
+                    />
+                  </div>
+                </label>
+                {logoDisplayUrl && (
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+                    onClick={handleRemoveLogo}
+                    className="mt-3 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition-colors hover:border-orange-200 hover:text-orange-500"
                   >
-                    <ImagePlus size={16} />
-                    Subir imagen
+                    Quitar imagen
                   </button>
-                  {logoDisplayUrl && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveLogo}
-                      className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-500 transition-colors hover:border-orange-200 hover:text-orange-500"
-                    >
-                      Quitar
-                    </button>
-                  )}
-                </div>
-                <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogoFile} className="hidden" />
-                <label className="mt-4 grid gap-1 text-sm font-medium text-gray-600">
-                  URL de imagen
-                  <input
-                    name="logoUrl"
-                    value={form.logoUrl ?? ''}
-                    onChange={handleChange}
-                    placeholder="https://..."
-                    disabled={Boolean(logoFile)}
-                    maxLength={SECURITY_LIMITS.url}
-                    className="border border-gray-300 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-400 disabled:bg-slate-100 disabled:text-slate-400"
-                  />
-                  {logoFile ? (
-                    <span className="text-xs font-semibold text-emerald-600">
-                      Nueva imagen seleccionada: {logoFile.name}
-                    </span>
-                  ) : null}
-                </label>
+                )}
+                <p className="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-500">
+                  <AlertCircle className="mt-0.5 shrink-0 text-emerald-500" size={15} />
+                  Formatos permitidos: PNG, JPG o WEBP. Tamaño maximo 2 MB.
+                </p>
               </div>
             </div>
           </div>
@@ -445,6 +444,8 @@ export const EditarPerfilEmpresa = () => {
             </div>
           </div>
 
+          <DocumentosEmpresa perfil={form} />
+
           <div className="flex gap-3">
             <button
               type="button"
@@ -455,11 +456,11 @@ export const EditarPerfilEmpresa = () => {
             </button>
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isSaving}
               className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Save size={16} />
-              {isPending ? 'Guardando...' : 'Guardar cambios'}
+              {isSaving ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
 
