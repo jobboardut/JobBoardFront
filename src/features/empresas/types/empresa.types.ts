@@ -34,6 +34,9 @@ export interface Vacante {
   estatus: string
   fechaPublicacion: string
   postulantes?: number
+  totalPostulantes?: number
+  lugares?: number
+  lugaresOcupados?: number
 }
 
 export interface VacanteUI {
@@ -51,6 +54,7 @@ export interface CreateVacanteRequest {
   requisitos: string
   sueldoAprox: number
   modalidad: string
+  lugares: number
 }
 
 export interface UpdateEstatusRequest {

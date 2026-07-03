@@ -18,6 +18,7 @@ import campusImg from '@/assets/images/campus.png'
 import { AppButton } from '@/shared/components/AppButton'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
+import { useFormDraft } from '@/shared/hooks/useFormDraft'
 import { defaultEmpresaProfile, markEmpresaProfileIncomplete, saveEmpresaProfileDraft } from '@/features/empresas/services/empresaProfile.storage'
 import { catalogService } from '@/services/catalog.service'
 import { ROUTES } from '@/router/routes'
@@ -164,7 +165,12 @@ export const RegistroEmpresa = () => {
   const toast = useAppToast()
   const logoRef = useRef<HTMLInputElement>(null)
 
-  const [form, setForm] = useState({
+  const { restoreDraft, saveDraft, clearDraft } = useFormDraft<typeof initialForm>({
+    key: 'registro-empresa',
+    exclude: ['password'],
+  })
+
+  const initialForm = {
     email: '',
     password: '',
     nombreEmpresa: '',
@@ -179,7 +185,14 @@ export const RegistroEmpresa = () => {
     puesto: '',
     telefonoContacto: '',
     correoContacto: '',
+  }
+
+  const [form, setForm] = useState(() => {
+    const draft = restoreDraft()
+    if (draft) return { ...initialForm, ...draft, password: '' }
+    return initialForm
   })
+  const [draftRestored, setDraftRestored] = useState(() => Boolean(restoreDraft()))
 
   const [documentos, setDocumentos] = useState<Record<DocumentoKey, File | null>>({
     situacionFiscal: null,
@@ -227,11 +240,22 @@ export const RegistroEmpresa = () => {
     }
   }, [logoPreview])
 
+  useEffect(() => {
+    if (draftRestored) {
+      toast.info('Borrador restaurado', 'Se recuperaron los datos que habias capturado antes.')
+      setDraftRestored(false)
+    }
+  }, [draftRestored, toast])
+
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({
-      ...prev,
-      [event.target.name]: limitText(event.target.value, getEmpresaFieldLimit(event.target.name)),
-    }))
+    setForm((prev) => {
+      const next = {
+        ...prev,
+        [event.target.name]: limitText(event.target.value, getEmpresaFieldLimit(event.target.name)),
+      }
+      saveDraft(next)
+      return next
+    })
     setErrorMsg(null)
     setSuccessMsg(null)
   }
@@ -362,6 +386,7 @@ export const RegistroEmpresa = () => {
         repFotoIne: documentos.repFotoIne,
       })
 
+      clearDraft()
       saveEmpresaProfileDraft({
         nombre: form.nombreEmpresa || defaultEmpresaProfile.nombre,
         giro: sectorSeleccionado.nombre || defaultEmpresaProfile.giro,

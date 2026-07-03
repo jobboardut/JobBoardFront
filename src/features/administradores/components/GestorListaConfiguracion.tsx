@@ -1,4 +1,4 @@
-import { Check, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Check, Pencil, Plus, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ConfigurationItem, ConfigurationListKey } from '../types/configuration.types'
@@ -10,7 +10,6 @@ type GestorListaConfiguracionProps = {
 	items: ConfigurationItem[]
 	onCreate: (listKey: ConfigurationListKey, value: string) => Promise<unknown>
 	onUpdate: (listKey: ConfigurationListKey, itemId: string, value: string) => Promise<unknown>
-	onDelete: (listKey: ConfigurationListKey, itemId: string) => Promise<unknown>
 	listKey: ConfigurationListKey
 	isBusy?: boolean
 }
@@ -22,7 +21,6 @@ function GestorListaConfiguracion({
 	items,
 	onCreate,
 	onUpdate,
-	onDelete,
 	listKey,
 	isBusy = false,
 }: GestorListaConfiguracionProps) {
@@ -151,17 +149,6 @@ function GestorListaConfiguracion({
 											onClick={() => startEditing(item)}
 										>
 											<Pencil size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
-										</button>
-										<button
-											type="button"
-											className="configuration-delete-btn"
-											aria-label={`Eliminar ${item.name}`}
-											disabled={isBusy}
-											onClick={() => {
-												void onDelete(listKey, item.id).catch(() => undefined)
-											}}
-										>
-											<Trash2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 										</button>
 									</div>
 								</>

@@ -20,6 +20,10 @@ export const EstudianteSeguimientoPage = () => {
     isJobModalOpen,
     applicationSearchText,
     applicationSearchInputRef,
+    selectedModalidades,
+    hasActiveFilters,
+    toggleModalidad,
+    clearFilters,
     isLoading,
     isError,
     openSearchMode,
@@ -95,7 +99,12 @@ export const EstudianteSeguimientoPage = () => {
               </div>
             </div>
 
-            <PublicacionesFilterPanel />
+            <PublicacionesFilterPanel
+              selectedModalidades={selectedModalidades}
+              onToggleModalidad={toggleModalidad}
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
           </section>
         )}
 

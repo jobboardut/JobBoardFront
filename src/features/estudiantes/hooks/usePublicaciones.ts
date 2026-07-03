@@ -64,6 +64,8 @@ export type ApplyFeedback = {
   message: string
 }
 
+const SALARY_BOUNDS = { min: 5000, max: 100000 }
+
 export const usePublicaciones = () => {
   const userId = getUserId()
   const queryClient = useQueryClient()
@@ -73,6 +75,8 @@ export const usePublicaciones = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [appliedIds, setAppliedIds] = useState<number[]>([])
   const [feedback, setFeedback] = useState<ApplyFeedback | null>(null)
+  const [selectedModalidades, setSelectedModalidades] = useState<string[]>([])
+  const [minSalary, setMinSalary] = useState<number>(SALARY_BOUNDS.min)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -118,15 +122,38 @@ export const usePublicaciones = () => {
 
   const vacantesFiltradas = useMemo(() => {
     const term = searchText.trim().toLowerCase()
+    const modalidadesNormalizadas = selectedModalidades.map(normalizeText)
 
-    if (!term) return vacantes
-
-    return vacantes.filter((vacante) =>
-      [vacante.titulo, vacante.nombreEmpresa, vacante.descripcion, vacante.modalidad]
+    return vacantes.filter((vacante) => {
+      const matchTerm = !term || [vacante.titulo, vacante.nombreEmpresa, vacante.descripcion, vacante.modalidad]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(term))
+
+      const matchModalidad = modalidadesNormalizadas.length === 0 ||
+        modalidadesNormalizadas.includes(normalizeText(vacante.modalidad ?? ''))
+
+      const matchSueldo = minSalary <= SALARY_BOUNDS.min ||
+        !vacante.sueldoAprox ||
+        vacante.sueldoAprox >= minSalary
+
+      return matchTerm && matchModalidad && matchSueldo
+    })
+  }, [vacantes, searchText, selectedModalidades, minSalary])
+
+  const toggleModalidad = useCallback((modalidad: string) => {
+    setSelectedModalidades((current) =>
+      current.includes(modalidad)
+        ? current.filter((value) => value !== modalidad)
+        : [...current, modalidad]
     )
-  }, [vacantes, searchText])
+  }, [])
+
+  const clearFilters = useCallback(() => {
+    setSelectedModalidades([])
+    setMinSalary(SALARY_BOUNDS.min)
+  }, [])
+
+  const hasActiveFilters = selectedModalidades.length > 0 || minSalary > SALARY_BOUNDS.min
 
   const vacantesDisponibles = useMemo(
     () => vacantesFiltradas.filter((vacante) => !isVacanteApplied(vacante)),
@@ -215,6 +242,13 @@ export const usePublicaciones = () => {
     appliedIds: [...appliedVacanteIds],
     appliedListItems,
     feedback,
+    selectedModalidades,
+    minSalary,
+    salaryBounds: SALARY_BOUNDS,
+    hasActiveFilters,
+    toggleModalidad,
+    setMinSalary,
+    clearFilters,
     openSearchMode,
     closeSearchMode,
     setSearchText,

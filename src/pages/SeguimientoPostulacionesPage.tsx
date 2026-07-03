@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertCircle, CheckCircle2, Clock3, Info, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, XCircle } from 'lucide-react'
 import { APP_ICONS, APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../config/iconConfig'
 import AdminLayout from '../features/administradores/components/AdminLayout'
 import AdminPageHeader from '../features/administradores/components/AdminPageHeader'
@@ -11,12 +11,6 @@ import useTrackingOverview from '../features/administradores/hooks/useTrackingOv
 import { matchesAdminFilterGroup, matchesAdminSearch } from '../features/administradores/utils/filtering'
 
 const statusInfoItems = [
-  {
-    title: 'PENDIENTE',
-    description: 'La postulacion fue registrada y aun no inicia la revision de la empresa.',
-    tone: 'is-orange',
-    Icon: Clock3,
-  },
   {
     title: 'ENTREVISTA',
     description: 'El candidato avanzo a una etapa de contacto o entrevista con la empresa.',

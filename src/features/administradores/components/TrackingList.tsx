@@ -11,10 +11,6 @@ function getStatusClass(status: TrackingRow['status']): string {
     return 'is-orange'
   }
 
-  if (status === 'Pendiente') {
-    return 'is-gray'
-  }
-
   if (status === 'Rechazado') {
     return 'is-red'
   }
@@ -27,23 +23,19 @@ function getStatusClass(status: TrackingRow['status']): string {
 }
 
 function getFlowConfig(status: TrackingRow['status']): { activeSteps: number; tone: string } {
-  if (status === 'Pendiente') {
-    return { activeSteps: 1, tone: 'is-yellow' }
-  }
-
   if (status === 'Entrevista') {
-    return { activeSteps: 2, tone: 'is-orange' }
+    return { activeSteps: 1, tone: 'is-orange' }
   }
 
   if (status === 'Aprobado') {
-    return { activeSteps: 3, tone: 'is-green' }
+    return { activeSteps: 2, tone: 'is-green' }
   }
 
   if (status === 'Contratado') {
-    return { activeSteps: 4, tone: 'is-green' }
+    return { activeSteps: 3, tone: 'is-green' }
   }
 
-  return { activeSteps: 5, tone: 'is-red' }
+  return { activeSteps: 4, tone: 'is-red' }
 }
 
 function TrackingList({ rows }: TrackingListProps) {
@@ -57,9 +49,9 @@ function TrackingList({ rows }: TrackingListProps) {
 
               return (
                 <div className="tracking-flow-map" aria-label={`Progreso del proceso para ${row.candidateName}`}>
-                  {Array.from({ length: 5 }).map((_, index) => {
+                  {Array.from({ length: 4 }).map((_, index) => {
                     const isActive = index < flow.activeSteps
-                    const isLast = index === 4
+                    const isLast = index === 3
 
                     return (
                       <div key={`${row.id}-flow-${index}`} className="tracking-flow-step">

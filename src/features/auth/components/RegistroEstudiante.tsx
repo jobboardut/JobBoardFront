@@ -5,6 +5,7 @@ import campusImg from '@/assets/images/campus.png'
 import { catalogService } from '@/services/catalog.service'
 import type { CatalogItem } from '@/services/catalog.service'
 import { useAppToast } from '@/shared/components/appToastContext'
+import { useFormDraft } from '@/shared/hooks/useFormDraft'
 import {
   FILE_LIMITS,
   limitText,
@@ -56,7 +57,12 @@ export const RegistroEstudiante = () => {
   const cvRef = useRef<HTMLInputElement>(null)
   const docRef = useRef<HTMLInputElement>(null)
 
-  const [form, setForm] = useState({
+  const { restoreDraft, saveDraft, clearDraft } = useFormDraft<typeof initialForm>({
+    key: `registro-estudiante-${estatusAcademico}`,
+    exclude: ['password'],
+  })
+
+  const initialForm = {
     nombre: '',
     apellidos: '',
     direccion: '',
@@ -66,7 +72,17 @@ export const RegistroEstudiante = () => {
     password: '',
     matricula: '',
     programaEducativoId: '',
+  }
+
+  const [form, setForm] = useState(() => {
+    const draft = restoreDraft()
+    if (draft) {
+      const restored = { ...initialForm, ...draft, password: '' }
+      return restored
+    }
+    return initialForm
   })
+  const [draftRestored, setDraftRestored] = useState(() => Boolean(restoreDraft()))
 
   const [foto, setFoto] = useState<string | null>(null)
   const [fotoFile, setFotoFile] = useState<File | null>(null)
@@ -106,8 +122,19 @@ export const RegistroEstudiante = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (draftRestored) {
+      toast.info('Borrador restaurado', 'Se recuperaron los datos que habias capturado antes.')
+      setDraftRestored(false)
+    }
+  }, [draftRestored, toast])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: limitText(e.target.value, getEstudianteFieldLimit(e.target.name)) }))
+    setForm(prev => {
+      const next = { ...prev, [e.target.name]: limitText(e.target.value, getEstudianteFieldLimit(e.target.name)) }
+      saveDraft(next)
+      return next
+    })
     setErrorMsg(null)
     setSuccessMsg(null)
   }
@@ -244,6 +271,7 @@ export const RegistroEstudiante = () => {
         docProbatorio: docFile,
       })
 
+      clearDraft()
       const message = `Registro de ${estatusAcademico.toLowerCase()} enviado correctamente. Te avisaremos por correo cuando sea validado.`
       setSuccessMsg(message)
       toast.success('Registro enviado', message)
@@ -265,7 +293,7 @@ export const RegistroEstudiante = () => {
       items: [
         { label: 'Tipo de cuenta', value: estatusAcademico },
         { label: 'Correo', value: form.correo },
-        { label: 'Contrasena', value: form.password ? 'Configurada' : '' },
+        { label: 'Contraseña', value: form.password ? 'Configurada' : '' },
       ],
     },
     {
@@ -476,7 +504,7 @@ export const RegistroEstudiante = () => {
             </div>
 
             <div className="flex flex-col gap-1 mb-6">
-              <label className="text-sm text-gray-600">Contrasena</label>
+              <label className="text-sm text-gray-600">Contraseña</label>
               <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white gap-2">
                 <Mail size={16} className="text-gray-400" />
                 <input

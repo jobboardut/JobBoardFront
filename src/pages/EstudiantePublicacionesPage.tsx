@@ -24,6 +24,13 @@ export const EstudiantePublicacionesPage = () => {
     isApplying,
     appliedIds,
     feedback,
+    selectedModalidades,
+    minSalary,
+    salaryBounds,
+    hasActiveFilters,
+    toggleModalidad,
+    setMinSalary,
+    clearFilters,
     openSearchMode,
     closeSearchMode,
     setSearchText,
@@ -149,7 +156,15 @@ export const EstudiantePublicacionesPage = () => {
               </div>
             </div>
 
-            <PublicacionesFilterPanel />
+            <PublicacionesFilterPanel
+              selectedModalidades={selectedModalidades}
+              onToggleModalidad={toggleModalidad}
+              minSalary={minSalary}
+              salaryBounds={salaryBounds}
+              onMinSalaryChange={setMinSalary}
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
           </section>
         )}
       </div>

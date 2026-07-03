@@ -6,14 +6,12 @@ import AdminPageState from '../features/administradores/components/AdminPageStat
 import GestorListaConfiguracion from '../features/administradores/components/GestorListaConfiguracion'
 import EstadisticasConfiguracion from '../features/administradores/components/EstadisticasConfiguracion'
 import useConfigurationOverview from '../features/administradores/hooks/useConfigurationOverview'
-import { useConfirmDialog } from '../shared/components/appConfirmContext'
 import { useAppToast } from '../shared/components/appToastContext'
 import type { ConfigurationListKey } from '../features/administradores/types/configuration.types'
 
 function ConfiguracionPage() {
-  const { programs, sectors, isLoading, isError, refetch, createItem, updateItem, deleteItem, isSaving } = useConfigurationOverview()
+  const { programs, sectors, isLoading, isError, refetch, createItem, updateItem, isSaving } = useConfigurationOverview()
   const toast = useAppToast()
-  const { confirm } = useConfirmDialog()
 
   const totals = useMemo(
     () => ({
@@ -43,27 +41,6 @@ function ConfiguracionPage() {
     }
   }
 
-  const handleDelete = async (listKey: ConfigurationListKey, itemId: string) => {
-    const accepted = await confirm({
-      title: 'Eliminar elemento',
-      message: 'Dejara de aparecer como opcion disponible en los registros nuevos.',
-      confirmLabel: 'Eliminar',
-      tone: 'danger',
-    })
-
-    if (!accepted) {
-      return
-    }
-
-    try {
-      await deleteItem({ listKey, itemId })
-      toast.success('Elemento eliminado', 'La lista de registro se actualizo correctamente.')
-    } catch {
-      toast.error('No se pudo eliminar', 'Intenta eliminar el elemento nuevamente.')
-      throw new Error('No se pudo eliminar el elemento')
-    }
-  }
-
   return (
     <AdminLayout contentId="configuracion">
       <AdminPageHeader
@@ -89,7 +66,6 @@ function ConfiguracionPage() {
               listKey="programs"
               onCreate={handleCreate}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
               isBusy={isSaving}
             />
 
@@ -101,7 +77,6 @@ function ConfiguracionPage() {
               listKey="sectors"
               onCreate={handleCreate}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
               isBusy={isSaving}
             />
           </section>

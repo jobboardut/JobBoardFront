@@ -53,7 +53,7 @@ export const getLoginErrorCopy = (error: unknown): LoginFeedback => {
   ) {
     return {
       title: 'Datos incorrectos',
-      message: 'Correo o contrasena incorrectos. Verifica tus datos e intenta nuevamente.',
+      message: 'Correo o contraseña incorrectos. Verifica tus datos e intenta nuevamente.',
       tone: 'error',
     }
   }

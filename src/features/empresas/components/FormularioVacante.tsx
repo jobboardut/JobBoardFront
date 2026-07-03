@@ -17,12 +17,15 @@ import type { CreateVacanteRequest, Vacante } from '../types/empresa.types'
 
 const modalidades = ['Presencial', 'Remota', 'Hibrida']
 
+const MAX_LUGARES = 999
+
 const EMPTY_VACANTE_FORM: CreateVacanteRequest = {
   titulo: '',
   descripcion: '',
   requisitos: '',
   sueldoAprox: 0,
   modalidad: '',
+  lugares: 1,
 }
 
 const VACANTE_FIELD_LIMITS = {
@@ -40,6 +43,7 @@ const toVacanteForm = (vacante?: Vacante): CreateVacanteRequest => ({
   requisitos: vacante?.requisitos ?? '',
   sueldoAprox: vacante?.sueldoAprox ?? 0,
   modalidad: vacante?.modalidad ?? '',
+  lugares: vacante?.lugares ?? 1,
 })
 
 interface FormularioVacanteProps {
@@ -74,7 +78,9 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
     const { name, value } = e.target
     const nextValue = name === 'sueldoAprox'
       ? Math.min(Number(value), SECURITY_LIMITS.moneyMax)
-      : limitText(value, getVacanteFieldLimit(name))
+      : name === 'lugares'
+        ? Math.min(Math.max(Number(value), 1), MAX_LUGARES)
+        : limitText(value, getVacanteFieldLimit(name))
 
     setDraftState(prev => ({
       key: formKey,
@@ -108,6 +114,11 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
 
     if (!form.sueldoAprox || form.sueldoAprox < 0 || form.sueldoAprox > SECURITY_LIMITS.moneyMax) {
       toast.warning('Sueldo no valido', `El sueldo debe estar entre 0 y ${SECURITY_LIMITS.moneyMax.toLocaleString('es-MX')} MXN.`)
+      return
+    }
+
+    if (!form.lugares || form.lugares < 1 || form.lugares > MAX_LUGARES) {
+      toast.warning('Lugares no validos', `El numero de lugares debe estar entre 1 y ${MAX_LUGARES}.`)
       return
     }
 
@@ -202,6 +213,20 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
                   placeholder="Ej: 15000"
                   min={0}
                   max={SECURITY_LIMITS.moneyMax}
+                  required
+                  className={FORM_FIELD_CLASS}
+                />
+              </FormControl>
+
+              <FormControl label="Numero de lugares" help="La vacante se cierra automaticamente cuando se llenan todos los lugares.">
+                <input
+                  name="lugares"
+                  type="number"
+                  value={form.lugares}
+                  onChange={handleChange}
+                  placeholder="Ej: 3"
+                  min={1}
+                  max={MAX_LUGARES}
                   required
                   className={FORM_FIELD_CLASS}
                 />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Eye, FileEdit, XCircle, } from 'lucide-react'
+import { Search, Eye, FileEdit, XCircle, Users } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
@@ -8,6 +8,9 @@ import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateF
 import { useVacantes, useActualizarEstatusVacante } from '../hooks/useEmpresa'
 
 const filtros = ['Todo', 'Activas', 'Pendientes', 'Cerradas'] as const
+
+const contarPostulantes = (vacante: { totalPostulantes?: number; postulantes?: number }): number =>
+  vacante.totalPostulantes ?? vacante.postulantes ?? 0
 
 const dotEstatus: Record<string, string> = {
   Activa:   'bg-emerald-500',
@@ -167,6 +170,13 @@ export const MisPublicaciones = () => {
                 <div className="mt-4 grid gap-2 text-sm text-slate-600">
                   <span>Modalidad: <strong className="text-slate-900">{vacante.modalidad}</strong></span>
                   <span>Sueldo: <strong className="text-slate-900">${vacante.sueldoAprox?.toLocaleString('es-MX') ?? '---'}</strong></span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users size={15} className="text-emerald-500" />
+                    <strong className="text-slate-900">{contarPostulantes(vacante)}</strong> postulantes
+                    {typeof vacante.lugares === 'number' && (
+                      <span className="text-slate-400">· {vacante.lugares} lugares</span>
+                    )}
+                  </span>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <button type="button" onClick={() => handleVerVacante(vacante.id)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">
@@ -189,6 +199,7 @@ export const MisPublicaciones = () => {
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Vacante</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Modalidad</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Sueldo aprox.</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Postulantes</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estatus</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
               </tr>
@@ -203,6 +214,15 @@ export const MisPublicaciones = () => {
                   <td className="px-6 py-4 text-sm text-gray-500">{vacante.modalidad}</td>
                   <td className="px-6 py-4 text-sm text-gray-800 font-medium">
                     ${vacante.sueldoAprox?.toLocaleString('es-MX') ?? '—'}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                      <Users size={16} className="text-emerald-500" />
+                      {contarPostulantes(vacante)}
+                    </span>
+                    {typeof vacante.lugares === 'number' && (
+                      <p className="mt-0.5 text-xs text-slate-400">de {vacante.lugares} lugares</p>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">

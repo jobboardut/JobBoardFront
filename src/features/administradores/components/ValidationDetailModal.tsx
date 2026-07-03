@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Building2, CheckCircle2, FileText, GraduationCap, Mail, Phone, XCircle, X } from 'lucide-react'
+import { Building2, CheckCircle2, FileText, GraduationCap, Mail, Phone, ShieldCheck, XCircle, X } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ValidationRequest } from '../types/validation.types'
 import ValidationRejectionModal from '../components/ValidationRejectionModal'
@@ -17,6 +17,8 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 	const [isPhotoZoomOpen, setIsPhotoZoomOpen] = useState(false)
 	const [isAvatarZoomOpen, setIsAvatarZoomOpen] = useState(false)
 	const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
+	// El "revisado" se ata al id de la solicitud: al cambiar de usuario se reinicia solo.
+	const [reviewState, setReviewState] = useState<{ id: string | null; checked: boolean }>({ id: null, checked: false })
 	const { data: docsData, isLoading: isLoadingDocs, isError: isErrorDocs } =
 		useValidationDocuments(request?.id ?? null)
 
@@ -24,6 +26,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 		return null
 	}
 
+	const isReviewed = reviewState.id === request.id && reviewState.checked
 	const documentos = docsData?.documentos ?? []
 	const profileDocument = documentos.find((documento) => {
 		const type = documento.tipo.toLowerCase()
@@ -138,17 +141,33 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 					</section>
 				) : null}
 
+				<label className="validation-modal-reviewed">
+					<input
+						type="checkbox"
+						checked={isReviewed}
+						disabled={isValidating}
+						onChange={(event) => setReviewState({ id: request.id, checked: event.target.checked })}
+					/>
+					<ShieldCheck size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
+					<span>Confirmo que revisé el perfil y los documentos de este usuario.</span>
+				</label>
+
 				<footer className="validation-modal-actions">
 					<button
 						type="button"
 						className="btn-approve"
-						disabled={isValidating}
+						disabled={isValidating || !isReviewed}
 						onClick={() => onValidate?.(request, 'aprobar')}
 					>
 						<CheckCircle2 size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 						Aprobar Solicitud
 					</button>
-					<button type="button" className="btn-reject" disabled={isValidating} onClick={() => setIsRejectModalOpen(true)}>
+					<button
+						type="button"
+						className="btn-reject"
+						disabled={isValidating || !isReviewed}
+						onClick={() => setIsRejectModalOpen(true)}
+					>
 						<XCircle size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
 						Rechazar
 					</button>

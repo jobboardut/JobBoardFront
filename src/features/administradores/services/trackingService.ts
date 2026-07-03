@@ -1,4 +1,4 @@
-import { CircleCheckBig, CircleX, Clock3, FileCheck2, MessagesSquare, Users } from 'lucide-react'
+import { CircleCheckBig, CircleX, FileCheck2, MessagesSquare, Users } from 'lucide-react'
 import { adminService } from './admin.service'
 import type { TrackingMetric, TrackingRow, TrackingStatus } from '../types/seguimiento.types'
 
@@ -84,14 +84,14 @@ const toTrackingRow = (item: RawPostulacion, index: number): TrackingRow => {
 
 export async function getTrackingOverview(): Promise<TrackingOverview> {
   const response = await adminService.getPostulantes()
-  const rows = asArray(response).map(toTrackingRow)
+  const allRows = asArray(response).map(toTrackingRow)
+  const rows = allRows.filter((row) => row.status !== 'Pendiente')
 
   const countByStatus = (status: TrackingStatus) => rows.filter((row) => row.status === status).length
 
   return {
     metrics: [
       { label: 'Total', value: rows.length, Icon: Users, tone: 'blue' },
-      { label: 'Pendientes', value: countByStatus('Pendiente'), Icon: Clock3, tone: 'gray' },
       { label: 'Entrevistas', value: countByStatus('Entrevista'), Icon: MessagesSquare, tone: 'orange' },
       { label: 'Aprobados', value: countByStatus('Aprobado'), Icon: CircleCheckBig, tone: 'green' },
       { label: 'Contratados', value: countByStatus('Contratado'), Icon: FileCheck2, tone: 'green' },

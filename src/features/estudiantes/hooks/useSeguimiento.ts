@@ -1,10 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { Application } from '../types/seguimiento.types'
 import type { JobDetailData } from '@/shared/types/job.types'
 import { seguimientoService } from '../services/seguimiento.service'
 
 const getUserId = () => Number(localStorage.getItem('userId'))
+
+const normalizeText = (value: string): string =>
+  value
+    .normalize('NFD')
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0)
+      return code < 0x300 || code > 0x36f
+    })
+    .join('')
+    .trim()
+    .toLowerCase()
 
 export const useSeguimiento = () => {
   const estudianteId = getUserId()
@@ -14,6 +26,7 @@ export const useSeguimiento = () => {
   const [applicationSearchText, setApplicationSearchText] = useState('')
   const [selectedJobModal, setSelectedJobModal] = useState<JobDetailData | null>(null)
   const [isJobModalOpen, setIsJobModalOpen] = useState(false)
+  const [selectedModalidades, setSelectedModalidades] = useState<string[]>([])
   const searchInputRef = useRef<HTMLInputElement>(null)
   const applicationSearchInputRef = useRef<HTMLInputElement>(null)
 
@@ -79,7 +92,26 @@ export const useSeguimiento = () => {
       )
     : applicationsData
 
-  const displayApplications = viewMode === 'detail' ? filteredApplications : applicationsData
+  const modalidadesNormalizadas = selectedModalidades.map(normalizeText)
+  const searchApplications = modalidadesNormalizadas.length
+    ? applicationsData.filter((app) =>
+        modalidadesNormalizadas.includes(normalizeText(app.modality ?? ''))
+      )
+    : applicationsData
+
+  const displayApplications = viewMode === 'detail' ? filteredApplications : searchApplications
+
+  const toggleModalidad = useCallback((modalidad: string) => {
+    setSelectedModalidades((current) =>
+      current.includes(modalidad)
+        ? current.filter((value) => value !== modalidad)
+        : [...current, modalidad]
+    )
+  }, [])
+
+  const clearFilters = useCallback(() => {
+    setSelectedModalidades([])
+  }, [])
 
   const applicationsByStatus = {
     PENDIENTE: applicationsData.filter((app) => app.status === 'PENDIENTE').length,
@@ -100,6 +132,10 @@ export const useSeguimiento = () => {
     isJobModalOpen,
     applicationSearchText,
     applicationSearchInputRef,
+    selectedModalidades,
+    hasActiveFilters: selectedModalidades.length > 0,
+    toggleModalidad,
+    clearFilters,
     isLoading: applicationsQuery.isLoading,
     isError: applicationsQuery.isError,
     openSearchMode,

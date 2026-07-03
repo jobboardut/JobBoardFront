@@ -72,18 +72,18 @@ export const validateOptionalEmailField = (value: string, label = 'Correo'): str
 }
 
 export const validatePasswordField = (value: string): string | null => {
-  if (!value) return 'La contrasena es requerida.'
+  if (!value) return 'La contraseña es requerida.'
   if (!isStrongPassword(value)) {
-    return 'La contrasena debe tener minimo 8 caracteres, mayuscula, minuscula, numero y maximo 72 caracteres.'
+    return 'La contraseña debe tener minimo 8 caracteres, mayuscula, minuscula, numero y maximo 72 caracteres.'
   }
 
   return null
 }
 
 export const validateLoginPasswordField = (value: string): string | null => {
-  if (!value) return 'La contrasena es requerida.'
+  if (!value) return 'La contraseña es requerida.'
   if (value.length > SECURITY_LIMITS.passwordMax) {
-    return `La contrasena no debe superar ${SECURITY_LIMITS.passwordMax} caracteres.`
+    return `La contraseña no debe superar ${SECURITY_LIMITS.passwordMax} caracteres.`
   }
 
   return null

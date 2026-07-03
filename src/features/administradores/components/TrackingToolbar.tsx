@@ -10,7 +10,6 @@ function TrackingToolbar(props: SearchFiltersToolbarControlProps) {
       inputId="tracking-search"
       placeholder="Buscar por candidato, vacante o empresa..."
       availableFilters={[
-        'Estado: Pendiente',
         'Estado: Entrevista',
         'Estado: Aprobado',
         'Estado: Contratado',
