@@ -1,14 +1,16 @@
 import api from '@/services/api'
 import type {
+  CambiarEstatusPostulacionRequest,
   EmpresaPerfil,
   EmpresaPerfilUpdateRequest,
   EmpresaArchivos,
+  EtapaMotivo,
+  MotivoRechazo,
   Vacante,
   CreateVacanteRequest,
   UpdateEstatusRequest,
   Postulante,
   PostulanteApi,
-  PostulanteEstatus,
 } from '../types/empresa.types'
 
 const asRecord = (value: unknown): Record<string, unknown> =>
@@ -41,6 +43,11 @@ const mapPostulante = (postulante: PostulanteApi): Postulante => ({
   fotoUrl: postulante.fotoUrl,
   cvUrl: postulante.cvUrl,
   urlExpirationSeconds: postulante.urlExpirationSeconds,
+  etapaRechazo: postulante.etapaRechazo,
+  motivoRechazo: postulante.motivoRechazo,
+  comentarioInterno: postulante.comentarioInterno,
+  fechaUltimoCambio: postulante.fechaUltimoCambio,
+  transicionesPermitidas: postulante.transicionesPermitidas ?? [],
 })
 
 export const empresaService = {
@@ -82,11 +89,21 @@ export const empresaService = {
     return unwrapPostulantes(response).map(mapPostulante)
   },
 
-  actualizarEstatusPostulante: (
+  /** Catálogo cerrado de motivos de rechazo, filtrado por la etapa desde la que se rechaza. */
+  getMotivosRechazo: (etapa?: EtapaMotivo): Promise<MotivoRechazo[]> =>
+    api.get('/empresa/motivos-rechazo', {
+      params: etapa ? { etapa } : undefined,
+    }) as Promise<MotivoRechazo[]>,
+
+  /**
+   * Única mutación del embudo. Sustituye al viejo PUT /estatus y a los atajos
+   * /aprobar, /rechazar y /entrevista, que permitían transiciones ilegales.
+   */
+  cambiarEstatusPostulante: (
     empresaId: number,
     postulacionId: number,
-    estatus: PostulanteEstatus
+    data: CambiarEstatusPostulacionRequest
   ): Promise<void> =>
-    api.put(`/empresa/${empresaId}/postulaciones/${postulacionId}/estatus`, { estatus }) as Promise<void>,
+    api.patch(`/empresa/${empresaId}/postulaciones/${postulacionId}/estatus`, data) as Promise<void>,
 
 }

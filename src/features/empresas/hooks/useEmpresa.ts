@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { empresaService } from '../services/empresa.service'
 import type {
+  CambiarEstatusPostulacionRequest,
   CreateVacanteRequest,
   EmpresaArchivos,
   EmpresaPerfilUpdateRequest,
-  PostulanteEstatus,
+  EtapaMotivo,
   UpdateEstatusRequest,
 } from '../types/empresa.types'
 
@@ -101,15 +102,29 @@ export const usePostulantes = (publicacionId: number) => {
   })
 }
 
-export const useActualizarEstatusPostulante = (publicacionId: number) => {
+/** Catálogo cerrado de motivos. Se cachea por etapa: cambia muy poco. */
+export const useMotivosRechazo = (etapa?: EtapaMotivo) =>
+  useQuery({
+    queryKey: ['empresa', 'motivos-rechazo', etapa ?? 'todos'],
+    queryFn: () => empresaService.getMotivosRechazo(etapa),
+    staleTime: 30 * 60 * 1000,
+  })
+
+export const useCambiarEstatusPostulante = (publicacionId: number) => {
   const empresaId = getUserId()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ postulacionId, estatus }: { postulacionId: number; estatus: PostulanteEstatus }) =>
-      empresaService.actualizarEstatusPostulante(empresaId, postulacionId, estatus),
+    mutationFn: ({
+      postulacionId,
+      ...data
+    }: CambiarEstatusPostulacionRequest & { postulacionId: number }) =>
+      empresaService.cambiarEstatusPostulante(empresaId, postulacionId, data),
     onSuccess: () => {
+      // El servidor recalcula `transicionesPermitidas`, así que hay que refetch:
+      // no se puede derivar el siguiente set de botones en el cliente.
       queryClient.invalidateQueries({ queryKey: ['empresa', 'postulantes', empresaId, publicacionId] })
+      queryClient.invalidateQueries({ queryKey: ['empresa', 'vacantes', empresaId] })
     },
   })
 }

@@ -4,8 +4,8 @@ import { Eye, FileText, LayoutGrid, List, UserCircle } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
 import { usePostulantes, useVacantes } from '../hooks/useEmpresa'
-import type { Postulante } from '../types/empresa.types'
-import { getPostulanteStatusMeta } from '../utils/postulanteStatus'
+import type { Postulante, PostulanteEstatus } from '../types/empresa.types'
+import { getPostulanteStatusMeta, normalizePostulanteStatus } from '../utils/postulanteStatus'
 import { KanbanPostulaciones } from './KanbanPostulaciones'
 
 const StatusPill = ({ status }: { status?: string }) => {
@@ -246,10 +246,10 @@ export const Postulantes = () => {
       ) : (
         <KanbanPostulaciones
           data={postulantes.reduce((acc, item) => {
-            const key = getPostulanteStatusMeta(item.estatus).key
-            acc[key] = acc[key] ? [...acc[key], item] : [item]
+            const key = normalizePostulanteStatus(item.estatus)
+            acc[key] = acc[key] ? [...acc[key]!, item] : [item]
             return acc
-          }, {} as Record<string, Postulante[]>)}
+          }, {} as Partial<Record<PostulanteEstatus, Postulante[]>>)}
         />
       )}
     </div>

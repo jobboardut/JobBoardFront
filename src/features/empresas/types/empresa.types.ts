@@ -71,12 +71,46 @@ export interface EmpresaArchivos {
   repFotoIne?: File | null
 }
 
+/**
+ * Estados del embudo, espejo de EstatusPostulacion en el backend.
+ *
+ * Ojo: NO existe 'Pendiente' (colisionaba con EstatusValidacion.Pendiente, que es la
+ * cuarentena del usuario, un proceso distinto) ni 'Contratado' (una postulación
+ * Aceptada YA cuenta como vinculación en las métricas). Ambos valores existían antes
+ * en el front y el backend los rechazaba con 400.
+ */
 export type PostulanteEstatus =
-  | 'Pendiente'
+  | 'Enviada'
+  | 'EnRevision'
   | 'Entrevista'
   | 'Aceptada'
-  | 'Contratado'
   | 'Rechazada'
+  | 'Retirada'
+  | 'Cerrada'
+
+/** Subconjunto que la empresa puede ejecutar. Retirada es del estudiante; Cerrada, del sistema. */
+export type EmpresaTransicion = Extract<
+  PostulanteEstatus,
+  'EnRevision' | 'Entrevista' | 'Aceptada' | 'Rechazada'
+>
+
+export type EtapaMotivo = 'Screening' | 'Entrevista' | 'Ambas'
+
+/** Entrada del catálogo cerrado. No hay texto libre hacia el estudiante. */
+export interface MotivoRechazo {
+  id: number
+  etiqueta: string
+  etapaAplicable: EtapaMotivo
+}
+
+/** Cuerpo del único endpoint de transición. */
+export interface CambiarEstatusPostulacionRequest {
+  estatus: EmpresaTransicion
+  /** Obligatorio si estatus === 'Rechazada'. */
+  motivoRechazoId?: number
+  /** Nota privada del reclutador. Nunca se muestra al estudiante. */
+  comentarioInterno?: string
+}
 
 export interface Postulante {
   id: number
@@ -94,6 +128,13 @@ export interface Postulante {
   fotoUrl?: string | null
   cvUrl?: string | null
   urlExpirationSeconds?: number
+  /** Etapa donde se rechazó. Null si no fue rechazada. */
+  etapaRechazo?: string | null
+  motivoRechazo?: string | null
+  comentarioInterno?: string | null
+  fechaUltimoCambio?: string | null
+  /** Transiciones legales calculadas por el servidor. La UI renderiza exactamente estas. */
+  transicionesPermitidas: EmpresaTransicion[]
 }
 
 export interface PostulanteApi {
@@ -110,4 +151,9 @@ export interface PostulanteApi {
   urlExpirationSeconds: number
   fechaPostulacion: string
   estatusPostulacion: string
+  fechaUltimoCambio: string | null
+  etapaRechazo: string | null
+  motivoRechazo: string | null
+  comentarioInterno: string | null
+  transicionesPermitidas: EmpresaTransicion[]
 }

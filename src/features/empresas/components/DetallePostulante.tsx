@@ -1,11 +1,18 @@
+import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, FileText, GraduationCap, Mail, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, FileText, GraduationCap, Lock, Mail, MapPin, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
-import { useActualizarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
-import type { PostulanteEstatus } from '../types/empresa.types'
-import { POSTULANTE_STATUS_FLOW, getPostulanteStatusMeta } from '../utils/postulanteStatus'
+import { useCambiarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
+import type { EmpresaTransicion } from '../types/empresa.types'
+import {
+  ETIQUETA_ACCION,
+  POSTULANTE_STATUS,
+  etapaDeRechazo,
+  getPostulanteStatusMeta,
+} from '../utils/postulanteStatus'
+import { ModalRechazo } from './ModalRechazo'
 
 export const DetallePostulante = () => {
   const navigate = useNavigate()
@@ -15,14 +22,10 @@ export const DetallePostulante = () => {
   const vacanteId = Number(searchParams.get('vacanteId'))
   const toast = useAppToast()
   const { confirm } = useConfirmDialog()
+  const [mostrarModalRechazo, setMostrarModalRechazo] = useState(false)
 
-  const {
-    data: postulantes = [],
-    isLoading,
-    isError,
-  } = usePostulantes(vacanteId)
-
-  const { mutate: cambiarEstatus, isPending: isUpdating } = useActualizarEstatusPostulante(vacanteId)
+  const { data: postulantes = [], isLoading, isError } = usePostulantes(vacanteId)
+  const { mutate: cambiarEstatus, isPending: isUpdating } = useCambiarEstatusPostulante(vacanteId)
 
   const postulante = postulantes.find((item) => item.id === postulanteId)
 
@@ -48,35 +51,58 @@ export const DetallePostulante = () => {
     )
   }
 
-  const estatusActual = postulante.estatus
-  const currentStatus = getPostulanteStatusMeta(estatusActual)
+  const currentStatus = getPostulanteStatusMeta(postulante.estatus)
 
-  const aplicarEstatus = async (estatus: PostulanteEstatus) => {
-    if (!postulante.postulacionId) {
-      toast.warning('No se encontro la postulacion', 'Abre el postulante desde una vacante publicada.')
+  // La máquina de estados vive en el servidor: aquí sólo se pintan las transiciones
+  // que ya vinieron autorizadas. Nunca se derivan en el cliente.
+  const transiciones = postulante.transicionesPermitidas ?? []
+
+  const notificarError = (error: unknown) => {
+    const message = (error as { message?: string })?.message ?? 'Intenta de nuevo en unos segundos.'
+    toast.error('No se pudo actualizar', message)
+  }
+
+  const notificarExito = (destino: EmpresaTransicion) => {
+    toast.success('Estatus actualizado', `${postulante.nombre} ahora aparece como ${POSTULANTE_STATUS[destino].label}.`)
+  }
+
+  const avanzar = async (destino: EmpresaTransicion) => {
+    // El rechazo tiene su propio flujo: exige motivo del catálogo.
+    if (destino === 'Rechazada') {
+      setMostrarModalRechazo(true)
       return
     }
 
-    const nextStatus = getPostulanteStatusMeta(estatus)
+    const meta = POSTULANTE_STATUS[destino]
     const accepted = await confirm({
-      title: `Marcar como ${nextStatus.label}`,
-      message: `Este cambio actualizara el seguimiento para empresa, estudiante/egresado y administracion.`,
-      confirmLabel: 'Actualizar estatus',
+      title: ETIQUETA_ACCION[destino],
+      message: meta.terminal
+        ? `Es una acción definitiva: la postulación de ${postulante.nombre} no podrá reabrirse.`
+        : `Este cambio actualiza el seguimiento para empresa, estudiante y administración.`,
+      confirmLabel: 'Confirmar',
       cancelLabel: 'Cancelar',
-      tone: nextStatus.key === 'rechazada' ? 'danger' : 'info',
+      tone: 'info',
     })
 
     if (!accepted) return
 
     cambiarEstatus(
-      { postulacionId: postulante.postulacionId, estatus },
+      { postulacionId: postulante.postulacionId, estatus: destino },
+      { onSuccess: () => notificarExito(destino), onError: notificarError }
+    )
+  }
+
+  const confirmarRechazo = (motivoRechazoId: number, comentarioInterno?: string) => {
+    cambiarEstatus(
+      { postulacionId: postulante.postulacionId, estatus: 'Rechazada', motivoRechazoId, comentarioInterno },
       {
         onSuccess: () => {
-          toast.success('Estatus actualizado', `${postulante.nombre} ahora aparece como ${nextStatus.label}.`)
+          setMostrarModalRechazo(false)
+          notificarExito('Rechazada')
         },
         onError: (error: unknown) => {
-          const message = (error as { message?: string })?.message ?? 'Intenta de nuevo en unos segundos.'
-          toast.error('No se pudo actualizar', message)
+          setMostrarModalRechazo(false)
+          notificarError(error)
         },
       }
     )
@@ -108,30 +134,37 @@ export const DetallePostulante = () => {
               ) : null}
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {POSTULANTE_STATUS_FLOW.filter((status) => status.key !== 'pendiente').map((status) => {
-              const Icon = status.Icon
-              const isActive = status.key === currentStatus.key
 
-              return (
-                <button
-                  type="button"
-                  key={status.key}
-                  onClick={() => void aplicarEstatus(status.apiValue)}
-                  disabled={isUpdating || isActive}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
-                    isActive
-                      ? 'bg-white/25 text-white'
-                      : status.key === 'aceptada'
-                        ? 'bg-white text-emerald-600'
-                        : 'border border-white/40 text-white hover:bg-white/15'
-                  }`}
-                >
-                  <Icon size={16} />
-                  {status.label}
-                </button>
-              )
-            })}
+          <div className="flex flex-wrap items-center gap-2">
+            {transiciones.length === 0 ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-white/80">
+                <Lock size={16} />
+                Proceso finalizado
+              </span>
+            ) : (
+              transiciones.map((destino) => {
+                const meta = POSTULANTE_STATUS[destino]
+                const Icon = meta.Icon
+                const esRechazo = destino === 'Rechazada'
+
+                return (
+                  <button
+                    type="button"
+                    key={destino}
+                    onClick={() => void avanzar(destino)}
+                    disabled={isUpdating}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
+                      esRechazo
+                        ? 'border border-white/40 text-white hover:bg-red-500/30'
+                        : 'bg-white text-emerald-600 hover:bg-white/90'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {ETIQUETA_ACCION[destino]}
+                  </button>
+                )
+              })
+            )}
           </div>
         </div>
       </div>
@@ -139,7 +172,29 @@ export const DetallePostulante = () => {
       <div className={`rounded-2xl border px-5 py-4 ${currentStatus.pillClass}`}>
         <p className="text-sm font-black">Estado actual: {currentStatus.label}</p>
         <p className="mt-1 text-sm">{currentStatus.description}</p>
+
+        {postulante.motivoRechazo ? (
+          <p className="mt-2 text-sm">
+            <span className="font-semibold">Motivo:</span> {postulante.motivoRechazo}
+            {postulante.etapaRechazo ? (
+              <span className="text-xs opacity-70">
+                {' '}
+                · rechazado en etapa {POSTULANTE_STATUS[
+                  postulante.etapaRechazo as keyof typeof POSTULANTE_STATUS
+                ]?.label ?? postulante.etapaRechazo}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
       </div>
+
+      {postulante.comentarioInterno ? (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+          <p className="text-xs font-semibold uppercase text-slate-500">Nota interna</p>
+          <p className="mt-1 text-sm text-slate-700">{postulante.comentarioInterno}</p>
+          <p className="mt-2 text-xs text-slate-400">Visible sólo para tu equipo y la administración.</p>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
@@ -163,11 +218,6 @@ export const DetallePostulante = () => {
           </div>
           <p className="mt-2 text-sm font-semibold text-gray-800">{postulante.ubicacion ?? postulante.carrera ?? 'Sin dato'}</p>
         </div>
-      </div>
-
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">Resumen</h2>
-        <p className="text-sm text-gray-600">{postulante.descripcion || 'Sin descripcion adicional.'}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -204,6 +254,16 @@ export const DetallePostulante = () => {
           )}
         </div>
       </div>
+
+      {mostrarModalRechazo ? (
+        <ModalRechazo
+          nombreCandidato={postulante.nombre}
+          etapa={etapaDeRechazo(postulante.estatus)}
+          isSubmitting={isUpdating}
+          onCancel={() => setMostrarModalRechazo(false)}
+          onConfirm={confirmarRechazo}
+        />
+      ) : null}
     </div>
   )
 }
