@@ -1,10 +1,18 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, DollarSign, Eye, Pencil, Users, XCircle } from 'lucide-react'
+import { ArrowLeft, BriefcaseBusiness, Calendar, DollarSign, Eye, MapPin, Pencil, Users, XCircle } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
+import { getLugaresInfo } from '@/shared/utils/lugares'
 import { useActualizarEstatusVacante, usePostulantes, useVacante } from '../hooks/useEmpresa'
+
+// Los campos de texto largo se capturan una linea por item.
+const listaDeTexto = (valor?: string | null): string[] =>
+  (valor ?? '')
+    .split('\n')
+    .map((linea) => linea.trim())
+    .filter(Boolean)
 
 const formatFecha = (fecha?: string) => {
   if (!fecha) return 'Sin fecha'
@@ -51,6 +59,8 @@ export const DetalleVacante = () => {
     mutate: actualizarEstatus,
     isPending: isUpdatingStatus,
   } = useActualizarEstatusVacante()
+
+  const lugares = vacante ? getLugaresInfo(vacante) : null
 
   const handleCerrarVacante = async () => {
     if (!vacante) return
@@ -136,7 +146,7 @@ export const DetalleVacante = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
           <div className="flex items-center gap-2 text-emerald-500">
             <Calendar size={16} />
@@ -158,6 +168,35 @@ export const DetalleVacante = () => {
           </div>
           <p className="mt-2 text-lg font-semibold text-gray-800">{formatCurrency(vacante.sueldoAprox)}</p>
         </div>
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className="flex items-center gap-2 text-emerald-500">
+            <MapPin size={16} />
+            <p className="text-xs font-semibold uppercase">Ubicacion</p>
+          </div>
+          <p className="mt-2 text-lg font-semibold text-gray-800">{vacante.ubicacion || 'No especificada'}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div className={`flex items-center gap-2 ${lugares?.isFull ? 'text-red-500' : 'text-emerald-500'}`}>
+            <BriefcaseBusiness size={16} />
+            <p className="text-xs font-semibold uppercase">Lugares</p>
+          </div>
+          {lugares ? (
+            <>
+              <p className="mt-2 text-lg font-semibold text-gray-800">
+                {lugares.label}
+                {lugares.isFull ? <span className="ml-2 text-xs font-bold text-red-500">LLENA</span> : null}
+              </p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className={`h-full rounded-full ${lugares.isFull ? 'bg-red-400' : 'bg-emerald-500'}`}
+                  style={{ width: `${lugares.percent}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="mt-2 text-lg font-semibold text-gray-800">No especificados</p>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -168,6 +207,30 @@ export const DetalleVacante = () => {
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <h2 className="text-lg font-semibold text-gray-800 mb-2">Requisitos</h2>
           <p className="text-sm leading-6 text-gray-600">{vacante.requisitos || 'Sin requisitos registrados.'}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Responsabilidades</h2>
+          {listaDeTexto(vacante.responsabilidades).length ? (
+            <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-gray-600">
+              {listaDeTexto(vacante.responsabilidades).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm leading-6 text-gray-600">Sin responsabilidades registradas.</p>
+          )}
+        </div>
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Competencias</h2>
+          {listaDeTexto(vacante.competencias).length ? (
+            <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-gray-600">
+              {listaDeTexto(vacante.competencias).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm leading-6 text-gray-600">Sin competencias registradas.</p>
+          )}
         </div>
       </div>
 

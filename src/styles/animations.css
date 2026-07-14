@@ -1,0 +1,380 @@
+/* ==========================================================================
+   Sistema de animaciones + identidad visual por rol
+   - Estudiante: esmeralda | Egresado: teal | Empresa: naranja | Admin: oscuro
+   - Animaciones suaves de entrada, hover y feedback, estilo reactbits.
+   - Respeta prefers-reduced-motion.
+   ========================================================================== */
+
+:root {
+  --role-accent: #009a4d;
+  --role-accent-strong: #047857;
+  --role-accent-soft: #ecfdf5;
+  --role-accent-border: #d1fae5;
+  --anim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ----------------------------- Acentos por rol --------------------------- */
+
+.role-estudiante {
+  --role-accent: #009a4d;
+  --role-accent-strong: #047857;
+  --role-accent-soft: #ecfdf5;
+  --role-accent-border: #d1fae5;
+}
+
+/* Egresado comparte vistas con estudiante pero con acento teal propio. */
+.role-egresado {
+  --role-accent: #0d9488;
+  --role-accent-strong: #0f766e;
+  --role-accent-soft: #f0fdfa;
+  --role-accent-border: #99f6e4;
+}
+
+.role-empresa {
+  --role-accent: #ea580c;
+  --role-accent-strong: #c2410c;
+  --role-accent-soft: #fff7ed;
+  --role-accent-border: #fed7aa;
+}
+
+.role-admin {
+  --role-accent: #10b981;
+  --role-accent-strong: #34d399;
+  --role-accent-soft: rgba(16, 185, 129, 0.14);
+  --role-accent-border: rgba(16, 185, 129, 0.35);
+}
+
+/* Sidebar tematizada con el acento del rol (sin tocar layout.css). */
+.role-estudiante .nav-item:hover,
+.role-estudiante .nav-item.active,
+.role-egresado .nav-item:hover,
+.role-egresado .nav-item.active,
+.role-empresa .nav-item:hover,
+.role-empresa .nav-item.active {
+  background: var(--role-accent-soft);
+  color: var(--role-accent-strong);
+}
+
+.role-estudiante .nav-item:hover .nav-icon,
+.role-estudiante .nav-item.active .nav-icon,
+.role-egresado .nav-item:hover .nav-icon,
+.role-egresado .nav-item.active .nav-icon,
+.role-empresa .nav-item:hover .nav-icon,
+.role-empresa .nav-item.active .nav-icon {
+  color: var(--role-accent);
+}
+
+.role-estudiante .nav-item.active::after,
+.role-egresado .nav-item.active::after,
+.role-empresa .nav-item.active::after {
+  background: var(--role-accent);
+}
+
+.role-estudiante .sidebar-account,
+.role-egresado .sidebar-account,
+.role-empresa .sidebar-account {
+  border-color: var(--role-accent-border);
+  background: var(--role-accent-soft);
+}
+
+.role-estudiante .sidebar-account-icon,
+.role-egresado .sidebar-account-icon,
+.role-empresa .sidebar-account-icon {
+  color: var(--role-accent);
+}
+
+/* ----------------------- Admin: panel oscuro elegante -------------------- */
+
+.role-admin .sidebar {
+  background: linear-gradient(180deg, #0f172a 0%, #10203a 100%);
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+.role-admin .brand-mark {
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+}
+
+.role-admin .sidebar .nav-group-label {
+  color: #64748b;
+}
+
+.role-admin .sidebar .nav-item {
+  color: #cbd5e1;
+}
+
+.role-admin .sidebar .nav-icon {
+  color: #7c8aa5;
+}
+
+.role-admin .sidebar .nav-item:hover,
+.role-admin .sidebar .nav-item.active {
+  background: var(--role-accent-soft);
+  color: var(--role-accent-strong);
+}
+
+.role-admin .sidebar .nav-item:hover .nav-icon,
+.role-admin .sidebar .nav-item.active .nav-icon {
+  color: var(--role-accent-strong);
+}
+
+.role-admin .sidebar .nav-item.active::after {
+  background: var(--role-accent);
+}
+
+.role-admin .sidebar-account {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.role-admin .sidebar-account-icon {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--role-accent-strong);
+}
+
+.role-admin .sidebar-account-copy strong {
+  color: #e2e8f0;
+}
+
+.role-admin .sidebar-account-copy small {
+  color: #94a3b8;
+}
+
+.role-admin .nav-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.role-admin .sidebar-menu-toggle {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+/* ------------------------------ Keyframes -------------------------------- */
+
+@keyframes anim-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes anim-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes anim-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes anim-shimmer {
+  from {
+    background-position: -400px 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+
+/* --------------------- Entrada suave de cada pantalla -------------------- */
+
+.content > *,
+.empresa-content > *,
+.feature-content > * {
+  animation: anim-fade-up 480ms var(--anim-ease) both;
+}
+
+/* Escalonado ligero para bloques hermanos (efecto stagger). */
+.content > *:nth-child(2),
+.empresa-content > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.content > *:nth-child(3),
+.empresa-content > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.content > *:nth-child(4),
+.empresa-content > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+.content > *:nth-child(n + 5),
+.empresa-content > *:nth-child(n + 5) {
+  animation-delay: 240ms;
+}
+
+/* Stagger para rejillas de tarjetas del admin. */
+.publications-grid > *,
+.management-stats > *,
+.validation-stats > *,
+.tracking-list > *,
+.configuration-grid > * {
+  animation: anim-fade-up 460ms var(--anim-ease) both;
+}
+
+.publications-grid > *:nth-child(1),
+.management-stats > *:nth-child(1),
+.validation-stats > *:nth-child(1),
+.tracking-list > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+
+.publications-grid > *:nth-child(2),
+.management-stats > *:nth-child(2),
+.validation-stats > *:nth-child(2),
+.tracking-list > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.publications-grid > *:nth-child(3),
+.management-stats > *:nth-child(3),
+.validation-stats > *:nth-child(3),
+.tracking-list > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.publications-grid > *:nth-child(4),
+.management-stats > *:nth-child(4),
+.validation-stats > *:nth-child(4),
+.tracking-list > *:nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.publications-grid > *:nth-child(n + 5),
+.management-stats > *:nth-child(n + 5),
+.validation-stats > *:nth-child(n + 5),
+.tracking-list > *:nth-child(n + 5) {
+  animation-delay: 240ms;
+}
+
+/* ------------------------- Microinteracciones ---------------------------- */
+
+/* Feedback tactil en todos los botones. */
+button:not(:disabled) {
+  transition: transform 150ms var(--anim-ease), box-shadow 150ms var(--anim-ease),
+    background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Elevacion sutil al pasar por tarjetas del panel admin. */
+.publication-card,
+.management-stat-card,
+.validation-stat-card,
+.tracking-stat-card,
+.configuration-stat-card,
+.tracking-row-card,
+.configuration-panel {
+  transition: transform 220ms var(--anim-ease), box-shadow 220ms var(--anim-ease),
+    border-color 220ms ease;
+}
+
+.publication-card:hover,
+.tracking-row-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.1);
+}
+
+.management-stat-card:hover,
+.validation-stat-card:hover,
+.tracking-stat-card:hover,
+.configuration-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.09);
+}
+
+/* Navegacion lateral con desplazamiento sutil. */
+.nav-item {
+  transition: background 180ms ease, color 180ms ease, transform 180ms var(--anim-ease);
+}
+
+.nav-item:hover {
+  transform: translateX(3px);
+}
+
+/* Filas de tablas del admin con hover claro. */
+.management-table tbody tr,
+.validation-table tbody tr {
+  transition: background 160ms ease;
+}
+
+/* Modales y overlays con aparicion suave. */
+.validation-modal,
+.publication-modal,
+.validation-reject-modal {
+  animation: anim-scale-in 260ms var(--anim-ease) both;
+}
+
+.validation-modal-overlay,
+.publication-modal-overlay,
+.validation-reject-overlay,
+.validation-photo-zoom-overlay {
+  animation: anim-fade-in 220ms ease both;
+}
+
+/* Esqueleto de carga reutilizable. */
+.anim-skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+  background-size: 400px 100%;
+  animation: anim-shimmer 1.4s ease infinite;
+}
+
+/* ------------------- Identidad naranja del area de empresa ---------------- */
+
+.role-empresa .empresa-topbar {
+  border-top: 3px solid var(--role-accent);
+}
+
+.role-empresa .empresa-topbar-label {
+  color: var(--role-accent-strong);
+}
+
+.role-empresa .empresa-icon-button {
+  border-color: var(--role-accent-border);
+  color: var(--role-accent-strong);
+}
+
+.role-empresa .empresa-icon-button:hover {
+  background: var(--role-accent-soft);
+}
+
+.role-empresa .empresa-primary-action {
+  border-color: var(--role-accent);
+  background: var(--role-accent);
+}
+
+.role-empresa .empresa-primary-action:hover {
+  border-color: var(--role-accent-strong);
+  background: var(--role-accent-strong);
+}
+
+/* ----------------------------- Accesibilidad ----------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

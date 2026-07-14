@@ -8,7 +8,7 @@ type AdminLayoutProps = {
 
 function AdminLayout({ children, contentId }: AdminLayoutProps) {
   return (
-    <div className="app-shell admin-shell">
+    <div className="app-shell admin-shell role-admin">
       <AdminSidebar />
       <main className="content admin-content" id={contentId}>
         {children}

@@ -26,12 +26,18 @@ const EMPTY_VACANTE_FORM: CreateVacanteRequest = {
   sueldoAprox: 0,
   modalidad: '',
   lugares: 1,
+  ubicacion: '',
+  competencias: '',
+  responsabilidades: '',
 }
 
 const VACANTE_FIELD_LIMITS = {
   titulo: SECURITY_LIMITS.shortText,
   descripcion: SECURITY_LIMITS.vacancyText,
   requisitos: SECURITY_LIMITS.vacancyText,
+  competencias: SECURITY_LIMITS.vacancyText,
+  responsabilidades: SECURITY_LIMITS.vacancyText,
+  ubicacion: SECURITY_LIMITS.address,
 } as const
 
 const getVacanteFieldLimit = (name: string): number =>
@@ -44,6 +50,9 @@ const toVacanteForm = (vacante?: Vacante): CreateVacanteRequest => ({
   sueldoAprox: vacante?.sueldoAprox ?? 0,
   modalidad: vacante?.modalidad ?? '',
   lugares: vacante?.lugares ?? 1,
+  ubicacion: vacante?.ubicacion ?? '',
+  competencias: vacante?.competencias ?? '',
+  responsabilidades: vacante?.responsabilidades ?? '',
 })
 
 interface FormularioVacanteProps {
@@ -104,8 +113,11 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
 
     const validationError =
       validateRequiredText(form.titulo, 'Titulo del puesto', SECURITY_LIMITS.shortText) ??
+      validateRequiredText(form.ubicacion, 'Ubicacion', SECURITY_LIMITS.address) ??
       validateRequiredText(form.descripcion, 'Descripcion del puesto', SECURITY_LIMITS.vacancyText) ??
-      validateRequiredText(form.requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText)
+      validateRequiredText(form.requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText) ??
+      validateRequiredText(form.competencias, 'Competencias', SECURITY_LIMITS.vacancyText) ??
+      validateRequiredText(form.responsabilidades, 'Responsabilidades', SECURITY_LIMITS.vacancyText)
 
     if (validationError) {
       toast.warning('Revisa los datos', validationError)
@@ -204,6 +216,18 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
                 </select>
               </FormControl>
 
+              <FormControl label="Ubicacion" help={getLengthHelp(SECURITY_LIMITS.address, 'Ciudad y estado donde se realizara el trabajo.')}>
+                <input
+                  name="ubicacion"
+                  value={form.ubicacion}
+                  onChange={handleChange}
+                  placeholder="Ej: Tecamachalco, Puebla"
+                  maxLength={SECURITY_LIMITS.address}
+                  required
+                  className={FORM_FIELD_CLASS}
+                />
+              </FormControl>
+
               <FormControl label="Sueldo aproximado (MXN)">
                 <input
                   name="sueldoAprox"
@@ -261,12 +285,42 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
               value={form.requisitos}
               onChange={handleChange}
               placeholder="Lista los requisitos del puesto..."
-              rows={8}
+              rows={5}
               maxLength={SECURITY_LIMITS.vacancyText}
               required
               className={`${FORM_FIELD_CLASS} resize-none`}
             />
             <p className="mt-2 text-xs text-slate-500">{getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-slate-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Responsabilidades</h2>
+            <textarea
+              name="responsabilidades"
+              value={form.responsabilidades}
+              onChange={handleChange}
+              placeholder="Escribe una responsabilidad por linea..."
+              rows={5}
+              maxLength={SECURITY_LIMITS.vacancyText}
+              required
+              className={`${FORM_FIELD_CLASS} resize-none`}
+            />
+            <p className="mt-2 text-xs text-slate-500">Una por linea. {getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-slate-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Competencias</h2>
+            <textarea
+              name="competencias"
+              value={form.competencias}
+              onChange={handleChange}
+              placeholder="Escribe una competencia por linea..."
+              rows={5}
+              maxLength={SECURITY_LIMITS.vacancyText}
+              required
+              className={`${FORM_FIELD_CLASS} resize-none`}
+            />
+            <p className="mt-2 text-xs text-slate-500">Una por linea. {getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

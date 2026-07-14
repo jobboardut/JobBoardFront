@@ -12,6 +12,7 @@ function ManagementToolbar(props: SearchFiltersToolbarControlProps) {
       availableFilters={[
         'Estado: Activo',
         'Estado: Inactivo',
+        'Estado: Rechazado',
         'Tipo: Alumno',
         'Tipo: Egresado',
         'Tipo: Empresa',

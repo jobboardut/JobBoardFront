@@ -86,6 +86,23 @@
   background: #f59e0b;
 }
 
+/* Eliminada: se queda al fondo del listado y en tono gris discreto. */
+.publication-card.is-deleted-card {
+  border-color: #e5e7eb;
+  background: #fafafa;
+  opacity: 0.72;
+}
+
+.publication-card.is-deleted-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 10px 24px rgba(107, 114, 128, 0.08);
+  opacity: 0.9;
+}
+
+.publication-card.is-deleted-card .publication-avatar {
+  background: #9ca3af;
+}
+
 .publication-card-head {
   display: flex;
   justify-content: space-between;
@@ -165,6 +182,12 @@
   color: #b45309;
 }
 
+/* Eliminada: visible pero apagada, sin competir con las activas. */
+.publication-status-pill.is-deleted {
+  background: rgba(107, 114, 128, 0.14);
+  color: #6b7280;
+}
+
 .publication-details {
   margin: 12px 0 0;
   padding: 0;
@@ -192,9 +215,28 @@
   color: #ea580c;
   font-size: 0.86rem;
   font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+}
+
+.publication-card-footer-item {
   display: inline-flex;
   gap: 6px;
   align-items: center;
+}
+
+/* Contador de lugares (ej. 3/10) con el mismo formato en todas las vistas. */
+.publication-places {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #059669;
+}
+
+.publication-places.is-full {
+  color: #dc2626;
 }
 
 .publications-footer {

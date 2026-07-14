@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { ArrowRight, CalendarDays } from 'lucide-react'
 import { APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { TrackingRow } from '../types/seguimiento.types'
@@ -109,4 +110,5 @@ function TrackingList({ rows }: TrackingListProps) {
   )
 }
 
-export default TrackingList
+// memo: la lista de seguimiento solo cambia cuando cambian las filas.
+export default memo(TrackingList)

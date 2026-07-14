@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { BriefcaseBusiness, Building2, CheckCircle2, Clock3, WalletCards } from 'lucide-react'
 import type { SearchPublicationItem } from '../types/publicaciones.types'
 
@@ -6,7 +7,8 @@ interface SearchPublicationCardProps {
   onSelect?: (id: number) => void
 }
 
-export const SearchPublicationCard = ({ item, onSelect }: SearchPublicationCardProps) => {
+// memo: la busqueda re-renderiza solo las tarjetas que cambian.
+export const SearchPublicationCard = memo(({ item, onSelect }: SearchPublicationCardProps) => {
   return (
     <article
       role="button"
@@ -67,4 +69,6 @@ export const SearchPublicationCard = ({ item, onSelect }: SearchPublicationCardP
       </div>
     </article>
   )
-}
+})
+
+SearchPublicationCard.displayName = 'SearchPublicationCard'

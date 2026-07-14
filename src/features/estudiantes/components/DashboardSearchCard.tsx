@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { BriefcaseBusiness } from 'lucide-react'
 import type { JobItem } from '../types/dashboard.types'
 
@@ -6,7 +7,8 @@ interface DashboardSearchCardProps {
   onJobClick: (item: JobItem) => void
 }
 
-export const DashboardSearchCard = ({ item, onJobClick }: DashboardSearchCardProps) => {
+// memo: evita re-render de todas las tarjetas al escribir en la busqueda.
+export const DashboardSearchCard = memo(({ item, onJobClick }: DashboardSearchCardProps) => {
   return (
     <article 
       onClick={() => onJobClick(item)}
@@ -34,4 +36,6 @@ export const DashboardSearchCard = ({ item, onJobClick }: DashboardSearchCardPro
       </div>
     </article>
   )
-}
+})
+
+DashboardSearchCard.displayName = 'DashboardSearchCard'

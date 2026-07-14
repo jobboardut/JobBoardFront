@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2, Hash } from 'lucide-react'
+import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2, Hash, X } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
 import { catalogService } from '@/services/catalog.service'
 import type { CatalogItem } from '@/services/catalog.service'
 import { useAppToast } from '@/shared/components/appToastContext'
+import { DateField } from '@/shared/components/DateField'
 import { useFormDraft } from '@/shared/hooks/useFormDraft'
+import { compressImage } from '@/shared/utils/imageCompression'
 import {
   FILE_LIMITS,
   limitText,
@@ -16,6 +18,7 @@ import {
   validateRequiredText,
 } from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
+import { getRegistroErrorMessage } from '../utils/registroErrors'
 import { RegistroResumenDialog, type RegistroResumenSection } from './RegistroResumenDialog'
 
 const pasos = [
@@ -32,6 +35,12 @@ const estadosCiviles = [
   'Viudo(a)',
   'Unión libre',
 ]
+
+// La foto de perfil solo admite imagenes; el CV y el documento tambien aceptan PDF.
+const IMAGE_ALLOWED_TYPES = ['image/png', 'image/jpeg']
+const IMAGE_ACCEPT = 'image/png,image/jpeg'
+const DOC_ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg']
+const DOC_ACCEPT = 'application/pdf,image/png,image/jpeg'
 
 const ESTUDIANTE_FIELD_LIMITS = {
   nombre: SECURITY_LIMITS.name,
@@ -139,12 +148,24 @@ export const RegistroEstudiante = () => {
     setSuccessMsg(null)
   }
 
-  const handleFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleFieldChange = (name: keyof typeof initialForm, value: string) => {
+    setForm(prev => {
+      const next = { ...prev, [name]: value }
+      saveDraft(next)
+      return next
+    })
+    setErrorMsg(null)
+    setSuccessMsg(null)
+  }
 
+  const handleFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
+    const original = input.files?.[0]
+    if (!original) return
+
+    const file = await compressImage(original)
     const fileError = validateFile(file, {
-      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      allowedTypes: IMAGE_ALLOWED_TYPES,
       label: 'La foto de perfil',
       maxBytes: FILE_LIMITS.imageBytes,
     })
@@ -153,7 +174,7 @@ export const RegistroEstudiante = () => {
       setErrorMsg(fileError)
       setFoto(null)
       setFotoFile(null)
-      e.target.value = ''
+      input.value = ''
       return
     }
 
@@ -161,12 +182,20 @@ export const RegistroEstudiante = () => {
     setFoto(URL.createObjectURL(file))
   }
 
-  const handleCV = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const removeFoto = () => {
+    setFotoFile(null)
+    setFoto(null)
+    if (fotoRef.current) fotoRef.current.value = ''
+  }
 
+  const handleCV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
+    const original = input.files?.[0]
+    if (!original) return
+
+    const file = await compressImage(original)
     const fileError = validateFile(file, {
-      allowedTypes: ['application/pdf'],
+      allowedTypes: DOC_ALLOWED_TYPES,
       label: 'El curriculum',
       maxBytes: FILE_LIMITS.documentBytes,
     })
@@ -175,7 +204,7 @@ export const RegistroEstudiante = () => {
       setErrorMsg(fileError)
       setCvNombre(null)
       setCvFile(null)
-      e.target.value = ''
+      input.value = ''
       return
     }
 
@@ -183,12 +212,20 @@ export const RegistroEstudiante = () => {
     setCvNombre(file.name)
   }
 
-  const handleDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const removeCV = () => {
+    setCvFile(null)
+    setCvNombre(null)
+    if (cvRef.current) cvRef.current.value = ''
+  }
 
+  const handleDoc = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target
+    const original = input.files?.[0]
+    if (!original) return
+
+    const file = await compressImage(original)
     const fileError = validateFile(file, {
-      allowedTypes: ['application/pdf', 'image/png', 'image/jpeg'],
+      allowedTypes: DOC_ALLOWED_TYPES,
       label: 'El documento avalatorio',
       maxBytes: FILE_LIMITS.documentBytes,
     })
@@ -197,12 +234,32 @@ export const RegistroEstudiante = () => {
       setErrorMsg(fileError)
       setDocNombre(null)
       setDocFile(null)
-      e.target.value = ''
+      input.value = ''
       return
     }
 
     setDocFile(file)
     setDocNombre(file.name)
+  }
+
+  const removeDoc = () => {
+    setDocFile(null)
+    setDocNombre(null)
+    if (docRef.current) docRef.current.value = ''
+  }
+
+  const validateFiles = () => {
+    const missing: string[] = []
+    if (!fotoFile) missing.push('Foto de perfil')
+    if (!cvFile) missing.push('Curriculum Vitae')
+    if (!docFile) missing.push('Documento avalatorio')
+
+    if (missing.length > 0) {
+      setErrorMsg(`Faltan archivos obligatorios: ${missing.join(', ')}.`)
+      return false
+    }
+
+    return true
   }
 
   const validateForm = () => {
@@ -231,6 +288,7 @@ export const RegistroEstudiante = () => {
     setErrorMsg(null)
     setSuccessMsg(null)
     if (!validateForm()) return
+    if (!validateFiles()) return
 
     if (!programaSeleccionado) {
       setErrorMsg('Selecciona un programa educativo valido.')
@@ -244,6 +302,10 @@ export const RegistroEstudiante = () => {
     setErrorMsg(null)
     setSuccessMsg(null)
     if (!validateForm()) return
+    if (!validateFiles()) {
+      setIsReviewOpen(false)
+      return
+    }
 
     if (!programaSeleccionado) {
       setErrorMsg('Selecciona un programa educativo valido.')
@@ -279,9 +341,8 @@ export const RegistroEstudiante = () => {
         navigate(`/registro/confirmacion?tipo=${estatusAcademico.toLowerCase()}`)
       }, 1200)
     } catch (error) {
-      const apiError = error as { message?: string; detalle?: string }
       setIsReviewOpen(false)
-      setErrorMsg(apiError.detalle || apiError.message || 'No se pudo registrar el estudiante. Verifica los datos e intenta de nuevo.')
+      setErrorMsg(getRegistroErrorMessage(error, 'estudiante'))
     } finally {
       setIsSubmitting(false)
     }
@@ -423,6 +484,7 @@ export const RegistroEstudiante = () => {
                     required
                   />
                 </div>
+                <p className="text-xs text-gray-400">Solo tu nombre. Maximo {SECURITY_LIMITS.name} caracteres.</p>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm text-gray-600">Apellidos</label>
@@ -437,6 +499,7 @@ export const RegistroEstudiante = () => {
                     required
                   />
                 </div>
+                <p className="text-xs text-gray-400">Apellido paterno y materno. Maximo {SECURITY_LIMITS.name} caracteres.</p>
               </div>
             </div>
 
@@ -454,20 +517,20 @@ export const RegistroEstudiante = () => {
                   required
                 />
               </div>
+              <p className="text-xs text-gray-400">Calle, numero, colonia y ciudad. Maximo {SECURITY_LIMITS.address} caracteres.</p>
             </div>
 
             {/* Fecha y estado civil */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="flex flex-col gap-1">
                 <label className="text-sm text-gray-600">Fecha de nacimiento</label>
-                <input
-                  type="date"
-                  name="fechaNacimiento"
+                <DateField
+                  id="fechaNacimiento"
                   value={form.fechaNacimiento}
-                  onChange={handleChange}
-                  className="border border-gray-300 rounded-xl px-3 py-2 bg-white text-sm outline-none"
-                  required
+                  onChange={(value) => handleFieldChange('fechaNacimiento', value)}
+                  placeholder="Selecciona tu fecha"
                 />
+                <p className="text-xs text-gray-400">Elige el dia, mes y anio de tu nacimiento.</p>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm text-gray-600">Estado civil</label>
@@ -483,6 +546,7 @@ export const RegistroEstudiante = () => {
                     <option key={e} value={e}>{e}</option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-400">Elige la opcion que corresponda.</p>
               </div>
             </div>
 
@@ -501,6 +565,7 @@ export const RegistroEstudiante = () => {
                   required
                 />
               </div>
+              <p className="text-xs text-gray-400">Con este correo iniciaras sesion. Usa el formato correo@dominio.com.</p>
             </div>
 
             <div className="flex flex-col gap-1 mb-6">
@@ -518,6 +583,7 @@ export const RegistroEstudiante = () => {
                   minLength={8}
                 />
               </div>
+              <p className="text-xs text-gray-400">Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero.</p>
             </div>
 
             <hr className="border-gray-200 mb-6" />
@@ -547,6 +613,7 @@ export const RegistroEstudiante = () => {
                     required
                   />
                 </div>
+                <p className="text-xs text-gray-400">Tu matricula institucional tal como aparece en tus documentos.</p>
               </div>
 
               <div className="flex flex-col gap-1">
@@ -566,8 +633,10 @@ export const RegistroEstudiante = () => {
                     <option key={p.id} value={p.id}>{p.nombre}</option>
                   ))}
                 </select>
-                {programasError && (
+                {programasError ? (
                   <p className="text-xs text-red-500">{programasError}</p>
+                ) : (
+                  <p className="text-xs text-gray-400">Selecciona la carrera de la que provienes.</p>
                 )}
               </div>
             </div>
@@ -587,53 +656,86 @@ export const RegistroEstudiante = () => {
           {/* Columna derecha — archivos */}
             <div className="col-span-1 flex flex-col gap-4">
 
+            {/* Aviso de formato */}
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+              La foto debe ser PNG o JPG. El CV y el documento aceptan PDF, PNG o JPG. Los tres archivos son obligatorios.
+            </div>
+
             {/* Foto de perfil */}
             <div className="bg-gray-50 rounded-2xl p-6 flex flex-col items-center gap-3">
               <div
                 onClick={() => fotoRef.current?.click()}
-                className="w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 border-[#009A4D] hover:border-[#10B981] transition-colors"
+                className={`relative w-28 h-28 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer overflow-hidden border-4 transition-colors ${fotoFile ? 'border-emerald-500' : 'border-[#009A4D] hover:border-[#10B981]'}`}
               >
                 {foto
                   ? <img src={foto} alt="foto" className="w-full h-full object-cover" />
                   : <Camera size={36} className="text-gray-400" />
                 }
+                {fotoFile && (
+                  <span className="absolute bottom-1 right-1 grid h-7 w-7 place-items-center rounded-full bg-white shadow ring-1 ring-emerald-100">
+                    <CheckCircle2 size={18} className="text-emerald-500" />
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-gray-600 font-medium">Subir Foto de Perfil</p>
-              <input ref={fotoRef} type="file" accept="image/*" className="hidden" onChange={handleFoto} />
+              <p className="text-sm font-medium flex items-center gap-1.5">
+                {fotoFile
+                  ? <><CheckCircle2 size={15} className="text-emerald-500" /><span className="text-emerald-700">Foto cargada</span></>
+                  : <span className="text-gray-600">Subir Foto de Perfil <span className="text-red-500">*</span></span>
+                }
+              </p>
+              {fotoFile && (
+                <button type="button" onClick={removeFoto} className="inline-flex items-center gap-1 text-xs font-semibold text-red-500 hover:text-red-600">
+                  <X size={13} /> Quitar
+                </button>
+              )}
+              <p className="text-xs text-gray-400 text-center">Solo PNG o JPG. Maximo 2 MB.</p>
+              <input ref={fotoRef} type="file" accept={IMAGE_ACCEPT} className="hidden" onChange={(e) => void handleFoto(e)} />
             </div>
 
             {/* CV */}
             <div className="bg-gray-50 rounded-2xl p-4">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Curriculum Vitae</p>
+              <p className="text-sm font-semibold text-gray-700 mb-3">Curriculum Vitae <span className="text-red-500">*</span></p>
               <div
                 onClick={() => cvRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-[#10B981] transition-colors"
+                className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer transition-colors ${cvFile ? 'border-emerald-400 bg-emerald-50/50' : 'border-gray-300 hover:border-[#10B981]'}`}
               >
-                <div className="w-12 h-12 bg-[#009A4D] rounded-xl flex items-center justify-center">
-                  <Upload size={22} color="white" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${cvFile ? 'bg-emerald-500' : 'bg-[#009A4D]'}`}>
+                  {cvFile ? <CheckCircle2 size={22} color="white" /> : <Upload size={22} color="white" />}
                 </div>
                 <p className="text-xs text-gray-500 text-center">
-                  {cvNombre ?? 'Arrastra y suelta tu archivo PDF aquí'}
+                  {cvNombre ?? 'Toca para subir tu CV (PDF, PNG o JPG)'}
                 </p>
+                <p className="text-xs text-gray-400 text-center">PDF, PNG o JPG. Maximo 5 MB.</p>
               </div>
-              <input ref={cvRef} type="file" accept=".pdf" className="hidden" onChange={handleCV} />
+              {cvFile && (
+                <button type="button" onClick={removeCV} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-red-500 hover:text-red-600">
+                  <X size={13} /> Quitar archivo
+                </button>
+              )}
+              <input ref={cvRef} type="file" accept={DOC_ACCEPT} className="hidden" onChange={(e) => void handleCV(e)} />
             </div>
 
             {/* Documento avalatorio */}
             <div className="bg-gray-50 rounded-2xl p-4">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Documento avalatorio</p>
+              <p className="text-sm font-semibold text-gray-700 mb-3">Documento avalatorio <span className="text-red-500">*</span></p>
               <div
                 onClick={() => docRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-[#10B981] transition-colors"
+                className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-2 cursor-pointer transition-colors ${docFile ? 'border-emerald-400 bg-emerald-50/50' : 'border-gray-300 hover:border-[#10B981]'}`}
               >
-                <div className="w-12 h-12 bg-[#009A4D] rounded-xl flex items-center justify-center">
-                  <Upload size={22} color="white" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${docFile ? 'bg-emerald-500' : 'bg-[#009A4D]'}`}>
+                  {docFile ? <CheckCircle2 size={22} color="white" /> : <Upload size={22} color="white" />}
                 </div>
                 <p className="text-xs text-gray-500 text-center">
-                  {docNombre ?? 'Arrastra y suelta tu archivo aquí PDF, JPG, PNG... (Max. 5MB)'}
+                  {docNombre ?? 'Toca para subir tu documento (PDF, PNG o JPG)'}
                 </p>
+                <p className="text-xs text-gray-400 text-center">PDF, PNG o JPG. Maximo 5 MB.</p>
               </div>
-              <input ref={docRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleDoc} />
+              {docFile && (
+                <button type="button" onClick={removeDoc} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-red-500 hover:text-red-600">
+                  <X size={13} /> Quitar archivo
+                </button>
+              )}
+              <input ref={docRef} type="file" accept={DOC_ACCEPT} className="hidden" onChange={(e) => void handleDoc(e)} />
             </div>
 
             {/* Boton continuar */}

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { BriefcaseBusiness, Building2, CheckCircle2, Clock3, UsersRound, WalletCards } from 'lucide-react'
 import type { JobCardItem } from '../types/publicaciones.types'
 
@@ -7,7 +8,8 @@ interface JobListCardProps {
   onSelect?: (id: number) => void
 }
 
-export const JobListCard = ({ item, isActive = false, onSelect }: JobListCardProps) => {
+// memo: la lista puede tener muchas tarjetas y solo re-renderiza la que cambia.
+export const JobListCard = memo(({ item, isActive = false, onSelect }: JobListCardProps) => {
   return (
     <article
       role="button"
@@ -70,11 +72,26 @@ export const JobListCard = ({ item, isActive = false, onSelect }: JobListCardPro
           <Clock3 size={14} />
           {item.dateLabel || 'Fecha no disponible'}
         </span>
-        <span className="inline-flex items-center gap-1.5">
-          <UsersRound size={14} />
-          {item.applicantCount} postulantes
+        <span className="inline-flex items-center gap-3">
+          <span className="inline-flex items-center gap-1.5">
+            <UsersRound size={14} />
+            {item.applicantCount} postulantes
+          </span>
+          {item.placesLabel ? (
+            <span
+              className={`inline-flex items-center gap-1.5 font-semibold ${
+                item.placesFull ? 'text-red-500' : 'text-emerald-600'
+              }`}
+            >
+              <BriefcaseBusiness size={14} />
+              {item.placesLabel} lugares
+              {item.placesFull ? ' · LLENA' : ''}
+            </span>
+          ) : null}
         </span>
       </div>
     </article>
   )
-}
+})
+
+JobListCard.displayName = 'JobListCard'

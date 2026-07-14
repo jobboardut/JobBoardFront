@@ -9,7 +9,11 @@ import useValidationDocuments from '../hooks/useValidationDocuments'
 type ValidationDetailModalProps = {
 	request: ValidationRequest | null
 	onClose: () => void
-	onValidate?: (request: ValidationRequest, accion: 'aprobar' | 'rechazar') => Promise<void>
+	onValidate?: (
+		request: ValidationRequest,
+		accion: 'aprobar' | 'rechazar',
+		observaciones?: string,
+	) => Promise<void>
 	isValidating?: boolean
 }
 
@@ -204,7 +208,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 				isOpen={isRejectModalOpen}
 				requestName={request.fullName}
 				onClose={() => setIsRejectModalOpen(false)}
-				onSubmit={() => onValidate?.(request, 'rechazar') ?? Promise.resolve()}
+				onSubmit={(observaciones) => onValidate?.(request, 'rechazar', observaciones) ?? Promise.resolve()}
 				isSubmitting={isValidating}
 			/>
 

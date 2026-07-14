@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { formatMoney } from '@/shared/utils/money'
+import { getLugaresInfo } from '@/shared/utils/lugares'
 import { publicacionesService } from '../services/publicaciones.service'
 import { estudianteService } from '../services/estudiante.service'
 import type { Application } from '../types/seguimiento.types'
@@ -7,8 +9,7 @@ import type { JobCardItem, SearchPublicationItem, Vacante } from '../types/publi
 
 const getUserId = () => Number(localStorage.getItem('userId'))
 
-const formatSalary = (value: number | null): string =>
-  typeof value === 'number' && value > 0 ? `$ ${value.toLocaleString('es-MX')}` : 'Sueldo no especificado'
+const formatSalary = (value: number | null): string => formatMoney(value)
 
 const formatDate = (iso: string): string => {
   const date = new Date(iso)
@@ -35,17 +36,23 @@ const getVacanteKey = (vacante: Pick<Vacante, 'titulo' | 'nombreEmpresa'>): stri
 const getApplicationKey = (application: Pick<Application, 'jobTitle' | 'company'>): string =>
   `${normalizeText(application.jobTitle)}|${normalizeText(application.company)}`
 
-const toJobCardItem = (vacante: Vacante, isApplied = false): JobCardItem => ({
-  id: vacante.id,
-  title: vacante.titulo,
-  company: vacante.nombreEmpresa,
-  salary: formatSalary(vacante.sueldoAprox),
-  modality: vacante.modalidad,
-  dateLabel: formatDate(vacante.fechaPublicacion),
-  applicantCount: vacante.totalPostulantes,
-  logoUrl: vacante.empresaLogoUrl,
-  isApplied,
-})
+const toJobCardItem = (vacante: Vacante, isApplied = false): JobCardItem => {
+  const lugares = getLugaresInfo(vacante)
+
+  return {
+    id: vacante.id,
+    title: vacante.titulo,
+    company: vacante.nombreEmpresa,
+    salary: formatSalary(vacante.sueldoAprox),
+    modality: vacante.modalidad,
+    dateLabel: formatDate(vacante.fechaPublicacion),
+    applicantCount: vacante.totalPostulantes,
+    logoUrl: vacante.empresaLogoUrl,
+    isApplied,
+    placesLabel: lugares?.label ?? null,
+    placesFull: lugares?.isFull ?? false,
+  }
+}
 
 const toSearchItem = (vacante: Vacante, isApplied = false): SearchPublicationItem => ({
   id: vacante.id,

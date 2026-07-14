@@ -10,7 +10,15 @@ function useValidationOverview() {
   })
 
   const validateMutation = useMutation({
-    mutationFn: ({ id, accion }: { id: string; accion: ValidarUsuarioAccion }) => validateUser(id, accion),
+    mutationFn: ({
+      id,
+      accion,
+      observaciones,
+    }: {
+      id: string
+      accion: ValidarUsuarioAccion
+      observaciones?: string
+    }) => validateUser(id, accion, observaciones),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin'] })
     },

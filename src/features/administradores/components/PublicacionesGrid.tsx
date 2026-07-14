@@ -1,5 +1,7 @@
-import { CalendarDays, Eye, MapPin, Users } from 'lucide-react'
+import { memo } from 'react'
+import { BriefcaseBusiness, CalendarDays, Eye, MapPin, Users, Wallet } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
+import { getLugaresInfo } from '@/shared/utils/lugares'
 import type { Publication } from '../types/publicaciones.types'
 
 type PublicationsGridProps = {
@@ -16,7 +18,7 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 					<button
 						key={publication.id}
 						type="button"
-						className={`publication-card ${publication.status === 'Pausado' ? 'is-paused-card' : ''}`}
+						className={`publication-card ${publication.status === 'Pausado' ? 'is-paused-card' : ''} ${publication.status === 'Eliminada' ? 'is-deleted-card' : ''}`}
 						onClick={() => onSelect(publication)}
 					>
 						<header className="publication-card-head">
@@ -34,7 +36,15 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 						</header>
 
 						<div className="publication-meta-pills">
-							<span className={`publication-status-pill ${publication.status === 'Activo' ? 'is-active' : 'is-paused'}`}>
+							<span
+								className={`publication-status-pill ${
+									publication.status === 'Activo'
+										? 'is-active'
+										: publication.status === 'Eliminada'
+											? 'is-deleted'
+											: 'is-paused'
+								}`}
+							>
 								{publication.status}
 							</span>
 							<span>{publication.modality}</span>
@@ -47,7 +57,7 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 								{publication.location}
 							</li>
 							<li>
-								<span className="currency">$</span>
+								<Wallet size={16} strokeWidth={APP_ICON_STROKE_WIDTH} />
 								{publication.salary}
 							</li>
 							<li>
@@ -57,8 +67,22 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 						</ul>
 
 						<footer className="publication-card-footer">
-							<Users size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
-							{publication.applicants} postulantes
+							<span className="publication-card-footer-item">
+								<Users size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
+								{publication.applicants} postulantes
+							</span>
+							{(() => {
+								const lugares = getLugaresInfo(publication)
+								if (!lugares) return null
+
+								return (
+									<span className={`publication-places ${lugares.isFull ? 'is-full' : ''}`}>
+										<BriefcaseBusiness size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
+										{lugares.label} lugares
+										{lugares.isFull ? <strong> · LLENA</strong> : null}
+									</span>
+								)
+							})()}
 						</footer>
 					</button>
 				))}
@@ -71,4 +95,5 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 	)
 }
 
-export default PublicacionesGrid
+// memo: el grid solo se re-renderiza cuando cambian las publicaciones filtradas.
+export default memo(PublicacionesGrid)

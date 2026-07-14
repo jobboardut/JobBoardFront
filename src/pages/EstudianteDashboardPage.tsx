@@ -26,6 +26,14 @@ export const EstudianteDashboardPage = () => {
     setSearchText,
     openJobModal,
     closeJobModal,
+    modalidades,
+    selectedModalidades,
+    toggleModalidad,
+    minSalary,
+    setMinSalary,
+    salaryBounds,
+    clearFilters,
+    hasActiveFilters,
   } = useDashboard()
 
   return (
@@ -68,12 +76,25 @@ export const EstudianteDashboardPage = () => {
                     />
                   ))
                 ) : (
-                  <EmptyState title="No hay publicaciones para mostrar" message="Ajusta la busqueda o revisa mas tarde." compact />
+                  <EmptyState
+                    title="No hay publicaciones para mostrar"
+                    message={hasActiveFilters ? 'Ningun resultado coincide con los filtros. Prueba limpiarlos.' : 'Ajusta la busqueda o revisa mas tarde.'}
+                    compact
+                  />
                 )}
               </div>
             </div>
 
-            <FilterPanel />
+            <FilterPanel
+              modalidades={modalidades}
+              selectedModalidades={selectedModalidades}
+              onToggleModalidad={toggleModalidad}
+              minSalary={minSalary}
+              salaryBounds={salaryBounds}
+              onMinSalaryChange={setMinSalary}
+              onClear={clearFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
           </section>
         )}
 

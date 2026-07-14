@@ -6,7 +6,7 @@ type ValidationRejectionModalProps = {
   isOpen: boolean
   requestName: string
   onClose: () => void
-  onSubmit?: () => Promise<void>
+  onSubmit?: (observaciones: string) => Promise<void>
   isSubmitting?: boolean
 }
 
@@ -24,7 +24,11 @@ function ValidationRejectionModal({
 	}
 
   const handleSubmit = async () => {
-    await onSubmit?.()
+    const motivo = observations.trim()
+    if (!motivo) return
+
+    // El motivo viaja al padre; antes se capturaba y se descartaba.
+    await onSubmit?.(motivo)
     setObservations('')
     onClose()
   }

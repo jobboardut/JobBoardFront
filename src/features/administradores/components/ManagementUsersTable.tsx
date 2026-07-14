@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Circle, Eye } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ManagementUser } from '../types/management.types'
@@ -23,13 +24,13 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 				</thead>
 				<tbody>
 					{rows.map((row) => (
-						<tr key={row.id}>
+						<tr key={row.id} className={row.state === 'Rechazado' ? 'is-rejected-row' : ''}>
 							<td data-label="Usuario">
 								<div className="management-user-cell">
 									<span className="management-avatar">{row.avatarLetter}</span>
 									<span>
 										<strong>{row.fullName}</strong>
-										<small>{row.description}</small>
+										<small>{row.state === 'Rechazado' && row.rejectionReason ? row.rejectionReason : row.description}</small>
 									</span>
 								</div>
 							</td>
@@ -41,7 +42,7 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 							<td data-label="Contacto">{row.contact}</td>
 							<td data-label="Registro">{row.registerDate}</td>
 							<td data-label="Estado">
-								<span className={`management-state-pill ${row.state === 'Activo' ? 'is-active' : 'is-inactive'}`}>
+								<span className={`management-state-pill ${row.state === 'Activo' ? 'is-active' : row.state === 'Rechazado' ? 'is-rejected' : 'is-inactive'}`}>
 									<Circle size={8} fill="currentColor" strokeWidth={0} />
 									{row.state}
 								</span>
@@ -64,4 +65,5 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 	)
 }
 
-export default ManagementUsersTable
+// memo: evita repintar toda la tabla mientras se escribe en el buscador.
+export default memo(ManagementUsersTable)

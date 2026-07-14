@@ -1,4 +1,5 @@
 import api from '@/services/api'
+import { formatMoney } from '@/shared/utils/money'
 import type { JobItem } from '../types/dashboard.types'
 import type { StudentProfile } from '../types/profile.types'
 import type { Application, ApplicationStatus } from '../types/seguimiento.types'
@@ -77,13 +78,12 @@ const formatDate = (value: unknown) => {
 }
 
 const formatSalary = (value: unknown) => {
-  if (typeof value === 'number') {
-    return value > 0 ? `$${value.toLocaleString('es-MX')}` : 'Sueldo no especificado'
+  // Un string ya formateado por el backend se respeta tal cual.
+  if (typeof value === 'string' && value.trim() && Number.isNaN(Number(value))) {
+    return value
   }
 
-  if (typeof value === 'string' && value.trim()) return value
-
-  return 'Sueldo no especificado'
+  return formatMoney(value)
 }
 
 const splitTextList = (value: string) =>

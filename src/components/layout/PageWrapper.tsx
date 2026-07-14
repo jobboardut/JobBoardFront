@@ -10,7 +10,8 @@ interface PageWrapperProps {
 
 export const PageWrapper = ({ children, role, account }: PageWrapperProps) => {
   return (
-    <div className="app-shell feature-shell">
+    // La clase role-* define el acento visual de cada apartado (colores y animaciones).
+    <div className={`app-shell feature-shell role-${role.toLowerCase()}`}>
       <Sidebar role={role} account={account} />
       <main className="content feature-content">{children}</main>
     </div>

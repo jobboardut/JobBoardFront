@@ -1,13 +1,32 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BriefcaseBusiness, Users } from 'lucide-react'
+import { formatMoney } from '@/shared/utils/money'
 import type { ActivityColumn, JobItem, Metric } from '../types/dashboard.types'
 import type { Application } from '../types/seguimiento.types'
+import type { Vacante } from '../types/publicaciones.types'
 import type { JobDetailData } from '@/shared/types/job.types'
 import { dashboardService } from '../services/dashboard.service'
+import { publicacionesService } from '../services/publicaciones.service'
 import { mapApplicationToJobItem } from '../services/estudiante.service'
 
 const getUserId = () => Number(localStorage.getItem('userId'))
+
+export const MODALIDADES_DASHBOARD = ['Presencial', 'Remota', 'Hibrida'] as const
+export const SALARY_BOUNDS_DASHBOARD = { min: 5000, max: 100000 } as const
+
+const normalizeText = (value: string): string =>
+  value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+
+const vacanteToJobItem = (vacante: Vacante): JobItem => ({
+  id: String(vacante.id),
+  title: vacante.titulo,
+  company: vacante.nombreEmpresa,
+  salary: formatMoney(vacante.sueldoAprox),
+  location: vacante.modalidad || 'No especificada',
+  type: vacante.modalidad || 'No especificada',
+  availability: 'Inmediata',
+})
 
 const buildMetrics = (applications: Application[], totalPostulaciones: number): Metric[] => {
   const activeApplications = applications.filter(
@@ -82,10 +101,19 @@ export const useDashboard = () => {
   const [isJobModalOpen, setIsJobModalOpen] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  const [selectedModalidades, setSelectedModalidades] = useState<string[]>([])
+  const [minSalary, setMinSalary] = useState<number>(SALARY_BOUNDS_DASHBOARD.min)
+
   const dashboardQuery = useQuery({
     queryKey: ['estudiante', 'dashboard', estudianteId],
     queryFn: () => dashboardService.getOverview(estudianteId),
     enabled: !!estudianteId,
+  })
+
+  // La vista de busqueda antes siempre venia vacia; ahora consulta vacantes reales.
+  const vacantesQuery = useQuery({
+    queryKey: ['estudiante', 'vacantes', 'dashboard'],
+    queryFn: () => publicacionesService.getVacantes(),
   })
 
   const dashboardData = dashboardQuery.data
@@ -96,7 +124,49 @@ export const useDashboard = () => {
   const totalPostulaciones = dashboardData?.totalPostulaciones ?? applications.length
   const metrics = buildMetrics(applications, totalPostulaciones)
   const activityColumns = buildActivityColumns(recentApplications)
-  const searchPublicationItems: JobItem[] = []
+
+  const searchPublicationItems: JobItem[] = useMemo(() => {
+    const vacantes = vacantesQuery.data ?? []
+    const query = normalizeText(searchText)
+
+    return vacantes
+      .filter((vacante) => {
+        const matchTexto =
+          !query ||
+          normalizeText(vacante.titulo).includes(query) ||
+          normalizeText(vacante.nombreEmpresa).includes(query)
+
+        const matchModalidad =
+          selectedModalidades.length === 0 ||
+          selectedModalidades.some(
+            (modalidad) => normalizeText(modalidad) === normalizeText(vacante.modalidad ?? ''),
+          )
+
+        const matchSueldo =
+          minSalary <= SALARY_BOUNDS_DASHBOARD.min ||
+          !vacante.sueldoAprox ||
+          vacante.sueldoAprox >= minSalary
+
+        return matchTexto && matchModalidad && matchSueldo
+      })
+      .map(vacanteToJobItem)
+  }, [vacantesQuery.data, searchText, selectedModalidades, minSalary])
+
+  const toggleModalidad = (modalidad: string) => {
+    setSelectedModalidades((current) =>
+      current.includes(modalidad)
+        ? current.filter((item) => item !== modalidad)
+        : [...current, modalidad],
+    )
+  }
+
+  const clearFilters = () => {
+    setSelectedModalidades([])
+    setMinSalary(SALARY_BOUNDS_DASHBOARD.min)
+  }
+
+  const hasActiveFilters =
+    selectedModalidades.length > 0 || minSalary > SALARY_BOUNDS_DASHBOARD.min
 
   useEffect(() => {
     if (isSearchOpen) {
@@ -139,10 +209,20 @@ export const useDashboard = () => {
     isJobModalOpen,
     isLoading: dashboardQuery.isLoading,
     isError: dashboardQuery.isError,
+    isLoadingVacantes: vacantesQuery.isLoading,
     openSearchMode,
     closeSearchMode,
     setSearchText,
     openJobModal,
     closeJobModal,
+    // Filtros de la vista de busqueda
+    modalidades: MODALIDADES_DASHBOARD,
+    selectedModalidades,
+    toggleModalidad,
+    minSalary,
+    setMinSalary,
+    salaryBounds: SALARY_BOUNDS_DASHBOARD,
+    clearFilters,
+    hasActiveFilters,
   }
 }

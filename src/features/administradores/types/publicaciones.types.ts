@@ -26,4 +26,6 @@ export type Publication = {
   experience: string
   description: string
   responsibilities: string[]
+  lugares?: number | null
+  lugaresOcupados?: number | null
 }

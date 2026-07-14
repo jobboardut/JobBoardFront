@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Circle, Clock3, Eye, UserCircle2 } from 'lucide-react'
 import { APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { ValidationRequest } from '../types/validation.types'
@@ -69,4 +70,5 @@ function ValidationRequestsTable({ rows, onView }: ValidationRequestsTableProps)
 	)
 }
 
-export default ValidationRequestsTable
+// memo: evita repintar la tabla completa al escribir en el buscador.
+export default memo(ValidationRequestsTable)

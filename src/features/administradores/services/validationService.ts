@@ -1,6 +1,6 @@
 import { Building2, FileBadge, GraduationCap, Users } from 'lucide-react'
 import { adminService } from './admin.service'
-import type { AdminUsuario, ValidarUsuarioAccion } from '../types/admin.types'
+import type { AdminUsuario, ValidarUsuarioAccion, ValidarUsuarioRequest } from '../types/admin.types'
 import type { ValidationMetric, ValidationRequest, ValidationType } from '../types/validation.types'
 
 export type ValidationOverview = {
@@ -99,6 +99,17 @@ export async function getValidationOverview(): Promise<ValidationOverview> {
   }
 }
 
-export function validateUser(id: string, accion: ValidarUsuarioAccion): Promise<void> {
-  return adminService.validarUsuario(id, { accion })
+export function validateUser(
+  id: string,
+  accion: ValidarUsuarioAccion,
+  observaciones?: string,
+): Promise<void> {
+  const payload: ValidarUsuarioRequest = { accion }
+
+  // El motivo solo aplica al rechazar.
+  if (accion === 'rechazar' && observaciones?.trim()) {
+    payload.observaciones = observaciones.trim()
+  }
+
+  return adminService.validarUsuario(id, payload)
 }

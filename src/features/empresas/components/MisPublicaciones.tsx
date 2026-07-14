@@ -1,16 +1,48 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Eye, FileEdit, XCircle, Users } from 'lucide-react'
+import { Search, Eye, FileEdit, XCircle, Users, BriefcaseBusiness } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
+import { formatMoney } from '@/shared/utils/money'
+import { getLugaresInfo } from '@/shared/utils/lugares'
+import type { Vacante } from '../types/empresa.types'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
 import { useVacantes, useActualizarEstatusVacante } from '../hooks/useEmpresa'
 
-const filtros = ['Todo', 'Activas', 'Pendientes', 'Cerradas'] as const
+const filtros = ['Todo', 'Activas', 'Cerradas'] as const
 
 const contarPostulantes = (vacante: { totalPostulantes?: number; postulantes?: number }): number =>
   vacante.totalPostulantes ?? vacante.postulantes ?? 0
+
+// Busqueda tolerante a acentos y mayusculas.
+const normalizar = (valor: string): string =>
+  valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+
+// Contador de lugares (ej. 3/10) con barra de avance. Se ve igual en todas las vistas.
+const ContadorLugares = ({ vacante }: { vacante: Vacante }) => {
+  const lugares = getLugaresInfo(vacante)
+  if (!lugares) return <span className="text-xs text-slate-400">Lugares no especificados</span>
+
+  return (
+    <span className="grid gap-1">
+      <span className="inline-flex items-center gap-1.5">
+        <BriefcaseBusiness size={15} className={lugares.isFull ? 'text-red-500' : 'text-emerald-500'} />
+        <strong className={lugares.isFull ? 'text-red-600' : 'text-slate-900'}>{lugares.label}</strong>
+        <span className="text-slate-500">lugares</span>
+        {lugares.isFull ? (
+          <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">LLENA</span>
+        ) : null}
+      </span>
+      <span className="block h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+        <span
+          className={`block h-full rounded-full ${lugares.isFull ? 'bg-red-400' : 'bg-emerald-500'}`}
+          style={{ width: `${lugares.percent}%` }}
+        />
+      </span>
+    </span>
+  )
+}
 
 const dotEstatus: Record<string, string> = {
   Activa:   'bg-emerald-500',
@@ -62,16 +94,15 @@ export const MisPublicaciones = () => {
   }
 
   const vacantesFiltradas = vacantes.filter(v => {
-  const estatus = v.estatus ?? ''
-  const matchFiltro =
-    filtroActivo === 'Todo' ||
-    (filtroActivo === 'Activas'    && estatus === 'Activa') ||
-    (filtroActivo === 'Pendientes' && estatus === 'Pendiente') ||
-    (filtroActivo === 'Cerradas'   && (estatus === 'Finalizada' || estatus === 'Pausada'))
+    const estatus = v.estatus ?? ''
+    const matchFiltro =
+      filtroActivo === 'Todo' ||
+      (filtroActivo === 'Activas' && estatus === 'Activa') ||
+      (filtroActivo === 'Cerradas' && (estatus === 'Finalizada' || estatus === 'Pausada'))
 
-  const matchBusqueda = v.titulo.toLowerCase().includes(busqueda.toLowerCase())
-  return matchFiltro && matchBusqueda
-})
+    const matchBusqueda = normalizar(v.titulo).includes(normalizar(busqueda))
+    return matchFiltro && matchBusqueda
+  })
 
   if (isLoading) return (
     <LoadingState title="Cargando vacantes" message="Estamos consultando tus publicaciones." />
@@ -169,14 +200,12 @@ export const MisPublicaciones = () => {
                 </div>
                 <div className="mt-4 grid gap-2 text-sm text-slate-600">
                   <span>Modalidad: <strong className="text-slate-900">{vacante.modalidad}</strong></span>
-                  <span>Sueldo: <strong className="text-slate-900">${vacante.sueldoAprox?.toLocaleString('es-MX') ?? '---'}</strong></span>
+                  <span>Sueldo: <strong className="text-slate-900">{formatMoney(vacante.sueldoAprox)}</strong></span>
                   <span className="inline-flex items-center gap-1.5">
                     <Users size={15} className="text-emerald-500" />
                     <strong className="text-slate-900">{contarPostulantes(vacante)}</strong> postulantes
-                    {typeof vacante.lugares === 'number' && (
-                      <span className="text-slate-400">· {vacante.lugares} lugares</span>
-                    )}
                   </span>
+                  <ContadorLugares vacante={vacante} />
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <button type="button" onClick={() => handleVerVacante(vacante.id)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">
@@ -200,6 +229,7 @@ export const MisPublicaciones = () => {
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Modalidad</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Sueldo aprox.</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Postulantes</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Lugares</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estatus</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
               </tr>
@@ -213,16 +243,16 @@ export const MisPublicaciones = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{vacante.modalidad}</td>
                   <td className="px-6 py-4 text-sm text-gray-800 font-medium">
-                    ${vacante.sueldoAprox?.toLocaleString('es-MX') ?? '—'}
+                    {formatMoney(vacante.sueldoAprox)}
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                       <Users size={16} className="text-emerald-500" />
                       {contarPostulantes(vacante)}
                     </span>
-                    {typeof vacante.lugares === 'number' && (
-                      <p className="mt-0.5 text-xs text-slate-400">de {vacante.lugares} lugares</p>
-                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <ContadorLugares vacante={vacante} />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">

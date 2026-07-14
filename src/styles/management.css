@@ -94,6 +94,16 @@
   background: #10b981;
 }
 
+/* Rechazados: metrica presente pero de bajo contraste. */
+.management-stat-card.tone-rejected {
+  background: #ffffff;
+  opacity: 0.75;
+}
+
+.management-stat-card.tone-rejected .management-stat-icon {
+  background: #9ca3af;
+}
+
 .management-toolbar {
   display: grid;
   grid-template-columns: 1fr auto;

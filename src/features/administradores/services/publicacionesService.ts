@@ -1,4 +1,5 @@
 import { BriefcaseBusiness, CircleCheckBig, PauseCircle, Users } from 'lucide-react'
+import { formatMoney } from '@/shared/utils/money'
 import { adminService } from './admin.service'
 import type { VacanteReciente } from '../types/admin.types'
 import type { Publication, PublicationMetric, PublicationStatus } from '../types/publicaciones.types'
@@ -44,18 +45,31 @@ const toPublication = (vacancy: VacanteReciente): Publication => ({
   status: toPublicationStatus(vacancy.estatus),
   modality: vacancy.modalidad,
   workday: 'No especificada',
-  location: 'No especificada',
-  salary: 'No especificado',
+  location: vacancy.ubicacion ?? 'No especificada',
+  salary: formatMoney(vacancy.sueldoAprox, 'No especificado'),
   date: formatDate(vacancy.fechaPublicacion),
   applicants: vacancy.totalPostulantes,
   experience: 'No especificada',
   description: `Vacante publicada por ${vacancy.nombreEmpresa}.`,
   responsibilities: ['Informacion pendiente de especificar por la empresa.'],
+  lugares: vacancy.lugares,
+  lugaresOcupados: vacancy.lugaresOcupados,
 })
+
+// Las eliminadas se muestran al final, igual que los usuarios rechazados.
+const STATUS_ORDER: Record<PublicationStatus, number> = {
+  Activo: 0,
+  Pausado: 1,
+  Finalizada: 2,
+  Baneada: 3,
+  Eliminada: 4,
+}
 
 export async function getPublicationsOverview(): Promise<PublicationsOverview> {
   const response = await adminService.getPublicaciones()
-  const publications = response.publicaciones.map(toPublication)
+  const publications = response.publicaciones
+    .map(toPublication)
+    .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status])
 
   return {
     metrics: [

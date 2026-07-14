@@ -33,6 +33,9 @@ export interface Vacante {
   modalidad: string
   estatus: string
   fechaPublicacion: string
+  ubicacion?: string | null
+  competencias?: string | null
+  responsabilidades?: string | null
   postulantes?: number
   totalPostulantes?: number
   lugares?: number
@@ -55,6 +58,9 @@ export interface CreateVacanteRequest {
   sueldoAprox: number
   modalidad: string
   lugares: number
+  ubicacion: string
+  competencias: string
+  responsabilidades: string
 }
 
 export interface UpdateEstatusRequest {

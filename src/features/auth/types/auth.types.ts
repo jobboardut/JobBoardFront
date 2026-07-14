@@ -28,6 +28,7 @@ export interface RegistroEstudianteRequest {
   fechaNacimiento: string
   estadoCivil: string
   matricula: string
+  telefono?: string
   programaEducativoId: string
   programaEducativo: string
   estatusAcademico?: 'Estudiante' | 'Egresado'

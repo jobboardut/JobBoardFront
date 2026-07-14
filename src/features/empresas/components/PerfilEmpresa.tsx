@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CheckCircle2, Globe, Loader2, Mail, MapPin, Pencil, X } from 'lucide-react'
+import { Camera, CheckCircle2, Globe, Loader2, Mail, MapPin, Pencil, X } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
-import { useEmpresaPerfil } from '../hooks/useEmpresa'
+import { useAppToast } from '@/shared/components/appToastContext'
+import { FILE_LIMITS, validateFile } from '@/shared/security/inputRules'
+import { compressImage } from '@/shared/utils/imageCompression'
+import { useActualizarArchivosEmpresa, useEmpresaPerfil } from '../hooks/useEmpresa'
 
 type Tab = 'descripcion' | 'requisitos'
 type ProfileToast = {
@@ -28,6 +31,37 @@ export const PerfilEmpresa = () => {
   })
 
   const { data: perfil, isLoading, isError } = useEmpresaPerfil()
+  const appToast = useAppToast()
+  const logoRef = useRef<HTMLInputElement>(null)
+  const { mutateAsync: actualizarArchivos, isPending: isSubiendoLogo } = useActualizarArchivosEmpresa()
+
+  const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target
+    const original = input.files?.[0]
+    if (!original) return
+
+    const file = await compressImage(original)
+    const fileError = validateFile(file, {
+      allowedTypes: ['image/png', 'image/jpeg'],
+      label: 'El logotipo',
+      maxBytes: FILE_LIMITS.imageBytes,
+    })
+
+    if (fileError) {
+      appToast.error('Archivo no valido', fileError)
+      input.value = ''
+      return
+    }
+
+    try {
+      await actualizarArchivos({ logo: file })
+      appToast.success('Logotipo actualizado', 'El cambio ya se guardo en tu perfil.')
+    } catch {
+      appToast.error('No se pudo actualizar', 'Intenta subir el logotipo nuevamente.')
+    } finally {
+      input.value = ''
+    }
+  }
 
   useEffect(() => {
     const state = location.state as { toast?: ProfileToast } | null
@@ -94,7 +128,14 @@ export const PerfilEmpresa = () => {
         <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg mb-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center overflow-hidden ring-2 ring-white/20">
+              <button
+                type="button"
+                onClick={() => logoRef.current?.click()}
+                disabled={isSubiendoLogo}
+                title="Cambiar logotipo"
+                aria-label="Cambiar logotipo de la empresa"
+                className="group relative w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center overflow-hidden ring-2 ring-white/20 transition hover:ring-white/60 disabled:cursor-not-allowed"
+              >
                 {perfil.logoUrl ? (
                   <img src={perfil.logoUrl} alt={perfil.nombreEmpresa} className="h-full w-full object-cover" />
                 ) : (
@@ -102,7 +143,22 @@ export const PerfilEmpresa = () => {
                     {perfil.nombreEmpresa?.charAt(0) ?? 'E'}
                   </span>
                 )}
-              </div>
+
+                <span className="absolute inset-0 grid place-items-center bg-black/45 opacity-0 transition-opacity group-hover:opacity-100">
+                  {isSubiendoLogo ? (
+                    <Loader2 size={20} className="animate-spin text-white" />
+                  ) : (
+                    <Camera size={20} className="text-white" />
+                  )}
+                </span>
+              </button>
+              <input
+                ref={logoRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                className="hidden"
+                onChange={(event) => void handleLogoChange(event)}
+              />
               <div>
                 <h1 className="mt-3 text-2xl font-semibold">{perfil.nombreEmpresa}</h1>
                 <div className="flex items-center gap-1 mt-2 text-white/80">

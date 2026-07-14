@@ -1,6 +1,9 @@
 import api from '@/services/api'
 import type { LoginRequest, LoginResponse, RegistroEmpresaRequest, RegistroEstudianteRequest } from '../types/auth.types'
 
+// Tiempo extra para las subidas de archivos del registro (el timeout global de axios es de 10s).
+const UPLOAD_TIMEOUT = 60000
+
 const appendFileOrEmpty = (formData: FormData, key: string, file?: File | null) => {
   if (file) {
     formData.append(key, file)
@@ -48,6 +51,7 @@ const buildRegistroEstudianteFormData = (data: RegistroEstudianteRequest) => {
   formData.append('FechaNacimiento', data.fechaNacimiento)
   formData.append('EstadoCivil', data.estadoCivil)
   formData.append('Matricula', data.matricula)
+  formData.append('Telefono', data.telefono ?? '')
   formData.append('ProgramaEducativoId', data.programaEducativoId)
   formData.append('CarreraId', data.programaEducativoId)
   formData.append('ProgramaEducativo', data.programaEducativo)
@@ -87,12 +91,13 @@ export const authService = {
 
   registroEmpresa: async (data: RegistroEmpresaRequest) => {
     const formData = buildRegistroEmpresaFormData(data)
-    return api.post('/registro/empresa', formData)
+    // Los registros suben archivos (multipart), por eso necesitan mas tiempo que el timeout global.
+    return api.post('/registro/empresa', formData, { timeout: UPLOAD_TIMEOUT })
   },
 
   registroEstudiante: async (data: RegistroEstudianteRequest) => {
     const formData = buildRegistroEstudianteFormData(data)
-    return api.post('/registro/estudiante', formData)
+    return api.post('/registro/estudiante', formData, { timeout: UPLOAD_TIMEOUT })
   },
 
 }

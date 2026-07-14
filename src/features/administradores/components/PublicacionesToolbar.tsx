@@ -14,9 +14,10 @@ function PublicacionesToolbar(props: SearchFiltersToolbarControlProps) {
         'Estado: Pausado',
         'Estado: Finalizada',
         'Estado: Baneada',
+        'Estado: Eliminada',
         'Modalidad: Presencial',
-        'Modalidad: Remoto',
-        'Modalidad: Hibrido',
+        'Modalidad: Remota',
+        'Modalidad: Hibrida',
       ]}
     />
   )

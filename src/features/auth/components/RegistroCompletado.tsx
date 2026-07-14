@@ -76,6 +76,7 @@ export const RegistroCompletado = () => {
         </h1>
         <p className="text-center text-gray-600 text-base max-w-lg mx-auto mb-8">
           Tu cuenta está pendiente de validación. Recibirás un correo electrónico cuando tu perfil sea aprobado.
+          También puedes revisar tu bandeja de entrada y spam para más detalles.
         </p>
 
         {/* Boton bandeja */}

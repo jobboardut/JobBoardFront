@@ -10,6 +10,11 @@ export interface Vacante {
   modalidad: string
   fechaPublicacion: string
   totalPostulantes: number
+  ubicacion?: string | null
+  competencias?: string | null
+  responsabilidades?: string | null
+  lugares?: number | null
+  lugaresOcupados?: number | null
 }
 
 export interface JobCardItem {
@@ -22,6 +27,9 @@ export interface JobCardItem {
   applicantCount: number
   logoUrl?: string | null
   isApplied?: boolean
+  /** Contador de lugares listo para pintar, ej. "3/10". */
+  placesLabel?: string | null
+  placesFull?: boolean
 }
 
 export interface SearchPublicationItem {

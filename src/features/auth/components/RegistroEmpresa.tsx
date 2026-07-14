@@ -11,7 +11,7 @@ import {
   Mail,
   ShieldCheck,
   Upload,
-  UserRound,
+  X,
   type LucideIcon,
 } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
@@ -19,6 +19,7 @@ import { AppButton } from '@/shared/components/AppButton'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { useFormDraft } from '@/shared/hooks/useFormDraft'
+import { compressImage } from '@/shared/utils/imageCompression'
 import { defaultEmpresaProfile, markEmpresaProfileIncomplete, saveEmpresaProfileDraft } from '@/features/empresas/services/empresaProfile.storage'
 import { catalogService } from '@/services/catalog.service'
 import { ROUTES } from '@/router/routes'
@@ -37,6 +38,7 @@ import {
   validateRequiredText,
 } from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
+import { getRegistroErrorMessage } from '../utils/registroErrors'
 import { RegistroResumenDialog, type RegistroResumenSection } from './RegistroResumenDialog'
 import './auth-flow.css'
 
@@ -50,7 +52,6 @@ const pasos = [
 type DocumentoKey = 'situacionFiscal' | 'docExistencia' | 'repDocCargo' | 'repFotoIne'
 
 const EMPRESA_FIELD_LIMITS = {
-  email: SECURITY_LIMITS.email,
   password: SECURITY_LIMITS.passwordMax,
   nombreEmpresa: SECURITY_LIMITS.companyName,
   telefonoEmpresa: SECURITY_LIMITS.phone,
@@ -75,36 +76,48 @@ const DOCUMENTOS: Array<{
   description: string
   icon: LucideIcon
   required: boolean
+  // El backend valida por campo: la foto del INE solo acepta imagen; el resto tambien PDF.
+  allowsPdf: boolean
 }> = [
   {
     key: 'situacionFiscal',
     label: 'Situacion fiscal',
-    description: 'PDF o imagen de la constancia fiscal.',
+    description: 'PDF o imagen de la constancia de situacion fiscal.',
     icon: FileCheck2,
     required: true,
+    allowsPdf: true,
   },
   {
     key: 'docExistencia',
     label: 'Existencia de empresa',
-    description: 'Acta, alta o documento legal de la empresa.',
+    description: 'Acta, alta o documento legal de la empresa (PDF o imagen).',
     icon: Building2,
     required: true,
+    allowsPdf: true,
   },
   {
     key: 'repDocCargo',
     label: 'Cargo del representante',
-    description: 'Documento que compruebe el cargo o autorizacion.',
+    description: 'Documento que compruebe el cargo o autorizacion (PDF o imagen).',
     icon: FileBadge2,
     required: true,
+    allowsPdf: true,
   },
   {
     key: 'repFotoIne',
     label: 'INE del representante',
-    description: 'Identificacion oficial del responsable.',
+    description: 'Foto de la identificacion oficial. Solo PNG o JPG (no PDF).',
     icon: ShieldCheck,
     required: true,
+    allowsPdf: false,
   },
 ]
+
+const documentoAllowedTypes = (allowsPdf: boolean): string[] =>
+  allowsPdf ? ['application/pdf', 'image/png', 'image/jpeg'] : ['image/png', 'image/jpeg']
+
+const documentoAccept = (allowsPdf: boolean): string =>
+  allowsPdf ? 'application/pdf,image/png,image/jpeg' : 'image/png,image/jpeg'
 
 type SectionHeadingProps = {
   icon: LucideIcon
@@ -134,12 +147,12 @@ const DocumentUploadCard = ({ item, file, onChange }: DocumentUploadCardProps) =
   const Icon = item.icon
 
   return (
-    <label className={`auth-file-card block cursor-pointer ${file ? 'is-ready' : ''}`}>
+    <label className={`auth-file-card relative block cursor-pointer ${file ? 'is-ready' : ''}`}>
       <input
         type="file"
-        accept=".pdf,image/*"
+        accept={documentoAccept(item.allowsPdf)}
         className="hidden"
-        onChange={(event) => onChange(item.key, event.target.files?.[0] ?? null)}
+        onChange={(event) => { void onChange(item.key, event.target.files?.[0] ?? null) }}
       />
       <span className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
@@ -148,14 +161,28 @@ const DocumentUploadCard = ({ item, file, onChange }: DocumentUploadCardProps) =
         <span className="min-w-0">
           <span className="block text-sm font-black text-slate-900">
             {item.label}
-            {item.required ? <span className="text-orange-500"> *</span> : null}
+            <span className="text-orange-500"> *</span>
           </span>
           <span className="mt-1 block text-xs leading-5 text-slate-500">{item.description}</span>
           <span className="mt-2 block truncate text-xs font-bold text-emerald-700">
-            {file ? file.name : 'Seleccionar archivo'}
+            {file ? file.name : `Seleccionar archivo (${item.allowsPdf ? 'PDF, PNG o JPG' : 'PNG o JPG'})`}
           </span>
         </span>
       </span>
+      {file ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void onChange(item.key, null)
+          }}
+          aria-label={`Quitar ${item.label}`}
+          className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-white text-slate-400 shadow ring-1 ring-slate-200 transition-colors hover:text-red-500"
+        >
+          <X size={14} />
+        </button>
+      ) : null}
     </label>
   )
 }
@@ -171,7 +198,6 @@ export const RegistroEmpresa = () => {
   })
 
   const initialForm = {
-    email: '',
     password: '',
     nombreEmpresa: '',
     telefonoEmpresa: '',
@@ -260,19 +286,21 @@ export const RegistroEmpresa = () => {
     setSuccessMsg(null)
   }
 
-  const handleLogo = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const handleLogo = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.target
+    const original = input.files?.[0]
+    if (!original) return
 
+    const file = await compressImage(original)
     const fileError = validateFile(file, {
-      allowedTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      allowedTypes: ['image/png', 'image/jpeg'],
       label: 'El logotipo',
       maxBytes: FILE_LIMITS.imageBytes,
     })
 
     if (fileError) {
       setErrorMsg(fileError)
-      event.target.value = ''
+      input.value = ''
       return
     }
 
@@ -280,18 +308,32 @@ export const RegistroEmpresa = () => {
     setLogoPreview(URL.createObjectURL(file))
   }
 
-  const handleDocumento = (key: DocumentoKey, file: File | null) => {
-    if (file) {
-      const fileError = validateFile(file, {
-        allowedTypes: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
-        label: 'El documento',
-        maxBytes: FILE_LIMITS.documentBytes,
-      })
+  const removeLogo = () => {
+    setLogoFile(null)
+    setLogoPreview(null)
+    if (logoRef.current) logoRef.current.value = ''
+  }
 
-      if (fileError) {
-        setErrorMsg(fileError)
-        return
-      }
+  const handleDocumento = async (key: DocumentoKey, rawFile: File | null) => {
+    if (!rawFile) {
+      setDocumentos((prev) => ({ ...prev, [key]: null }))
+      setErrorMsg(null)
+      return
+    }
+
+    const documento = DOCUMENTOS.find((item) => item.key === key)
+    const allowsPdf = documento?.allowsPdf ?? true
+
+    const file = await compressImage(rawFile)
+    const fileError = validateFile(file, {
+      allowedTypes: documentoAllowedTypes(allowsPdf),
+      label: documento ? `El campo "${documento.label}"` : 'El documento',
+      maxBytes: FILE_LIMITS.documentBytes,
+    })
+
+    if (fileError) {
+      setErrorMsg(fileError)
+      return
     }
 
     setDocumentos((prev) => ({ ...prev, [key]: file }))
@@ -299,21 +341,53 @@ export const RegistroEmpresa = () => {
   }
 
   const validateDocuments = () => {
-    const missing = DOCUMENTOS.filter((item) => item.required && !documentos[item.key])
-    if (!missing.length) return true
+    const missing = [
+      ...(logoFile ? [] : ['Logotipo']),
+      ...DOCUMENTOS.filter((item) => item.required && !documentos[item.key]).map((item) => item.label),
+    ]
+    if (missing.length) {
+      setErrorMsg(`Faltan archivos obligatorios: ${missing.join(', ')}.`)
+      return false
+    }
 
-    setErrorMsg(`Faltan documentos de validacion: ${missing.map((item) => item.label).join(', ')}.`)
-    return false
+    // El logotipo solo puede ser imagen.
+    if (logoFile) {
+      const logoError = validateFile(logoFile, {
+        allowedTypes: ['image/png', 'image/jpeg'],
+        label: 'El logotipo',
+        maxBytes: FILE_LIMITS.imageBytes,
+      })
+      if (logoError) {
+        setErrorMsg(logoError)
+        return false
+      }
+    }
+
+    // Reverifica el tipo de cada documento por si quedo uno invalido cargado en memoria.
+    for (const item of DOCUMENTOS) {
+      const file = documentos[item.key]
+      if (!file) continue
+      const typeError = validateFile(file, {
+        allowedTypes: documentoAllowedTypes(item.allowsPdf),
+        label: `El campo "${item.label}"`,
+        maxBytes: FILE_LIMITS.documentBytes,
+      })
+      if (typeError) {
+        setErrorMsg(`${typeError} Vuelve a subir ese archivo.`)
+        return false
+      }
+    }
+
+    return true
   }
 
   const validateForm = () => {
     const validations = [
-      validateEmailField(form.email, 'Email de acceso'),
+      validateEmailField(form.correoEmpresa, 'Correo de la empresa'),
       validatePasswordField(form.password),
       validateRequiredText(form.nombreEmpresa, 'Nombre de la empresa', SECURITY_LIMITS.companyName),
       validateRequiredText(form.sectorId, 'Sector', 12),
       validateOptionalPhoneField(form.telefonoEmpresa, 'Telefono de la empresa'),
-      validateOptionalEmailField(form.correoEmpresa, 'Correo de la empresa'),
       validateOptionalText(form.direccion, 'Direccion', SECURITY_LIMITS.address),
       validateOptionalUrlField(form.sitioWeb, 'Sitio web'),
       validateOptionalText(form.descripcion, 'Descripcion', SECURITY_LIMITS.longText),
@@ -365,7 +439,7 @@ export const RegistroEmpresa = () => {
 
     try {
       await authService.registroEmpresa({
-        email: form.email,
+        email: form.correoEmpresa,
         password: form.password,
         nombreEmpresa: form.nombreEmpresa,
         telefonoEmpresa: form.telefonoEmpresa,
@@ -402,9 +476,8 @@ export const RegistroEmpresa = () => {
         navigate('/registro/confirmacion?tipo=empresa')
       }, 1200)
     } catch (error) {
-      const apiError = error as { message?: string; detalle?: string }
       setIsReviewOpen(false)
-      setErrorMsg(apiError.detalle || apiError.message || 'No se pudo registrar la empresa. Verifica los datos e intenta de nuevo.')
+      setErrorMsg(getRegistroErrorMessage(error, 'empresa'))
     } finally {
       setIsSubmitting(false)
     }
@@ -412,19 +485,13 @@ export const RegistroEmpresa = () => {
 
   const resumenSections: RegistroResumenSection[] = [
     {
-      title: 'Cuenta de acceso',
-      items: [
-        { label: 'Email', value: form.email },
-        { label: 'Password', value: form.password ? 'Configurada' : '' },
-      ],
-    },
-    {
       title: 'Datos de la empresa',
       items: [
         { label: 'Nombre', value: form.nombreEmpresa },
         { label: 'Sector', value: sectorSeleccionado?.nombre },
+        { label: 'Correo de acceso', value: form.correoEmpresa },
+        { label: 'Contraseña', value: form.password ? 'Configurada' : '' },
         { label: 'Telefono', value: form.telefonoEmpresa },
-        { label: 'Correo', value: form.correoEmpresa },
         { label: 'Direccion', value: form.direccion },
         { label: 'Sitio web', value: form.sitioWeb },
       ],
@@ -488,8 +555,8 @@ export const RegistroEmpresa = () => {
               </p>
             </div>
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
-              <strong className="block text-emerald-900">Archivos requeridos</strong>
-              La API de registro usa multipart-form, por eso los documentos se envian junto con los datos de la empresa.
+              <strong className="block text-emerald-900">Antes de enviar</strong>
+              Ten a la mano el logotipo y los documentos de la empresa. Se envian junto con el registro para que administracion pueda validarlo.
             </div>
           </div>
 
@@ -497,44 +564,9 @@ export const RegistroEmpresa = () => {
             <div className="grid gap-5">
               <section className="auth-section-card">
                 <SectionHeading
-                  icon={UserRound}
-                  title="Cuenta de acceso"
-                  description="Credenciales que usara la empresa despues de la validacion."
-                />
-                <div className="grid gap-4 md:grid-cols-2">
-                  <FormControl label="Email de acceso" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
-                    <input
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      className={FORM_FIELD_CLASS}
-                      placeholder="empresa@correo.com"
-                      maxLength={SECURITY_LIMITS.email}
-                      required
-                    />
-                  </FormControl>
-                  <FormControl label="Password" help="Minimo 8 caracteres, mayuscula, minuscula, numero y maximo 72 caracteres.">
-                    <input
-                      type="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      className={FORM_FIELD_CLASS}
-                      placeholder="Minimo 6 caracteres"
-                      minLength={SECURITY_LIMITS.passwordMin}
-                      maxLength={SECURITY_LIMITS.passwordMax}
-                      required
-                    />
-                  </FormControl>
-                </div>
-              </section>
-
-              <section className="auth-section-card">
-                <SectionHeading
                   icon={Globe}
                   title="Datos de la empresa"
-                  description="Informacion publica y fiscal para identificar a la organizacion."
+                  description="Informacion de la empresa y datos con los que iniciara sesion en la plataforma."
                 />
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormControl label="Nombre de la empresa" help={getLengthHelp(SECURITY_LIMITS.companyName)}>
@@ -548,7 +580,7 @@ export const RegistroEmpresa = () => {
                       required
                     />
                   </FormControl>
-                  <FormControl label="Sector">
+                  <FormControl label="Sector" help="Selecciona el giro principal de la empresa.">
                     <select
                       name="sectorId"
                       value={form.sectorId}
@@ -570,7 +602,35 @@ export const RegistroEmpresa = () => {
                       <p className="text-xs font-semibold text-red-500">{sectoresError}</p>
                     )}
                   </FormControl>
-                  <FormControl label="Telefono de la empresa" help="De 7 a 18 caracteres. Solo numeros, espacios, +, - o parentesis.">
+                  <FormControl
+                    label="Correo de la empresa (acceso)"
+                    help="Con este correo la empresa iniciara sesion. Usa el formato correo@dominio.com."
+                  >
+                    <input
+                      type="email"
+                      name="correoEmpresa"
+                      value={form.correoEmpresa}
+                      onChange={handleChange}
+                      className={FORM_FIELD_CLASS}
+                      placeholder="contacto@empresa.com"
+                      maxLength={SECURITY_LIMITS.email}
+                      required
+                    />
+                  </FormControl>
+                  <FormControl label="Contraseña" help="Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero.">
+                    <input
+                      type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      className={FORM_FIELD_CLASS}
+                      placeholder="Crea una contraseña segura"
+                      minLength={SECURITY_LIMITS.passwordMin}
+                      maxLength={SECURITY_LIMITS.passwordMax}
+                      required
+                    />
+                  </FormControl>
+                  <FormControl label="Telefono de la empresa" help="Opcional. De 7 a 18 caracteres: numeros, espacios, +, - o parentesis.">
                     <input
                       name="telefonoEmpresa"
                       value={form.telefonoEmpresa}
@@ -580,18 +640,7 @@ export const RegistroEmpresa = () => {
                       maxLength={SECURITY_LIMITS.phone}
                     />
                   </FormControl>
-                  <FormControl label="Correo de la empresa" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
-                    <input
-                      type="email"
-                      name="correoEmpresa"
-                      value={form.correoEmpresa}
-                      onChange={handleChange}
-                      className={FORM_FIELD_CLASS}
-                      placeholder="contacto@empresa.com"
-                      maxLength={SECURITY_LIMITS.email}
-                    />
-                  </FormControl>
-                  <FormControl label="Direccion" help={getLengthHelp(SECURITY_LIMITS.address)}>
+                  <FormControl label="Direccion" help={getLengthHelp(SECURITY_LIMITS.address, 'Opcional. Calle, numero y ciudad.')}>
                     <input
                       name="direccion"
                       value={form.direccion}
@@ -601,7 +650,7 @@ export const RegistroEmpresa = () => {
                       maxLength={SECURITY_LIMITS.address}
                     />
                   </FormControl>
-                  <FormControl label="Sitio web" help={getLengthHelp(SECURITY_LIMITS.url, 'Debe iniciar con http:// o https://.')}>
+                  <FormControl label="Sitio web" help={getLengthHelp(SECURITY_LIMITS.url, 'Opcional. Debe iniciar con http:// o https://.')}>
                     <input
                       name="sitioWeb"
                       value={form.sitioWeb}
@@ -612,7 +661,7 @@ export const RegistroEmpresa = () => {
                     />
                   </FormControl>
                   <div className="md:col-span-2">
-                    <FormControl label="Descripcion" help={getLengthHelp(SECURITY_LIMITS.longText)}>
+                    <FormControl label="Descripcion" help={getLengthHelp(SECURITY_LIMITS.longText, 'Opcional. Describe a que se dedica la empresa.')}>
                       <textarea
                         name="descripcion"
                         value={form.descripcion}
@@ -654,7 +703,7 @@ export const RegistroEmpresa = () => {
                       required
                     />
                   </FormControl>
-                  <FormControl label="Puesto o cargo" help={getLengthHelp(SECURITY_LIMITS.shortText)}>
+                  <FormControl label="Puesto o cargo" help={getLengthHelp(SECURITY_LIMITS.shortText, 'Opcional.')}>
                     <input
                       name="puesto"
                       value={form.puesto}
@@ -664,7 +713,7 @@ export const RegistroEmpresa = () => {
                       maxLength={SECURITY_LIMITS.shortText}
                     />
                   </FormControl>
-                  <FormControl label="Telefono" help="De 7 a 18 caracteres. Solo numeros, espacios, +, - o parentesis.">
+                  <FormControl label="Telefono" help="Opcional. De 7 a 18 caracteres: numeros, espacios, +, - o parentesis.">
                     <input
                       name="telefonoContacto"
                       value={form.telefonoContacto}
@@ -675,7 +724,7 @@ export const RegistroEmpresa = () => {
                     />
                   </FormControl>
                   <div className="md:col-span-2">
-                    <FormControl label="Correo del representante" help={getLengthHelp(SECURITY_LIMITS.email, 'Formato correo@dominio.com.')}>
+                    <FormControl label="Correo del representante" help={getLengthHelp(SECURITY_LIMITS.email, 'Opcional. Formato correo@dominio.com.')}>
                       <input
                         type="email"
                         name="correoContacto"
@@ -692,37 +741,59 @@ export const RegistroEmpresa = () => {
             </div>
 
             <aside className="grid content-start gap-5">
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-800">
+                El logotipo y la foto del INE deben ser PNG o JPG. Los demas documentos aceptan PDF, PNG o JPG. Todos son obligatorios.
+              </div>
+
               <section className="auth-section-card">
                 <SectionHeading
                   icon={Camera}
-                  title="Logotipo"
-                  description="Opcional, ayuda a reconocer la empresa en la plataforma."
+                  title="Logotipo *"
+                  description="Obligatorio. Ayuda a reconocer la empresa en la plataforma."
                 />
                 <button
                   type="button"
                   onClick={() => logoRef.current?.click()}
-                  className="auth-spotlight grid w-full place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-emerald-300 hover:bg-white"
+                  className={`auth-spotlight grid w-full place-items-center rounded-2xl border border-dashed bg-slate-50 p-5 text-center transition hover:bg-white ${logoFile ? 'border-emerald-400' : 'border-slate-300 hover:border-emerald-300'}`}
                 >
-                  <span className="grid h-28 w-28 place-items-center overflow-hidden rounded-3xl border-4 border-white bg-slate-200 shadow-sm">
+                  <span className="relative grid h-28 w-28 place-items-center overflow-hidden rounded-3xl border-4 border-white bg-slate-200 shadow-sm">
                     {logoPreview ? (
                       <img src={logoPreview} alt="Logo de empresa" className="h-full w-full object-cover" />
                     ) : (
                       <Camera size={34} className="text-slate-400" />
                     )}
+                    {logoFile ? (
+                      <span className="absolute bottom-1 right-1 grid h-7 w-7 place-items-center rounded-full bg-white shadow ring-1 ring-emerald-100">
+                        <CheckCircle2 size={18} className="text-emerald-600" />
+                      </span>
+                    ) : null}
                   </span>
-                  <span className="mt-3 text-sm font-black text-slate-900">
-                    {logoFile ? logoFile.name : 'Subir logotipo'}
+                  <span className="mt-3 flex items-center gap-1.5 text-sm font-black">
+                    {logoFile ? (
+                      <><CheckCircle2 size={15} className="text-emerald-600" /><span className="text-emerald-700">Logotipo cargado</span></>
+                    ) : (
+                      <span className="text-slate-900">Subir logotipo</span>
+                    )}
                   </span>
-                  <span className="mt-1 text-xs text-slate-500">PNG, JPG o WEBP</span>
+                  <span className="mt-1 text-xs text-slate-500">Solo PNG o JPG. Maximo 2 MB.</span>
                 </button>
-                <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={handleLogo} />
+                {logoFile ? (
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-red-500 transition-colors hover:text-red-600"
+                  >
+                    <X size={13} /> Quitar logotipo
+                  </button>
+                ) : null}
+                <input ref={logoRef} type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => void handleLogo(e)} />
               </section>
 
               <section className="auth-section-card">
                 <SectionHeading
                   icon={Upload}
                   title="Documentos probatorios"
-                  description="Estos archivos se envian a validacion del administrador."
+                  description="Obligatorios. PDF, PNG o JPG. Se envian a validacion del administrador."
                 />
                 <div className="grid gap-3">
                   {DOCUMENTOS.map((item) => (

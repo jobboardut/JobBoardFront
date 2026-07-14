@@ -13,6 +13,11 @@ export interface VacanteReciente {
   estatus: string
   fechaPublicacion?: string
   totalPostulantes: number
+  // El sueldo se muestra en cuanto el backend lo incluya en la respuesta.
+  sueldoAprox?: number | null
+  ubicacion?: string | null
+  lugares?: number | null
+  lugaresOcupados?: number | null
 }
 
 export interface AdminUsuario {
@@ -22,6 +27,8 @@ export interface AdminUsuario {
   estatusValidacion: 'Pendiente' | 'Validado' | 'Rechazado' | string
   fechaRegistro: string
   nombreCompleto: string | null
+  // Motivo capturado por el admin al rechazar. Pendiente de que el backend lo devuelva.
+  observaciones?: string | null
 }
 
 export interface AdminUsuariosResponse {
@@ -42,6 +49,8 @@ export type ValidarUsuarioAccion = 'aprobar' | 'rechazar'
 
 export interface ValidarUsuarioRequest {
   accion: ValidarUsuarioAccion
+  // Motivo del rechazo redactado por el admin. Solo se envia al rechazar.
+  observaciones?: string
 }
 
 export interface ValidationDocument {
