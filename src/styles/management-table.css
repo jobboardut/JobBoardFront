@@ -82,10 +82,16 @@
   background: rgba(156, 163, 175, 0.24);
 }
 
-/* Rechazado: presente pero discreto, sin llamar la atencion. */
+/* Rechazado / Inhabilitado: presentes pero discretos, sin llamar la atencion. */
 .management-state-pill.is-rejected {
   color: #6b7280;
   background: rgba(107, 114, 128, 0.12);
+}
+
+/* Devuelto: el usuario debe corregir y reenviar; tono ambar para distinguirlo. */
+.management-state-pill.is-returned {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.16);
 }
 
 .management-table tbody tr.is-rejected-row {

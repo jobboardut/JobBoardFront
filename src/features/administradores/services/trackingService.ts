@@ -15,8 +15,12 @@ const asText = (value: unknown, fallback = 'No especificado'): string =>
 const asArray = (value: unknown): RawPostulacion[] => (Array.isArray(value) ? value as RawPostulacion[] : [])
 
 const asStatus = (value: unknown): TrackingStatus => {
-  const status = asText(value, 'Pendiente')
+  const status = asText(value, 'Postulado')
   const normalized = status.toLowerCase()
+
+  if (normalized.includes('visto') || normalized.includes('cv')) {
+    return 'CV visto'
+  }
 
   if (normalized.includes('entrevista')) {
     return 'Entrevista'
@@ -26,15 +30,20 @@ const asStatus = (value: unknown): TrackingStatus => {
     return 'Contratado'
   }
 
-  if (normalized.includes('acept') || normalized.includes('aprob') || normalized.includes('aprue')) {
-    return 'Aprobado'
-  }
-
   if (normalized.includes('rechaz')) {
     return 'Rechazado'
   }
 
-  return 'Pendiente'
+  if (normalized.includes('retir')) {
+    return 'Retirado'
+  }
+
+  // Legado: "Aceptada/Aprobado" del flujo anterior equivale a entrevista.
+  if (normalized.includes('acept') || normalized.includes('aprob') || normalized.includes('aprue')) {
+    return 'Entrevista'
+  }
+
+  return 'Postulado'
 }
 
 const formatDate = (value: unknown): string => {
@@ -78,22 +87,23 @@ const toTrackingRow = (item: RawPostulacion, index: number): TrackingRow => {
     status: asStatus(item.estatus ?? item.status),
     date: formatDate(item.fechaPostulacion ?? item.fecha ?? item.createdAt),
     email: asText(item.email ?? item.correo, 'Sin correo'),
-    note: asText(item.observacion ?? item.nota, 'Sin observaciones'),
+    note: asText(item.motivoRechazo ?? item.observacion ?? item.nota, 'Sin observaciones'),
   }
 }
 
 export async function getTrackingOverview(): Promise<TrackingOverview> {
   const response = await adminService.getPostulantes()
   const allRows = asArray(response).map(toTrackingRow)
-  const rows = allRows.filter((row) => row.status !== 'Pendiente')
+  // Los "Postulado" aun no son revisados por la empresa: no se muestran al admin.
+  const rows = allRows.filter((row) => row.status !== 'Postulado')
 
   const countByStatus = (status: TrackingStatus) => rows.filter((row) => row.status === status).length
 
   return {
     metrics: [
       { label: 'Total', value: rows.length, Icon: Users, tone: 'blue' },
+      { label: 'CV vistos', value: countByStatus('CV visto'), Icon: CircleCheckBig, tone: 'blue' },
       { label: 'Entrevistas', value: countByStatus('Entrevista'), Icon: MessagesSquare, tone: 'orange' },
-      { label: 'Aprobados', value: countByStatus('Aprobado'), Icon: CircleCheckBig, tone: 'green' },
       { label: 'Contratados', value: countByStatus('Contratado'), Icon: FileCheck2, tone: 'green' },
       { label: 'Rechazados', value: countByStatus('Rechazado'), Icon: CircleX, tone: 'red' },
     ],

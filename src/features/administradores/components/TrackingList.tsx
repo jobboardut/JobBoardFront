@@ -8,6 +8,10 @@ type TrackingListProps = {
 }
 
 function getStatusClass(status: TrackingRow['status']): string {
+  if (status === 'CV visto') {
+    return 'is-blue'
+  }
+
   if (status === 'Entrevista') {
     return 'is-orange'
   }
@@ -16,24 +20,33 @@ function getStatusClass(status: TrackingRow['status']): string {
     return 'is-red'
   }
 
-  if (status === 'Aprobado' || status === 'Contratado') {
+  if (status === 'Retirado') {
+    return 'is-gray'
+  }
+
+  if (status === 'Contratado') {
     return 'is-green'
   }
 
   return 'is-blue'
 }
 
+// Camino: CV visto -> Entrevista -> Contratado. Rechazado/Retirado pintan la barra completa.
 function getFlowConfig(status: TrackingRow['status']): { activeSteps: number; tone: string } {
-  if (status === 'Entrevista') {
-    return { activeSteps: 1, tone: 'is-orange' }
+  if (status === 'CV visto') {
+    return { activeSteps: 1, tone: 'is-blue' }
   }
 
-  if (status === 'Aprobado') {
-    return { activeSteps: 2, tone: 'is-green' }
+  if (status === 'Entrevista') {
+    return { activeSteps: 2, tone: 'is-orange' }
   }
 
   if (status === 'Contratado') {
     return { activeSteps: 3, tone: 'is-green' }
+  }
+
+  if (status === 'Retirado') {
+    return { activeSteps: 4, tone: 'is-gray' }
   }
 
   return { activeSteps: 4, tone: 'is-red' }

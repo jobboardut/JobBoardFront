@@ -30,7 +30,10 @@ const vacanteToJobItem = (vacante: Vacante): JobItem => ({
 
 const buildMetrics = (applications: Application[], totalPostulaciones: number): Metric[] => {
   const activeApplications = applications.filter(
-    (application) => application.status !== 'CONTRATADO' && application.status !== 'RECHAZADO'
+    (application) =>
+      application.status !== 'CONTRATADO' &&
+      application.status !== 'RECHAZADO' &&
+      application.status !== 'RETIRADO'
   ).length
 
   return [
@@ -48,12 +51,12 @@ const buildMetrics = (applications: Application[], totalPostulaciones: number): 
 }
 
 const buildActivityColumns = (applications: Application[]): ActivityColumn[] => {
-  const inReview = applications.filter((application) => application.status === 'PENDIENTE')
-  const inProgress = applications.filter((application) =>
-    ['ENTREVISTA', 'APROBADO'].includes(application.status)
+  const inReview = applications.filter((application) =>
+    ['POSTULADO', 'CV VISTO'].includes(application.status)
   )
+  const inProgress = applications.filter((application) => application.status === 'ENTREVISTA')
   const finished = applications.filter((application) =>
-    ['CONTRATADO', 'RECHAZADO'].includes(application.status)
+    ['CONTRATADO', 'RECHAZADO', 'RETIRADO'].includes(application.status)
   )
 
   return [

@@ -106,8 +106,8 @@ export function validateUser(
 ): Promise<void> {
   const payload: ValidarUsuarioRequest = { accion }
 
-  // El motivo solo aplica al rechazar.
-  if (accion === 'rechazar' && observaciones?.trim()) {
+  // Al devolver, el backend envia las observaciones por correo al usuario.
+  if (accion === 'devolver' && observaciones?.trim()) {
     payload.observaciones = observaciones.trim()
   }
 

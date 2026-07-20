@@ -8,7 +8,7 @@ import type {
   UpdateEstatusRequest,
   Postulante,
   PostulanteApi,
-  PostulanteEstatus,
+  CambiarEstatusPostulacionRequest,
 } from '../types/empresa.types'
 
 const asRecord = (value: unknown): Record<string, unknown> =>
@@ -69,7 +69,8 @@ export const empresaService = {
     api.get(`/empresa/${empresaId}/vacantes/${publicacionId}`) as Promise<Vacante>,
 
   crearVacante: (empresaId: number, data: CreateVacanteRequest): Promise<Vacante> =>
-    api.post(`/empresa/${empresaId}/vacantes`, data) as Promise<Vacante>,
+    // El backend nombra "cupo" a los lugares de la vacante; se envian ambos por compatibilidad.
+    api.post(`/empresa/${empresaId}/vacantes`, { ...data, cupo: data.lugares }) as Promise<Vacante>,
 
   actualizarEstatusVacante: (publicacionId: number, data: UpdateEstatusRequest): Promise<void> =>
     api.put(`/empresa/vacantes/${publicacionId}/estatus`, data) as Promise<void>,
@@ -82,11 +83,13 @@ export const empresaService = {
     return unwrapPostulantes(response).map(mapPostulante)
   },
 
-  actualizarEstatusPostulante: (
+  // Endpoint unico para las cuatro acciones del ciclo:
+  // CvVisto | Entrevista (fechaEntrevista opcional) | Contratado (valida cupo) | Rechazado (motivo obligatorio)
+  cambiarEstatusPostulante: (
     empresaId: number,
     postulacionId: number,
-    estatus: PostulanteEstatus
+    data: CambiarEstatusPostulacionRequest
   ): Promise<void> =>
-    api.put(`/empresa/${empresaId}/postulaciones/${postulacionId}/estatus`, { estatus }) as Promise<void>,
+    api.put(`/empresa/${empresaId}/postulaciones/${postulacionId}/estatus`, data) as Promise<void>,
 
 }

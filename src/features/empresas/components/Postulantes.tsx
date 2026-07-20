@@ -141,7 +141,7 @@ export const Postulantes = () => {
 
   // Conteo por etapa del proceso, para leer el avance de un vistazo.
   const resumenEstatus = useMemo(() => {
-    const etapas = ['Pendiente', 'Entrevista', 'Aceptada', 'Contratado', 'Rechazada']
+    const etapas = ['Postulado', 'CvVisto', 'Entrevista', 'Contratado', 'Rechazado']
 
     return etapas.map((etapa) => ({
       label: getPostulanteStatusMeta(etapa).label,

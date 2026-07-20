@@ -1,78 +1,74 @@
-import { Eye } from 'lucide-react'
+import { Eye, Undo2 } from 'lucide-react'
 import { EmptyState } from '@/shared/components/StateFeedback'
 import type { Application } from '../types/seguimiento.types'
 
 interface ApplicationsTableProps {
   applications: Application[]
   onViewDetails?: (application: Application) => void
+  onRetirar?: (application: Application) => void
+  isRetirando?: boolean
 }
 
-const timelineSteps = ['PENDIENTE', 'ENTREVISTA', 'APROBADO', 'CONTRATADO', 'RECHAZADO'] as const
+// Etapas del camino feliz; RECHAZADO y RETIRADO son salidas terminales.
+const timelineSteps = ['POSTULADO', 'CV VISTO', 'ENTREVISTA', 'CONTRATADO'] as const
+
+const TERMINALES = ['CONTRATADO', 'RECHAZADO', 'RETIRADO']
+
+const STEP_COLORS: Record<string, string> = {
+  POSTULADO: 'bg-[#EA580C]',
+  'CV VISTO': 'bg-[#0EA5E9]',
+  ENTREVISTA: 'bg-[#EAB308]',
+  CONTRATADO: 'bg-[#10B981]',
+}
 
 const getStatusStyles = (status: string) => {
   switch (status) {
-    case 'PENDIENTE':
+    case 'POSTULADO':
       return 'bg-[rgba(234,88,12,0.12)] text-[#EA580C] border-[#EA580C]'
+    case 'CV VISTO':
+      return 'bg-[rgba(14,165,233,0.12)] text-[#0284C7] border-[#0EA5E9]'
     case 'ENTREVISTA':
       return 'bg-[rgba(234,179,8,0.14)] text-[#CA8A04] border-[#EAB308]'
-    case 'APROBADO':
-      return 'bg-[rgba(0,154,77,0.12)] text-[#009A4D] border-[#009A4D]'
     case 'CONTRATADO':
       return 'bg-[rgba(16,185,129,0.12)] text-[#10B981] border-[#10B981]'
     case 'RECHAZADO':
       return 'bg-red-100 text-red-700 border-red-300'
+    case 'RETIRADO':
+      return 'bg-slate-100 text-slate-600 border-slate-300'
     default:
       return 'bg-gray-100 text-gray-700 border-gray-300'
   }
 }
 
 const getStatusDotColor = (status: string) => {
-  switch (status) {
-    case 'PENDIENTE':
-      return 'bg-[#EA580C]'
-    case 'ENTREVISTA':
-      return 'bg-[#EAB308]'
-    case 'APROBADO':
-      return 'bg-[#009A4D]'
-    case 'CONTRATADO':
-      return 'bg-[#10B981]'
-    case 'RECHAZADO':
-      return 'bg-red-500'
-    default:
-      return 'bg-gray-500'
-  }
+  if (status === 'RECHAZADO') return 'bg-red-500'
+  if (status === 'RETIRADO') return 'bg-slate-400'
+  return STEP_COLORS[status] ?? 'bg-gray-500'
 }
 
 const getTimelinePointClass = (status: string, step: (typeof timelineSteps)[number], stepIndex: number) => {
-  if (status === 'RECHAZADO') {
-    return step === 'RECHAZADO' ? 'bg-red-500' : 'bg-slate-300'
+  if (status === 'RECHAZADO' || status === 'RETIRADO') {
+    return stepIndex === 0 ? getStatusDotColor(status) : 'bg-slate-300'
   }
 
   const currentIndex = timelineSteps.indexOf(status as (typeof timelineSteps)[number])
-  if (currentIndex === -1) return 'bg-slate-300'
-  if (stepIndex > currentIndex) return 'bg-slate-300'
-  if (step === 'PENDIENTE') return 'bg-[#EA580C]'
-  if (step === 'ENTREVISTA') return 'bg-[#EAB308]'
-  if (step === 'APROBADO') return 'bg-[#009A4D]'
-  if (step === 'CONTRATADO') return 'bg-[#10B981]'
-  return 'bg-slate-300'
+  if (currentIndex === -1 || stepIndex > currentIndex) return 'bg-slate-300'
+
+  return STEP_COLORS[step] ?? 'bg-slate-300'
 }
 
 const getTimelineSegmentClass = (status: string, stepIndex: number) => {
-  if (status === 'RECHAZADO') {
-    return 'bg-slate-300'
-  }
+  if (status === 'RECHAZADO' || status === 'RETIRADO') return 'bg-slate-300'
 
   const currentIndex = timelineSteps.indexOf(status as (typeof timelineSteps)[number])
-  if (currentIndex <= 0) return 'bg-slate-300'
-  if (stepIndex >= currentIndex) return 'bg-slate-300'
-  if (stepIndex === 0) return 'bg-[#EA580C]'
-  if (stepIndex === 1) return 'bg-[#EAB308]'
-  if (stepIndex === 2) return 'bg-[#009A4D]'
-  return 'bg-[#10B981]'
+  if (currentIndex <= 0 || stepIndex >= currentIndex) return 'bg-slate-300'
+
+  return STEP_COLORS[timelineSteps[stepIndex]] ?? 'bg-slate-300'
 }
 
-export const ApplicationsTable = ({ applications, onViewDetails }: ApplicationsTableProps) => {
+const puedeRetirarse = (status: string) => !TERMINALES.includes(status)
+
+export const ApplicationsTable = ({ applications, onViewDetails, onRetirar, isRetirando = false }: ApplicationsTableProps) => {
   if (!applications.length) {
     return <EmptyState title="No hay postulaciones para mostrar" message="Tus aplicaciones apareceran aqui cuando postules a una vacante." />
   }
@@ -103,6 +99,17 @@ export const ApplicationsTable = ({ applications, onViewDetails }: ApplicationsT
               </span>
             </div>
             <p className="mt-3 text-xs font-semibold text-slate-500">Postulacion: {app.postulationDate}</p>
+            {puedeRetirarse(app.status) && onRetirar ? (
+              <button
+                type="button"
+                onClick={() => onRetirar(app)}
+                disabled={isRetirando}
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 transition hover:text-red-500 disabled:opacity-50"
+              >
+                <Undo2 size={13} />
+                Retirar postulacion
+              </button>
+            ) : null}
           </article>
         ))}
       </div>
@@ -163,14 +170,28 @@ export const ApplicationsTable = ({ applications, onViewDetails }: ApplicationsT
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onViewDetails?.(app)}
-                      className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-[#f0f0f0]"
-                      aria-label="Ver detalles"
-                    >
-                      <Eye size={18} strokeWidth={2} />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      {puedeRetirarse(app.status) && onRetirar ? (
+                        <button
+                          type="button"
+                          onClick={() => onRetirar(app)}
+                          disabled={isRetirando}
+                          title="Retirar postulacion"
+                          className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500 disabled:opacity-50"
+                          aria-label="Retirar postulacion"
+                        >
+                          <Undo2 size={17} strokeWidth={2} />
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => onViewDetails?.(app)}
+                        className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-[#f0f0f0]"
+                        aria-label="Ver detalles"
+                      >
+                        <Eye size={18} strokeWidth={2} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

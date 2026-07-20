@@ -12,14 +12,14 @@ import { matchesAdminFilterGroup, matchesAdminSearch } from '../features/adminis
 
 const statusInfoItems = [
   {
-    title: 'ENTREVISTA',
-    description: 'El candidato avanzo a una etapa de contacto o entrevista con la empresa.',
+    title: 'CV VISTO',
+    description: 'La empresa ya reviso el CV y el perfil del candidato.',
     tone: 'is-green',
     Icon: CheckCircle2,
   },
   {
-    title: 'APROBADO',
-    description: 'La empresa aprobo al candidato para continuar con los pasos finales.',
+    title: 'ENTREVISTA',
+    description: 'El candidato avanzo a una etapa de contacto o entrevista con la empresa.',
     tone: 'is-green',
     Icon: CheckCircle2,
   },
@@ -31,7 +31,13 @@ const statusInfoItems = [
   },
   {
     title: 'RECHAZADO',
-    description: 'La postulacion finalizo sin continuar a las siguientes etapas.',
+    description: 'La postulacion finalizo sin continuar a las siguientes etapas. Incluye el motivo registrado.',
+    tone: 'is-red',
+    Icon: XCircle,
+  },
+  {
+    title: 'RETIRADO',
+    description: 'El estudiante decidio retirar su postulacion del proceso.',
     tone: 'is-red',
     Icon: XCircle,
   },

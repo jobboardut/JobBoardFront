@@ -98,12 +98,15 @@ const normalizeStatus = (value: string): ApplicationStatus => {
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
 
+  if (normalized.includes('VISTO') || normalized.includes('CV')) return 'CV VISTO'
   if (normalized.includes('ENTREV')) return 'ENTREVISTA'
-  if (normalized.includes('ACEPT') || normalized.includes('APROB') || normalized.includes('APRUE')) return 'APROBADO'
   if (normalized.includes('CONTRAT')) return 'CONTRATADO'
   if (normalized.includes('RECHAZ')) return 'RECHAZADO'
+  if (normalized.includes('RETIR')) return 'RETIRADO'
+  // Legado del flujo anterior: "Aceptada/Aprobado" equivale a la etapa de entrevista.
+  if (normalized.includes('ACEPT') || normalized.includes('APROB') || normalized.includes('APRUE')) return 'ENTREVISTA'
 
-  return 'PENDIENTE'
+  return 'POSTULADO'
 }
 
 const mapStudentProfile = (payload: unknown): StudentProfile => {
@@ -167,6 +170,8 @@ const mapApplication = (payload: unknown, index: number): Application => {
 
   return {
     id: pickString(records, ['id', 'postulacionId', 'publicacionId', 'vacanteId'], String(index + 1)),
+    // Id explicito de la postulacion, necesario para poder retirarla.
+    postulacionId: pickNumber([application], ['postulacionId', 'id']) || undefined,
     vacancyId:
       pickNumber([application], ['publicacionId', 'vacanteId']) ||
       pickNumber([vacancy], ['id', 'publicacionId', 'vacanteId']) ||
@@ -174,7 +179,7 @@ const mapApplication = (payload: unknown, index: number): Application => {
     jobTitle: pickString(records, ['titulo', 'tituloVacante', 'jobTitle', 'title'], 'Vacante sin titulo'),
     company: pickString(records, ['nombreEmpresa', 'empresaNombre', 'companyName', 'company', 'nombre'], 'Empresa no especificada'),
     postulationDate: formatDate(pickValue(records, ['fechaPostulacion', 'fechaAplicacion', 'fecha', 'createdAt', 'fechaPublicacion'])),
-    status: normalizeStatus(pickString(records, ['estatusPostulacion', 'estatus', 'status'], 'PENDIENTE')),
+    status: normalizeStatus(pickString(records, ['estatusPostulacion', 'estatus', 'status'], 'POSTULADO')),
     modality: pickString(records, ['modalidad', 'type', 'tipo'], 'No especificado'),
     salary: formatSalary(pickValue(records, ['sueldoAprox', 'salario', 'salary', 'salaryTag'])),
     location: pickString(records, ['ubicacion', 'location', 'direccion'], 'No especificado'),
@@ -246,4 +251,8 @@ export const estudianteService = {
       recientes,
     }
   },
+
+  // El estudiante retira su postulacion (estatus terminal "Retirado").
+  retirarPostulacion: (estudianteId: number, postulacionId: number): Promise<void> =>
+    api.put(`/estudiante/${estudianteId}/postulaciones/${postulacionId}/retirar`) as Promise<void>,
 }

@@ -10,7 +10,9 @@ export type ManagementMetric = {
 }
 
 export type ManagementUserType = 'Alumno' | 'Egresado' | 'Empresa'
-export type ManagementUserState = 'Activo' | 'Inactivo' | 'Rechazado'
+// Devuelto: el registro regreso al usuario con observaciones para corregir.
+// Inhabilitado: el admin desactivo la cuenta.
+export type ManagementUserState = 'Activo' | 'Inactivo' | 'Devuelto' | 'Rechazado' | 'Inhabilitado'
 
 export type ManagementUser = {
   id: string

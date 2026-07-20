@@ -1,4 +1,4 @@
-import { Clock, CircleCheck, AlertCircle, XCircle } from 'lucide-react'
+import { Clock, CircleCheck, AlertCircle, Eye, Undo2, XCircle } from 'lucide-react'
 
 interface SeguimientoFilterPanelProps {
   selectedStatus?: string
@@ -7,22 +7,22 @@ interface SeguimientoFilterPanelProps {
 
 const statuses = [
   {
-    status: 'PENDIENTE',
+    status: 'POSTULADO',
     color: 'text-[#EA580C]',
     bgColor: 'bg-[rgba(234,88,12,0.12)]',
     icon: AlertCircle,
+  },
+  {
+    status: 'CV VISTO',
+    color: 'text-[#0284C7]',
+    bgColor: 'bg-[rgba(14,165,233,0.12)]',
+    icon: Eye,
   },
   {
     status: 'ENTREVISTA',
     color: 'text-[#CA8A04]',
     bgColor: 'bg-[rgba(234,179,8,0.14)]',
     icon: Clock,
-  },
-  {
-    status: 'APROBADO',
-    color: 'text-[#009A4D]',
-    bgColor: 'bg-[rgba(0,154,77,0.12)]',
-    icon: CircleCheck,
   },
   {
     status: 'CONTRATADO',
@@ -35,6 +35,12 @@ const statuses = [
     color: 'text-red-600',
     bgColor: 'bg-red-50',
     icon: XCircle,
+  },
+  {
+    status: 'RETIRADO',
+    color: 'text-slate-500',
+    bgColor: 'bg-slate-100',
+    icon: Undo2,
   },
 ]
 

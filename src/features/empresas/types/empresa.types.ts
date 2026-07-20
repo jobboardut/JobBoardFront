@@ -40,6 +40,9 @@ export interface Vacante {
   totalPostulantes?: number
   lugares?: number
   lugaresOcupados?: number
+  // Nombres reales que devuelve el backend para los lugares.
+  cupo?: number | null
+  cuposDisponibles?: number | null
 }
 
 export interface VacanteUI {
@@ -77,12 +80,25 @@ export interface EmpresaArchivos {
   repFotoIne?: File | null
 }
 
+// Ciclo estandar acordado con backend:
+// Postulado -> CvVisto -> Entrevista -> Contratado
+// Rechazado (con motivo) desde CvVisto o Entrevista. Retirado lo hace el estudiante.
 export type PostulanteEstatus =
-  | 'Pendiente'
+  | 'Postulado'
+  | 'CvVisto'
   | 'Entrevista'
-  | 'Aceptada'
   | 'Contratado'
-  | 'Rechazada'
+  | 'Rechazado'
+  | 'Retirado'
+
+// Body de PUT /empresa/{userId}/postulaciones/{postulacionId}/estatus
+export interface CambiarEstatusPostulacionRequest {
+  estatus: PostulanteEstatus
+  /** Solo al citar a entrevista. Fecha futura, opcional. */
+  fechaEntrevista?: string
+  /** Obligatorio al rechazar. */
+  motivoRechazo?: string
+}
 
 export interface Postulante {
   id: number

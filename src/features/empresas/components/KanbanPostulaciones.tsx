@@ -7,9 +7,14 @@ interface KanbanPostulacionesProps {
 }
 
 export const KanbanPostulaciones = ({ data }: KanbanPostulacionesProps) => {
+  // El buzon muestra las 5 etapas del ciclo; "Retirado" solo aparece si tiene candidatos.
+  const columnas = POSTULANTE_STATUS_FLOW.filter(
+    (status) => status.key !== 'retirado' || (data[status.key]?.length ?? 0) > 0,
+  )
+
   return (
     <div className="grid gap-4 xl:grid-cols-5">
-      {POSTULANTE_STATUS_FLOW.map((status) => {
+      {columnas.map((status) => {
         const items = data[status.key] ?? []
         const Icon = status.Icon
 

@@ -32,6 +32,8 @@ export const EstudianteSeguimientoPage = () => {
     setApplicationSearchText,
     openJobModal,
     closeJobModal,
+    retirarPostulacion,
+    isRetirando,
   } = useSeguimiento()
 
   return (
@@ -70,6 +72,8 @@ export const EstudianteSeguimientoPage = () => {
                   <ApplicationsTable
                     applications={applications}
                     onViewDetails={openJobModal}
+                    onRetirar={(app) => void retirarPostulacion(app)}
+                    isRetirando={isRetirando}
                   />
                 </div>
 

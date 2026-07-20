@@ -51,9 +51,15 @@ const toPublication = (vacancy: VacanteReciente): Publication => ({
   applicants: vacancy.totalPostulantes,
   experience: 'No especificada',
   description: `Vacante publicada por ${vacancy.nombreEmpresa}.`,
-  responsibilities: ['Informacion pendiente de especificar por la empresa.'],
-  lugares: vacancy.lugares,
-  lugaresOcupados: vacancy.lugaresOcupados,
+  responsibilities: vacancy.responsabilidades
+    ? vacancy.responsabilidades.split(/\r?\n|;/).map((item) => item.trim()).filter(Boolean)
+    : ['Informacion pendiente de especificar por la empresa.'],
+  // El backend nombra "cupo" a los lugares; se normaliza al formato interno.
+  lugares: vacancy.cupo ?? vacancy.lugares,
+  lugaresOcupados:
+    typeof vacancy.cupo === 'number' && typeof vacancy.cuposDisponibles === 'number'
+      ? vacancy.cupo - vacancy.cuposDisponibles
+      : vacancy.lugaresOcupados,
 })
 
 // Las eliminadas se muestran al final, igual que los usuarios rechazados.

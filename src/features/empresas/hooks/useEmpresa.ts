@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { empresaService } from '../services/empresa.service'
 import type {
+  CambiarEstatusPostulacionRequest,
   CreateVacanteRequest,
   EmpresaArchivos,
   EmpresaPerfilUpdateRequest,
-  PostulanteEstatus,
   UpdateEstatusRequest,
 } from '../types/empresa.types'
 
@@ -101,15 +101,18 @@ export const usePostulantes = (publicacionId: number) => {
   })
 }
 
-export const useActualizarEstatusPostulante = (publicacionId: number) => {
+export const useCambiarEstatusPostulante = (publicacionId: number) => {
   const empresaId = getUserId()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ postulacionId, estatus }: { postulacionId: number; estatus: PostulanteEstatus }) =>
-      empresaService.actualizarEstatusPostulante(empresaId, postulacionId, estatus),
+    mutationFn: ({ postulacionId, ...data }: CambiarEstatusPostulacionRequest & { postulacionId: number }) =>
+      empresaService.cambiarEstatusPostulante(empresaId, postulacionId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['empresa', 'postulantes', empresaId, publicacionId] })
+      // Contratar consume cupo: refresca tambien las vacantes.
+      queryClient.invalidateQueries({ queryKey: ['empresa', 'vacantes', empresaId] })
+      queryClient.invalidateQueries({ queryKey: ['empresa', 'vacante', empresaId, publicacionId] })
     },
   })
 }

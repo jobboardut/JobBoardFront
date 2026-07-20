@@ -5,13 +5,19 @@
   background: #f8fafc;
 }
 
+/* Banner con degradado, misma familia visual que empresa/estudiante,
+   con firma institucional propia (slate -> esmeralda). */
 .admin-page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  border-bottom: 1px solid var(--border);
-  padding: 4px 2px 16px;
+  border: 0;
+  border-radius: 22px;
+  padding: 22px 24px;
+  background: linear-gradient(120deg, #1e293b 0%, #047857 58%, #10b981 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
 
 .admin-page-header__main {
@@ -27,24 +33,24 @@
   width: 46px;
   height: 46px;
   place-items: center;
-  border: 1px solid rgba(0, 154, 77, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 14px;
-  background: #ecfdf5;
-  color: #009a4d;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
 }
 
 .admin-page-header__eyebrow {
   margin: 0 0 3px;
-  color: #047857;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .admin-page-header h1 {
   margin: 0;
-  color: var(--ink-soft);
+  color: #ffffff;
   font-size: clamp(1.35rem, 2.2vw, 1.9rem);
   line-height: 1.15;
 }
@@ -52,7 +58,7 @@
 .admin-page-header__description {
   max-width: 720px;
   margin: 5px 0 0;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.94rem;
   line-height: 1.45;
 }
@@ -81,30 +87,31 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 11px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
   padding: 8px 12px;
-  color: var(--ink-soft);
+  color: #ffffff;
   font-size: 0.84rem;
   font-weight: 700;
 }
 
 .admin-header-action:hover {
-  border-color: rgba(0, 154, 77, 0.3);
-  color: #047857;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
 .admin-header-action.is-primary {
-  border-color: #009a4d;
-  background: #009a4d;
-  color: #ffffff;
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #065f46;
 }
 
 .admin-header-action.is-primary:hover {
-  background: #047857;
-  color: #ffffff;
+  background: #ecfdf5;
+  color: #065f46;
 }
 
 .admin-results-summary {

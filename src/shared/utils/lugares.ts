@@ -15,14 +15,23 @@ export type LugaresInfo = {
 export const getLugaresInfo = (vacante: {
   lugares?: number | null
   lugaresOcupados?: number | null
+  // Nombres reales que devuelve el backend.
+  cupo?: number | null
+  cuposDisponibles?: number | null
 }): LugaresInfo | null => {
-  const total = vacante.lugares
+  const total = vacante.cupo ?? vacante.lugares
 
   if (typeof total !== 'number' || total <= 0) {
     return null
   }
 
-  const ocupados = Math.min(Math.max(vacante.lugaresOcupados ?? 0, 0), total)
+  // El backend reporta disponibles; ocupados = cupo - disponibles.
+  const ocupadosCrudo =
+    typeof vacante.cuposDisponibles === 'number'
+      ? total - vacante.cuposDisponibles
+      : vacante.lugaresOcupados ?? 0
+
+  const ocupados = Math.min(Math.max(ocupadosCrudo, 0), total)
 
   return {
     ocupados,

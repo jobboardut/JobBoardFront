@@ -9,7 +9,8 @@ export type TrackingMetric = {
   tone: TrackingMetricTone
 }
 
-export type TrackingStatus = 'Pendiente' | 'Entrevista' | 'Aprobado' | 'Contratado' | 'Rechazado'
+// Ciclo estandar: Postulado -> CV visto -> Entrevista -> Contratado; Rechazado/Retirado son salidas.
+export type TrackingStatus = 'Postulado' | 'CV visto' | 'Entrevista' | 'Contratado' | 'Rechazado' | 'Retirado'
 
 export type TrackingRow = {
   id: string

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAppToast } from '@/shared/components/appToastContext'
+import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import type { Application } from '../types/seguimiento.types'
 import type { JobDetailData } from '@/shared/types/job.types'
 import { seguimientoService } from '../services/seguimiento.service'
+import { estudianteService } from '../services/estudiante.service'
 
 const getUserId = () => Number(localStorage.getItem('userId'))
 
@@ -20,6 +23,9 @@ const normalizeText = (value: string): string =>
 
 export const useSeguimiento = () => {
   const estudianteId = getUserId()
+  const toast = useAppToast()
+  const { confirm } = useConfirmDialog()
+  const queryClient = useQueryClient()
   const [viewMode, setViewMode] = useState<'detail' | 'search'>('detail')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
@@ -114,14 +120,48 @@ export const useSeguimiento = () => {
   }, [])
 
   const applicationsByStatus = {
-    PENDIENTE: applicationsData.filter((app) => app.status === 'PENDIENTE').length,
+    POSTULADO: applicationsData.filter((app) => app.status === 'POSTULADO').length,
+    'CV VISTO': applicationsData.filter((app) => app.status === 'CV VISTO').length,
     ENTREVISTA: applicationsData.filter((app) => app.status === 'ENTREVISTA').length,
-    APROBADO: applicationsData.filter((app) => app.status === 'APROBADO').length,
     CONTRATADO: applicationsData.filter((app) => app.status === 'CONTRATADO').length,
     RECHAZADO: applicationsData.filter((app) => app.status === 'RECHAZADO').length,
   }
 
+  const retirarMutation = useMutation({
+    mutationFn: (postulacionId: number) => estudianteService.retirarPostulacion(estudianteId, postulacionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones', estudianteId] })
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'dashboard', estudianteId] })
+    },
+  })
+
+  const retirarPostulacion = useCallback(async (app: Application) => {
+    if (!app.postulacionId) {
+      toast.warning('No se pudo identificar la postulacion', 'Actualiza la pagina e intenta de nuevo.')
+      return
+    }
+
+    const accepted = await confirm({
+      title: 'Retirar postulacion',
+      message: `Dejaras de participar en el proceso de "${app.jobTitle}" en ${app.company}. Esta accion no se puede deshacer.`,
+      confirmLabel: 'Retirar postulacion',
+      cancelLabel: 'Seguir participando',
+      tone: 'danger',
+    })
+
+    if (!accepted) return
+
+    try {
+      await retirarMutation.mutateAsync(app.postulacionId)
+      toast.success('Postulacion retirada', `Ya no participas en "${app.jobTitle}".`)
+    } catch {
+      toast.error('No se pudo retirar', 'Intenta de nuevo en unos segundos.')
+    }
+  }, [confirm, retirarMutation, toast])
+
   return {
+    retirarPostulacion,
+    isRetirando: retirarMutation.isPending,
     viewMode,
     applications: displayApplications,
     applicationsByStatus,

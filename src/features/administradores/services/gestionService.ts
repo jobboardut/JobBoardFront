@@ -44,16 +44,20 @@ const toUserState = (estatusValidacion: string): ManagementUserState => {
   const normalized = normalizeRole(estatusValidacion)
 
   if (normalized === 'validado') return 'Activo'
+  if (normalized.startsWith('devuel')) return 'Devuelto'
   if (normalized === 'rechazado') return 'Rechazado'
+  if (normalized === 'inhabilitado') return 'Inhabilitado'
 
   return 'Inactivo'
 }
 
-// Los rechazados se muestran al final, despues de activos e inactivos.
+// Rechazados e inhabilitados van al final, despues de activos, inactivos y devueltos.
 const STATE_ORDER: Record<ManagementUserState, number> = {
   Activo: 0,
   Inactivo: 1,
-  Rechazado: 2,
+  Devuelto: 2,
+  Rechazado: 3,
+  Inhabilitado: 4,
 }
 
 const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
@@ -62,6 +66,7 @@ const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
 
   const fullName = user.nombreCompleto ?? user.email
   const state = toUserState(user.estatusValidacion)
+  const ultimaObservacion = user.ultimaObservacion ?? user.observaciones ?? null
 
   const detailItems = [
     { label: 'Correo', value: user.email },
@@ -70,9 +75,15 @@ const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
     { label: 'Estado', value: user.estatusValidacion },
   ]
 
-  if (state === 'Rechazado' && user.observaciones) {
-    detailItems.push({ label: 'Motivo del rechazo', value: user.observaciones })
+  if (ultimaObservacion) {
+    detailItems.push({ label: 'Ultima observacion', value: ultimaObservacion })
   }
+
+  if (typeof user.totalDevoluciones === 'number' && user.totalDevoluciones > 0) {
+    detailItems.push({ label: 'Devoluciones', value: String(user.totalDevoluciones) })
+  }
+
+  const mostrarObservacion = state === 'Rechazado' || state === 'Devuelto' || state === 'Inhabilitado'
 
   return {
     id: String(user.id),
@@ -84,7 +95,7 @@ const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
     contactPhone: 'No registrado',
     registerDate: formatDate(user.fechaRegistro),
     state,
-    rejectionReason: state === 'Rechazado' ? (user.observaciones ?? null) : null,
+    rejectionReason: mostrarObservacion ? ultimaObservacion : null,
     detailTitle: type === 'Empresa' ? 'Datos de la empresa' : 'Datos del usuario',
     detailItems,
   }
@@ -99,8 +110,8 @@ export async function getManagementOverview(): Promise<ManagementOverview> {
     .sort((a, b) => STATE_ORDER[a.state] - STATE_ORDER[b.state])
 
   const activeCount = users.filter((user) => user.state === 'Activo').length
-  const inactiveCount = users.filter((user) => user.state === 'Inactivo').length
-  const rejectedCount = users.filter((user) => user.state === 'Rechazado').length
+  const inactiveCount = users.filter((user) => user.state === 'Inactivo' || user.state === 'Devuelto').length
+  const rejectedCount = users.filter((user) => user.state === 'Rechazado' || user.state === 'Inhabilitado').length
   const graduateCount = users.filter((user) => user.type === 'Egresado').length
   const studentCount = users.filter((user) => user.type === 'Alumno').length
   const companyCount = users.filter((user) => user.type === 'Empresa').length

@@ -38,15 +38,15 @@ function CentroValidacionPage() {
 
   const handleValidate = async (
     request: ValidationRequest,
-    accion: 'aprobar' | 'rechazar',
+    accion: 'aprobar' | 'devolver',
     observaciones?: string,
   ) => {
     try {
       await validateUser({ id: request.id, accion, observaciones })
       toast.success(
-        accion === 'aprobar' ? 'Usuario aprobado' : 'Usuario rechazado',
-        accion === 'rechazar'
-          ? `${request.fullName} paso a rechazados con el motivo registrado.`
+        accion === 'aprobar' ? 'Usuario aprobado' : 'Solicitud devuelta',
+        accion === 'devolver'
+          ? `${request.fullName} recibira las observaciones por correo para corregir su registro.`
           : `${request.fullName} fue actualizado correctamente.`,
       )
       setSelectedRequest(null)

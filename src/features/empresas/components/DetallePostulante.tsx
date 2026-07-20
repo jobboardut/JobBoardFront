@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, FileText, GraduationCap, Mail, MapPin, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
-import { useActualizarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
+import { useCambiarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
 import type { PostulanteEstatus } from '../types/empresa.types'
-import { POSTULANTE_STATUS_FLOW, getPostulanteStatusMeta } from '../utils/postulanteStatus'
+import { ETIQUETA_ACCION, TRANSICIONES_EMPRESA, getPostulanteStatusMeta } from '../utils/postulanteStatus'
+import { ModalRechazoPostulacion } from './ModalRechazoPostulacion'
 
 export const DetallePostulante = () => {
   const navigate = useNavigate()
@@ -15,6 +17,7 @@ export const DetallePostulante = () => {
   const vacanteId = Number(searchParams.get('vacanteId'))
   const toast = useAppToast()
   const { confirm } = useConfirmDialog()
+  const [isRejectOpen, setIsRejectOpen] = useState(false)
 
   const {
     data: postulantes = [],
@@ -22,7 +25,7 @@ export const DetallePostulante = () => {
     isError,
   } = usePostulantes(vacanteId)
 
-  const { mutate: cambiarEstatus, isPending: isUpdating } = useActualizarEstatusPostulante(vacanteId)
+  const { mutate: cambiarEstatus, isPending: isUpdating } = useCambiarEstatusPostulante(vacanteId)
 
   const postulante = postulantes.find((item) => item.id === postulanteId)
 
@@ -50,36 +53,66 @@ export const DetallePostulante = () => {
 
   const estatusActual = postulante.estatus
   const currentStatus = getPostulanteStatusMeta(estatusActual)
+  const transiciones = TRANSICIONES_EMPRESA[currentStatus.key]
 
-  const aplicarEstatus = async (estatus: PostulanteEstatus) => {
+  const describirError = (error: unknown): string => {
+    const apiError = error as { status?: number; message?: string; detalle?: string; detail?: string }
+    const texto = apiError.detalle ?? apiError.detail ?? apiError.message ?? ''
+
+    if (apiError.status === 409 || /cupo|transicion|prohibid/i.test(texto)) {
+      return texto || 'La transicion no esta permitida o la vacante ya no tiene cupo.'
+    }
+
+    return texto || 'Intenta de nuevo en unos segundos.'
+  }
+
+  const ejecutarCambio = (estatus: PostulanteEstatus, motivoRechazo?: string) => {
     if (!postulante.postulacionId) {
       toast.warning('No se encontro la postulacion', 'Abre el postulante desde una vacante publicada.')
       return
     }
 
     const nextStatus = getPostulanteStatusMeta(estatus)
-    const accepted = await confirm({
-      title: `Marcar como ${nextStatus.label}`,
-      message: `Este cambio actualizara el seguimiento para empresa, estudiante/egresado y administracion.`,
-      confirmLabel: 'Actualizar estatus',
-      cancelLabel: 'Cancelar',
-      tone: nextStatus.key === 'rechazada' ? 'danger' : 'info',
-    })
-
-    if (!accepted) return
 
     cambiarEstatus(
-      { postulacionId: postulante.postulacionId, estatus },
+      {
+        postulacionId: postulante.postulacionId,
+        estatus,
+        ...(motivoRechazo ? { motivoRechazo } : {}),
+      },
       {
         onSuccess: () => {
+          setIsRejectOpen(false)
           toast.success('Estatus actualizado', `${postulante.nombre} ahora aparece como ${nextStatus.label}.`)
         },
         onError: (error: unknown) => {
-          const message = (error as { message?: string })?.message ?? 'Intenta de nuevo en unos segundos.'
-          toast.error('No se pudo actualizar', message)
+          toast.error('No se pudo actualizar', describirError(error))
         },
       }
     )
+  }
+
+  const aplicarEstatus = async (estatus: PostulanteEstatus) => {
+    // El rechazo exige motivo: se captura en su propio modal.
+    if (estatus === 'Rechazado') {
+      setIsRejectOpen(true)
+      return
+    }
+
+    const nextStatus = getPostulanteStatusMeta(estatus)
+    const accepted = await confirm({
+      title: ETIQUETA_ACCION[estatus] ?? `Marcar como ${nextStatus.label}`,
+      message:
+        estatus === 'Contratado'
+          ? 'Se validara el cupo de la vacante y el cambio se vera en todos los apartados.'
+          : 'Este cambio actualizara el seguimiento para empresa, estudiante/egresado y administracion.',
+      confirmLabel: 'Confirmar',
+      cancelLabel: 'Cancelar',
+      tone: 'info',
+    })
+
+    if (!accepted) return
+    ejecutarCambio(estatus)
   }
 
   return (
@@ -109,29 +142,35 @@ export const DetallePostulante = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {POSTULANTE_STATUS_FLOW.filter((status) => status.key !== 'pendiente').map((status) => {
-              const Icon = status.Icon
-              const isActive = status.key === currentStatus.key
+            {transiciones.length === 0 ? (
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white">
+                <currentStatus.Icon size={16} />
+                Proceso finalizado: {currentStatus.label}
+              </span>
+            ) : (
+              transiciones.map((estatus) => {
+                const meta = getPostulanteStatusMeta(estatus)
+                const Icon = meta.Icon
+                const esRechazo = estatus === 'Rechazado'
 
-              return (
-                <button
-                  type="button"
-                  key={status.key}
-                  onClick={() => void aplicarEstatus(status.apiValue)}
-                  disabled={isUpdating || isActive}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-60 ${
-                    isActive
-                      ? 'bg-white/25 text-white'
-                      : status.key === 'aceptada'
-                        ? 'bg-white text-emerald-600'
-                        : 'border border-white/40 text-white hover:bg-white/15'
-                  }`}
-                >
-                  <Icon size={16} />
-                  {status.label}
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    type="button"
+                    key={estatus}
+                    onClick={() => void aplicarEstatus(estatus)}
+                    disabled={isUpdating}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-60 ${
+                      esRechazo
+                        ? 'border border-white/40 text-white hover:bg-red-500/40'
+                        : 'bg-white text-emerald-600 hover:bg-emerald-50'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {ETIQUETA_ACCION[estatus] ?? meta.label}
+                  </button>
+                )
+              })
+            )}
           </div>
         </div>
       </div>
@@ -204,6 +243,14 @@ export const DetallePostulante = () => {
           )}
         </div>
       </div>
+
+      <ModalRechazoPostulacion
+        isOpen={isRejectOpen}
+        candidatoNombre={postulante.nombre}
+        isSubmitting={isUpdating}
+        onClose={() => setIsRejectOpen(false)}
+        onSubmit={(motivo) => ejecutarCambio('Rechazado', motivo)}
+      />
     </div>
   )
 }

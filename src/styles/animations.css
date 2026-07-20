@@ -1,6 +1,6 @@
 /* ==========================================================================
    Sistema de animaciones + identidad visual por rol
-   - Estudiante: esmeralda | Egresado: teal | Empresa: naranja | Admin: oscuro
+   - Estudiante: esmeralda | Egresado: teal | Empresa: naranja | Admin: firma institucional (slate + esmeralda)
    - Animaciones suaves de entrada, hover y feedback, estilo reactbits.
    - Respeta prefers-reduced-motion.
    ========================================================================== */
@@ -38,10 +38,10 @@
 }
 
 .role-admin {
-  --role-accent: #10b981;
-  --role-accent-strong: #34d399;
-  --role-accent-soft: rgba(16, 185, 129, 0.14);
-  --role-accent-border: rgba(16, 185, 129, 0.35);
+  --role-accent: #009a4d;
+  --role-accent-strong: #065f46;
+  --role-accent-soft: #f0fdf4;
+  --role-accent-border: #bbf7d0;
 }
 
 /* Sidebar tematizada con el acento del rol (sin tocar layout.css). */
@@ -83,70 +83,45 @@
   color: var(--role-accent);
 }
 
-/* ----------------------- Admin: panel oscuro elegante -------------------- */
+/* ----------------- Admin: claro y coherente, firma propia ----------------- */
+/* Mismo lienzo blanco que los demas roles; lo distingue la pildora activa
+   en tinta oscura con acento esmeralda. */
 
 .role-admin .sidebar {
-  background: linear-gradient(180deg, #0f172a 0%, #10203a 100%);
-  border-right-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, #f8faf9 100%);
 }
 
-.role-admin .brand-mark {
-  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+.role-admin .sidebar .nav-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-.role-admin .sidebar .nav-group-label {
-  color: #64748b;
-}
-
-.role-admin .sidebar .nav-item {
-  color: #cbd5e1;
-}
-
-.role-admin .sidebar .nav-icon {
-  color: #7c8aa5;
-}
-
-.role-admin .sidebar .nav-item:hover,
 .role-admin .sidebar .nav-item.active {
-  background: var(--role-accent-soft);
-  color: var(--role-accent-strong);
+  background: #0f172a;
+  color: #f8fafc;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.22);
 }
 
-.role-admin .sidebar .nav-item:hover .nav-icon,
+.role-admin .sidebar .nav-item:hover .nav-icon {
+  color: #0f172a;
+}
+
 .role-admin .sidebar .nav-item.active .nav-icon {
-  color: var(--role-accent-strong);
+  color: #34d399;
 }
 
 .role-admin .sidebar .nav-item.active::after {
-  background: var(--role-accent);
+  background: #34d399;
 }
 
 .role-admin .sidebar-account {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: #e2e8f0;
+  background: #f8fafc;
 }
 
 .role-admin .sidebar-account-icon {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--role-accent-strong);
-}
-
-.role-admin .sidebar-account-copy strong {
-  color: #e2e8f0;
-}
-
-.role-admin .sidebar-account-copy small {
-  color: #94a3b8;
-}
-
-.role-admin .nav-footer {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-.role-admin .sidebar-menu-toggle {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  color: #e2e8f0;
+  background: #0f172a;
+  color: #34d399;
 }
 
 /* ------------------------------ Keyframes -------------------------------- */

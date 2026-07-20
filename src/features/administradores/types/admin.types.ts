@@ -13,9 +13,13 @@ export interface VacanteReciente {
   estatus: string
   fechaPublicacion?: string
   totalPostulantes: number
-  // El sueldo se muestra en cuanto el backend lo incluya en la respuesta.
   sueldoAprox?: number | null
   ubicacion?: string | null
+  competencias?: string | null
+  responsabilidades?: string | null
+  // Nombres reales del backend para los lugares de la vacante.
+  cupo?: number | null
+  cuposDisponibles?: number | null
   lugares?: number | null
   lugaresOcupados?: number | null
 }
@@ -24,10 +28,15 @@ export interface AdminUsuario {
   id: number
   email: string
   rol: 'Admin' | 'Empresa' | 'Estudiante' | string
-  estatusValidacion: 'Pendiente' | 'Validado' | 'Rechazado' | string
+  estatusValidacion: 'Pendiente' | 'Validado' | 'Rechazado' | 'Inhabilitado' | string
   fechaRegistro: string
   nombreCompleto: string | null
-  // Motivo capturado por el admin al rechazar. Pendiente de que el backend lo devuelva.
+  estatusAcademico?: string | null
+  // Historial de devoluciones que ya regresa el backend.
+  totalDevoluciones?: number
+  ultimaObservacion?: string | null
+  fechaUltimaObservacion?: string | null
+  // Compatibilidad con versiones previas del backend.
   observaciones?: string | null
 }
 
@@ -45,11 +54,12 @@ export interface AdminPublicacionesResponse {
   publicaciones: VacanteReciente[]
 }
 
-export type ValidarUsuarioAccion = 'aprobar' | 'rechazar'
+// Acciones del backend: aprobar | devolver (con observaciones, avisa por correo) | inhabilitar.
+export type ValidarUsuarioAccion = 'aprobar' | 'devolver' | 'inhabilitar'
 
 export interface ValidarUsuarioRequest {
   accion: ValidarUsuarioAccion
-  // Motivo del rechazo redactado por el admin. Solo se envia al rechazar.
+  // Motivo redactado por el admin. Obligatorio al devolver.
   observaciones?: string
 }
 

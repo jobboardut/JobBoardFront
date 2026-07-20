@@ -23,14 +23,25 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 					</tr>
 				</thead>
 				<tbody>
-					{rows.map((row) => (
-						<tr key={row.id} className={row.state === 'Rechazado' ? 'is-rejected-row' : ''}>
+					{rows.map((row) => {
+						const isMuted = row.state === 'Rechazado' || row.state === 'Inhabilitado'
+						const statePillClass =
+							row.state === 'Activo'
+								? 'is-active'
+								: row.state === 'Devuelto'
+									? 'is-returned'
+									: isMuted
+										? 'is-rejected'
+										: 'is-inactive'
+
+						return (
+						<tr key={row.id} className={isMuted ? 'is-rejected-row' : ''}>
 							<td data-label="Usuario">
 								<div className="management-user-cell">
 									<span className="management-avatar">{row.avatarLetter}</span>
 									<span>
 										<strong>{row.fullName}</strong>
-										<small>{row.state === 'Rechazado' && row.rejectionReason ? row.rejectionReason : row.description}</small>
+										<small>{row.rejectionReason ?? row.description}</small>
 									</span>
 								</div>
 							</td>
@@ -42,7 +53,7 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 							<td data-label="Contacto">{row.contact}</td>
 							<td data-label="Registro">{row.registerDate}</td>
 							<td data-label="Estado">
-								<span className={`management-state-pill ${row.state === 'Activo' ? 'is-active' : row.state === 'Rechazado' ? 'is-rejected' : 'is-inactive'}`}>
+								<span className={`management-state-pill ${statePillClass}`}>
 									<Circle size={8} fill="currentColor" strokeWidth={0} />
 									{row.state}
 								</span>
@@ -54,7 +65,8 @@ function ManagementUsersTable({ rows, onView }: ManagementUsersTableProps) {
 								</button>
 							</td>
 						</tr>
-					))}
+						)
+					})}
 				</tbody>
 			</table>
 

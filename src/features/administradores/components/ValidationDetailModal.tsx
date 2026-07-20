@@ -11,7 +11,7 @@ type ValidationDetailModalProps = {
 	onClose: () => void
 	onValidate?: (
 		request: ValidationRequest,
-		accion: 'aprobar' | 'rechazar',
+		accion: 'aprobar' | 'devolver',
 		observaciones?: string,
 	) => Promise<void>
 	isValidating?: boolean
@@ -208,7 +208,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 				isOpen={isRejectModalOpen}
 				requestName={request.fullName}
 				onClose={() => setIsRejectModalOpen(false)}
-				onSubmit={(observaciones) => onValidate?.(request, 'rechazar', observaciones) ?? Promise.resolve()}
+				onSubmit={(observaciones) => onValidate?.(request, 'devolver', observaciones) ?? Promise.resolve()}
 				isSubmitting={isValidating}
 			/>
 

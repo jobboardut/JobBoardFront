@@ -15,6 +15,9 @@ export interface Vacante {
   responsabilidades?: string | null
   lugares?: number | null
   lugaresOcupados?: number | null
+  // Nombres reales del backend para los lugares.
+  cupo?: number | null
+  cuposDisponibles?: number | null
 }
 
 export interface JobCardItem {
