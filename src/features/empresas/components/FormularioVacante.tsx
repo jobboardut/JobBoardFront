@@ -19,15 +19,21 @@ const modalidades = ['Presencial', 'Remota', 'Hibrida']
 
 const MAX_LUGARES = 999
 
-const EMPTY_VACANTE_FORM: CreateVacanteRequest = {
+// Los numericos se manejan como texto mientras se escribe para poder borrarlos
+// por completo; se convierten a numero al enviar.
+type VacanteForm = Omit<CreateVacanteRequest, 'sueldoAprox' | 'lugares' | 'competencias'> & {
+  sueldoAprox: string
+  lugares: string
+}
+
+const EMPTY_VACANTE_FORM: VacanteForm = {
   titulo: '',
   descripcion: '',
   requisitos: '',
-  sueldoAprox: 0,
+  sueldoAprox: '',
   modalidad: '',
-  lugares: 1,
+  lugares: '1',
   ubicacion: '',
-  competencias: '',
   responsabilidades: '',
 }
 
@@ -35,7 +41,6 @@ const VACANTE_FIELD_LIMITS = {
   titulo: SECURITY_LIMITS.shortText,
   descripcion: SECURITY_LIMITS.vacancyText,
   requisitos: SECURITY_LIMITS.vacancyText,
-  competencias: SECURITY_LIMITS.vacancyText,
   responsabilidades: SECURITY_LIMITS.vacancyText,
   ubicacion: SECURITY_LIMITS.address,
 } as const
@@ -43,15 +48,22 @@ const VACANTE_FIELD_LIMITS = {
 const getVacanteFieldLimit = (name: string): number =>
   VACANTE_FIELD_LIMITS[name as keyof typeof VACANTE_FIELD_LIMITS] ?? SECURITY_LIMITS.shortText
 
-const toVacanteForm = (vacante?: Vacante): CreateVacanteRequest => ({
+// Deja solo digitos y respeta el campo vacio (para poder borrar y reescribir).
+const limitDigits = (value: string, max: number): string => {
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return ''
+
+  return String(Math.min(Number(digits), max))
+}
+
+const toVacanteForm = (vacante?: Vacante): VacanteForm => ({
   titulo: vacante?.titulo ?? '',
   descripcion: vacante?.descripcion ?? '',
   requisitos: vacante?.requisitos ?? '',
-  sueldoAprox: vacante?.sueldoAprox ?? 0,
+  sueldoAprox: vacante?.sueldoAprox ? String(vacante.sueldoAprox) : '',
   modalidad: vacante?.modalidad ?? '',
-  lugares: vacante?.lugares ?? 1,
+  lugares: vacante?.lugares ? String(vacante.lugares) : '1',
   ubicacion: vacante?.ubicacion ?? '',
-  competencias: vacante?.competencias ?? '',
   responsabilidades: vacante?.responsabilidades ?? '',
 })
 
@@ -75,7 +87,7 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
   )
   const [draftState, setDraftState] = useState<{
     key: number
-    values: Partial<CreateVacanteRequest>
+    values: Partial<VacanteForm>
   }>({ key: formKey, values: {} })
 
   const draftValues = draftState.key === formKey ? draftState.values : {}
@@ -85,10 +97,11 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
+    // Los numericos aceptan vacio mientras se edita; el minimo se valida al enviar.
     const nextValue = name === 'sueldoAprox'
-      ? Math.min(Number(value), SECURITY_LIMITS.moneyMax)
+      ? limitDigits(value, SECURITY_LIMITS.moneyMax)
       : name === 'lugares'
-        ? Math.min(Math.max(Number(value), 1), MAX_LUGARES)
+        ? limitDigits(value, MAX_LUGARES)
         : limitText(value, getVacanteFieldLimit(name))
 
     setDraftState(prev => ({
@@ -116,7 +129,6 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
       validateRequiredText(form.ubicacion, 'Ubicacion', SECURITY_LIMITS.address) ??
       validateRequiredText(form.descripcion, 'Descripcion del puesto', SECURITY_LIMITS.vacancyText) ??
       validateRequiredText(form.requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText) ??
-      validateRequiredText(form.competencias, 'Competencias', SECURITY_LIMITS.vacancyText) ??
       validateRequiredText(form.responsabilidades, 'Responsabilidades', SECURITY_LIMITS.vacancyText)
 
     if (validationError) {
@@ -124,17 +136,31 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
       return
     }
 
-    if (!form.sueldoAprox || form.sueldoAprox < 0 || form.sueldoAprox > SECURITY_LIMITS.moneyMax) {
-      toast.warning('Sueldo no valido', `El sueldo debe estar entre 0 y ${SECURITY_LIMITS.moneyMax.toLocaleString('es-MX')} MXN.`)
+    const sueldoAprox = Number(form.sueldoAprox)
+    const lugares = Number(form.lugares)
+
+    if (!form.sueldoAprox || !Number.isFinite(sueldoAprox) || sueldoAprox <= 0 || sueldoAprox > SECURITY_LIMITS.moneyMax) {
+      toast.warning('Sueldo no valido', `El sueldo debe estar entre 1 y ${SECURITY_LIMITS.moneyMax.toLocaleString('es-MX')} MXN.`)
       return
     }
 
-    if (!form.lugares || form.lugares < 1 || form.lugares > MAX_LUGARES) {
+    if (!form.lugares || !Number.isFinite(lugares) || lugares < 1 || lugares > MAX_LUGARES) {
       toast.warning('Lugares no validos', `El numero de lugares debe estar entre 1 y ${MAX_LUGARES}.`)
       return
     }
 
-    crearVacante(form, {
+    const payload: CreateVacanteRequest = {
+      titulo: form.titulo,
+      descripcion: form.descripcion,
+      requisitos: form.requisitos,
+      modalidad: form.modalidad,
+      ubicacion: form.ubicacion,
+      responsabilidades: form.responsabilidades,
+      sueldoAprox,
+      lugares,
+    }
+
+    crearVacante(payload, {
       onSuccess: () => {
         toast.success('Vacante publicada', 'La publicacion se creo correctamente.')
         navigate(ROUTES.EMPRESA_PUBLICACIONES)
@@ -228,29 +254,30 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
                 />
               </FormControl>
 
-              <FormControl label="Sueldo aproximado (MXN)">
+              {/* inputMode numerico con type=text para poder borrar el campo completo. */}
+              <FormControl label="Sueldo aproximado (MXN)" help={`Entre 1 y ${SECURITY_LIMITS.moneyMax.toLocaleString('es-MX')} MXN.`}>
                 <input
                   name="sueldoAprox"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
                   value={form.sueldoAprox}
                   onChange={handleChange}
                   placeholder="Ej: 15000"
-                  min={0}
-                  max={SECURITY_LIMITS.moneyMax}
                   required
                   className={FORM_FIELD_CLASS}
                 />
               </FormControl>
 
-              <FormControl label="Numero de lugares" help="La vacante se cierra automaticamente cuando se llenan todos los lugares.">
+              <FormControl label="Numero de lugares" help={`Cuantas personas se contrataran. Entre 1 y ${MAX_LUGARES}.`}>
                 <input
                   name="lugares"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
                   value={form.lugares}
                   onChange={handleChange}
                   placeholder="Ej: 3"
-                  min={1}
-                  max={MAX_LUGARES}
                   required
                   className={FORM_FIELD_CLASS}
                 />
@@ -300,21 +327,6 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
               value={form.responsabilidades}
               onChange={handleChange}
               placeholder="Escribe una responsabilidad por linea..."
-              rows={5}
-              maxLength={SECURITY_LIMITS.vacancyText}
-              required
-              className={`${FORM_FIELD_CLASS} resize-none`}
-            />
-            <p className="mt-2 text-xs text-slate-500">Una por linea. {getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-slate-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Competencias</h2>
-            <textarea
-              name="competencias"
-              value={form.competencias}
-              onChange={handleChange}
-              placeholder="Escribe una competencia por linea..."
               rows={5}
               maxLength={SECURITY_LIMITS.vacancyText}
               required

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, FileText, GraduationCap, Mail, MapPin, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
@@ -29,6 +29,22 @@ export const DetallePostulante = () => {
 
   const postulante = postulantes.find((item) => item.id === postulanteId)
 
+  // Marca "CV visto" automaticamente al abrir el perfil por primera vez.
+  // El ref evita repetir la llamada si el componente se vuelve a renderizar.
+  const autoVistoRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!postulante?.postulacionId) return
+
+    const yaMarcado = autoVistoRef.current === postulante.postulacionId
+    const esPostulado = getPostulanteStatusMeta(postulante.estatus).key === 'postulado'
+
+    if (yaMarcado || !esPostulado) return
+
+    autoVistoRef.current = postulante.postulacionId
+    cambiarEstatus({ postulacionId: postulante.postulacionId, estatus: 'CvVisto' })
+  }, [postulante?.postulacionId, postulante?.estatus, cambiarEstatus])
+
   if (!id || Number.isNaN(postulanteId) || !vacanteId || Number.isNaN(vacanteId)) {
     return (
       <div className="rounded-2xl bg-white p-8 shadow-sm">
@@ -53,7 +69,8 @@ export const DetallePostulante = () => {
 
   const estatusActual = postulante.estatus
   const currentStatus = getPostulanteStatusMeta(estatusActual)
-  const transiciones = TRANSICIONES_EMPRESA[currentStatus.key]
+  // "CvVisto" se marca solo al abrir el perfil, por eso no se ofrece como boton.
+  const transiciones = TRANSICIONES_EMPRESA[currentStatus.key].filter((estatus) => estatus !== 'CvVisto')
 
   const describirError = (error: unknown): string => {
     const apiError = error as { status?: number; message?: string; detalle?: string; detail?: string }
@@ -178,6 +195,11 @@ export const DetallePostulante = () => {
       <div className={`rounded-2xl border px-5 py-4 ${currentStatus.pillClass}`}>
         <p className="text-sm font-black">Estado actual: {currentStatus.label}</p>
         <p className="mt-1 text-sm">{currentStatus.description}</p>
+        {currentStatus.key === 'cvvisto' ? (
+          <p className="mt-2 text-xs font-semibold opacity-80">
+            Se marco automaticamente al abrir el perfil del candidato.
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

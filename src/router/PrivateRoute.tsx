@@ -1,4 +1,6 @@
 import { Navigate } from 'react-router-dom'
+import CuentaEnRevision from '@/features/auth/components/CuentaEnRevision'
+import { canUsePlatform, getRole, getToken, getValidationState } from '@/features/auth/services/session'
 import type { UserRole } from '@/features/auth/types/auth.types'
 import { ROUTES } from './routes'
 
@@ -15,10 +17,17 @@ const getRoleHome = (role: UserRole | null) => {
 }
 
 export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
-  const token = localStorage.getItem('token')
-  const role = localStorage.getItem('rol') as UserRole | null
+  const token = getToken()
+  const role = getRole()
 
   if (!token) return <Navigate to={ROUTES.LOGIN} replace />
+
+  // Un perfil sin validar no entra a la plataforma: ve el motivo y puede
+  // reenviar sus documentos desde la pantalla de revision.
+  if (!canUsePlatform(role, getValidationState())) {
+    return <CuentaEnRevision />
+  }
+
   if (allowedRoles && (!role || !allowedRoles.includes(role))) {
     return <Navigate to={getRoleHome(role)} replace />
   }

@@ -84,8 +84,8 @@ export const JobListCard = memo(({ item, isActive = false, onSelect }: JobListCa
               }`}
             >
               <BriefcaseBusiness size={14} />
-              {item.placesLabel} lugares
-              {item.placesFull ? ' · LLENA' : ''}
+              {item.placesLabel} contratados
+              {item.placesFull ? ' · CUPO LLENO' : ''}
             </span>
           ) : null}
         </span>

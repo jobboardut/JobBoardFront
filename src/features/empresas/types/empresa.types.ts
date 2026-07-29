@@ -62,8 +62,9 @@ export interface CreateVacanteRequest {
   modalidad: string
   lugares: number
   ubicacion: string
-  competencias: string
   responsabilidades: string
+  // Se dejo de capturar (se traslapaba con requisitos); el backend aun lo acepta.
+  competencias?: string
 }
 
 export interface UpdateEstatusRequest {

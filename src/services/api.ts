@@ -37,7 +37,10 @@ api.interceptors.response.use(
     const isLoginRequest = requestUrl.includes('/auth/login')
 
     if (status === 401 && !isLoginRequest) {
-      localStorage.removeItem('token')
+      // Limpieza completa: token, rol y estatus de validacion.
+      for (const key of ['token', 'userId', 'rol', 'estatusValidacion', 'ultimaObservacion']) {
+        localStorage.removeItem(key)
+      }
       window.location.href = '/login'
     }
     return Promise.reject(error.response?.data)

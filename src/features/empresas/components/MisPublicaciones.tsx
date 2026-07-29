@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Eye, FileEdit, XCircle, Users, BriefcaseBusiness } from 'lucide-react'
+import { Search, Eye, XCircle, Users, BriefcaseBusiness } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { formatMoney } from '@/shared/utils/money'
 import { getLugaresInfo } from '@/shared/utils/lugares'
@@ -19,19 +19,20 @@ const contarPostulantes = (vacante: { totalPostulantes?: number; postulantes?: n
 const normalizar = (valor: string): string =>
   valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
 
-// Contador de lugares (ej. 3/10) con barra de avance. Se ve igual en todas las vistas.
+// Ocupacion del cupo (ej. 1/10 contratados) con barra de avance.
+// El cupo se descuenta al CONTRATAR, no al postularse: son dos metricas distintas.
 const ContadorLugares = ({ vacante }: { vacante: Vacante }) => {
   const lugares = getLugaresInfo(vacante)
-  if (!lugares) return <span className="text-xs text-slate-400">Lugares no especificados</span>
+  if (!lugares) return <span className="text-xs text-slate-400">Cupo no especificado</span>
 
   return (
     <span className="grid gap-1">
-      <span className="inline-flex items-center gap-1.5">
+      <span className="inline-flex flex-wrap items-center gap-1.5">
         <BriefcaseBusiness size={15} className={lugares.isFull ? 'text-red-500' : 'text-emerald-500'} />
         <strong className={lugares.isFull ? 'text-red-600' : 'text-slate-900'}>{lugares.label}</strong>
-        <span className="text-slate-500">lugares</span>
+        <span className="text-slate-500">contratados</span>
         {lugares.isFull ? (
-          <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">LLENA</span>
+          <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">CUPO LLENO</span>
         ) : null}
       </span>
       <span className="block h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
@@ -46,16 +47,16 @@ const ContadorLugares = ({ vacante }: { vacante: Vacante }) => {
 
 const dotEstatus: Record<string, string> = {
   Activa:   'bg-emerald-500',
-  Pendiente: 'bg-orange-400',
-  Pausada:  'bg-red-400',
-  Finalizada: 'bg-red-400',
+  Pausada:  'bg-orange-400',
+  Finalizada: 'bg-slate-400',
+  Baneada:  'bg-red-400',
 }
 
 const textEstatus: Record<string, string> = {
   Activa:   'text-emerald-500',
-  Pendiente: 'text-orange-400',
-  Pausada:  'text-red-400',
-  Finalizada: 'text-red-400',
+  Pausada:  'text-orange-400',
+  Finalizada: 'text-slate-500',
+  Baneada:  'text-red-400',
 }
 
 export const MisPublicaciones = () => {
@@ -87,10 +88,6 @@ export const MisPublicaciones = () => {
 
   const handleVerVacante = (id: number) => {
     navigate(ROUTES.EMPRESA_DETALLE_VACANTE.replace(':id', String(id)))
-  }
-
-  const handleEditarVacante = (id: number) => {
-    navigate(ROUTES.EMPRESA_EDITAR_VACANTE.replace(':id', String(id)))
   }
 
   const vacantesFiltradas = vacantes.filter(v => {
@@ -211,9 +208,6 @@ export const MisPublicaciones = () => {
                   <button type="button" onClick={() => handleVerVacante(vacante.id)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">
                     Ver
                   </button>
-                  <button type="button" onClick={() => handleEditarVacante(vacante.id)} className="rounded-xl border border-emerald-100 px-3 py-2 text-xs font-bold text-emerald-600">
-                    Editar
-                  </button>
                   <button type="button" onClick={() => handleCerrarVacante(vacante.id, vacante.titulo)} className="rounded-xl border border-orange-100 px-3 py-2 text-xs font-bold text-orange-600">
                     Cerrar
                   </button>
@@ -229,7 +223,7 @@ export const MisPublicaciones = () => {
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Modalidad</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Sueldo aprox.</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Postulantes</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Lugares</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Cupo</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Estatus</th>
                 <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Acciones</th>
               </tr>
@@ -273,15 +267,9 @@ export const MisPublicaciones = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleEditarVacante(vacante.id)}
-                        className="text-gray-400 hover:text-emerald-500"
-                      >
-                        <FileEdit size={18} />
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => handleCerrarVacante(vacante.id, vacante.titulo)}
                         className="text-gray-400 hover:text-orange-500"
+                        title="Cerrar vacante"
                       >
                         <XCircle size={18} />
                       </button>

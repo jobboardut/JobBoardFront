@@ -71,7 +71,6 @@ export const PublicationDetail = ({ vacante, onApply, isApplying, hasApplied }: 
 
   const requirements = listaDeTexto(vacante.requisitos)
   const responsabilidades = listaDeTexto(vacante.responsabilidades)
-  const competencias = listaDeTexto(vacante.competencias)
   const lugares = getLugaresInfo(vacante)
 
   return (
@@ -148,13 +147,13 @@ export const PublicationDetail = ({ vacante, onApply, isApplying, hasApplied }: 
             <div className="rounded-2xl bg-[#f7f5f1] p-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
                 <BriefcaseBusiness size={15} className={lugares?.isFull ? 'text-red-500' : 'text-emerald-600'} />
-                Lugares
+                Cupo
               </div>
               {lugares ? (
                 <>
                   <p className={`mt-2 text-lg font-bold ${lugares.isFull ? 'text-red-600' : 'text-slate-800'}`}>
                     {lugares.label}
-                    {lugares.isFull ? <span className="ml-2 text-xs font-black">LLENA</span> : null}
+                    {lugares.isFull ? <span className="ml-2 text-xs font-black">LLENO</span> : null}
                   </p>
                   <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white">
                     <span
@@ -183,10 +182,6 @@ export const PublicationDetail = ({ vacante, onApply, isApplying, hasApplied }: 
 
           {responsabilidades.length > 0 ? (
             <ListaDetalle titulo="Responsabilidades" items={responsabilidades} color="bg-orange-500" />
-          ) : null}
-
-          {competencias.length > 0 ? (
-            <ListaDetalle titulo="Competencias" items={competencias} color="bg-sky-500" />
           ) : null}
         </div>
 

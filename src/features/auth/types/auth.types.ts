@@ -6,6 +6,9 @@ export interface AuthUser {
   rol: UserRole
   estatusValidacion: string
   nombreCompleto: string | null
+  // Motivo de la ultima devolucion. Pendiente de que el login lo incluya.
+  ultimaObservacion?: string | null
+  totalDevoluciones?: number
 }
 
 export interface LoginRequest {

@@ -71,6 +71,32 @@ export type ApplyFeedback = {
   message: string
 }
 
+// Traduce el error del backend a un mensaje que el alumno pueda entender.
+const describirErrorPostulacion = (error: unknown): string => {
+  const apiError = (error ?? {}) as {
+    status?: number
+    message?: string
+    detalle?: string
+    detail?: string
+    title?: string
+  }
+  const texto = `${apiError.detalle ?? ''} ${apiError.detail ?? ''} ${apiError.message ?? ''} ${apiError.title ?? ''}`.toLowerCase()
+
+  if (/valid|pendiente|autoriz|aprob/.test(texto) || apiError.status === 403) {
+    return 'Tu perfil aun esta en validacion. Podras postularte cuando administracion lo apruebe.'
+  }
+
+  if (/cupo|lleno|complet/.test(texto) || apiError.status === 409) {
+    return 'Esta vacante ya no tiene cupo disponible.'
+  }
+
+  if (/ya (te )?(has )?postul|duplicad|existe/.test(texto)) {
+    return 'Ya te habias postulado a esta vacante.'
+  }
+
+  return 'No se pudo enviar la postulacion. Intenta de nuevo en unos segundos.'
+}
+
 const SALARY_BOUNDS = { min: 5000, max: 100000 }
 
 export const usePublicaciones = () => {
@@ -212,12 +238,15 @@ export const usePublicaciones = () => {
         current.includes(publicacionId) ? current : [...current, publicacionId]
       ))
       setFeedback({ type: 'ok', message: 'Tu postulacion fue enviada correctamente.' })
-      queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones'] })
+      // Las postulaciones y el dashboard se registran con userId en la llave:
+      // sin el prefijo exacto la invalidacion no surtia efecto y el seguimiento
+      // quedaba desactualizado al refrescar.
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones', userId] })
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'dashboard', userId] })
       queryClient.invalidateQueries({ queryKey: ['estudiante', 'vacantes'] })
     },
     onError: (error: unknown) => {
-      const message = (error as { message?: string })?.message ?? 'No se pudo enviar la postulacion.'
-      setFeedback({ type: 'error', message })
+      setFeedback({ type: 'error', message: describirErrorPostulacion(error) })
     },
   })
 

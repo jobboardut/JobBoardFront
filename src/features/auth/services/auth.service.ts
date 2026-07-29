@@ -1,4 +1,5 @@
 import api from '@/services/api'
+import { clearSession, saveSession } from './session'
 import type { LoginRequest, LoginResponse, RegistroEmpresaRequest, RegistroEstudianteRequest } from '../types/auth.types'
 
 // Tiempo extra para las subidas de archivos del registro (el timeout global de axios es de 10s).
@@ -63,20 +64,18 @@ const buildRegistroEstudianteFormData = (data: RegistroEstudianteRequest) => {
   return formData
 }
 
-const clearAuthSession = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userId')
-  localStorage.removeItem('rol')
-}
-
 export const authService = {
 
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post('/auth/login', data) as LoginResponse
 
-    localStorage.setItem('token', response.token)
-    localStorage.setItem('userId', String(response.usuario.id))
-    localStorage.setItem('rol', response.usuario.rol)
+    saveSession({
+      token: response.token,
+      userId: response.usuario.id,
+      rol: response.usuario.rol,
+      estatusValidacion: response.usuario.estatusValidacion,
+      ultimaObservacion: response.usuario.ultimaObservacion,
+    })
 
     return response
   },
@@ -85,7 +84,7 @@ export const authService = {
     try {
       await api.post('/auth/logout')
     } finally {
-      clearAuthSession()
+      clearSession()
     }
   },
 

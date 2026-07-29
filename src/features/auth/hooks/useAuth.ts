@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '../services/auth.service'
+import { normalizeValidationState } from '../services/session'
 import type { LoginRequest } from '../types/auth.types'
 import { ROUTES } from '@/router/routes'
 import { useAppToast, type ToastTone } from '@/shared/components/appToastContext'
@@ -34,10 +35,26 @@ export const getLoginErrorCopy = (error: unknown): LoginFeedback => {
     }
   }
 
+  if (normalized.includes('devuel')) {
+    return {
+      title: 'Registro devuelto',
+      message: 'Administracion te pidio corregir tu registro. Inicia sesion para ver el motivo y reenviar tus documentos.',
+      tone: 'warning',
+    }
+  }
+
+  if (normalized.includes('inhabilit')) {
+    return {
+      title: 'Cuenta inhabilitada',
+      message: 'Tu cuenta fue desactivada por administracion. Contacta a la coordinacion de la bolsa de trabajo.',
+      tone: 'error',
+    }
+  }
+
   if (normalized.includes('rechaz')) {
     return {
       title: 'Cuenta rechazada',
-      message: 'Tu registro fue rechazado. Contacta a administracion para revisar el motivo.',
+      message: 'Tu registro fue rechazado. Inicia sesion para ver el motivo y reenviar tus documentos.',
       tone: 'error',
     }
   }
@@ -68,31 +85,37 @@ export const getLoginErrorCopy = (error: unknown): LoginFeedback => {
 const getValidationFeedback = (status: string, role: string): LoginFeedback | null => {
   if (role === 'Admin') return null
 
-  const normalized = status.toLowerCase()
-  if (!normalized || normalized === 'validado' || normalized === 'validada' || normalized === 'activo') {
-    return null
-  }
+  const state = normalizeValidationState(status)
+  if (state === 'validado') return null
 
-  if (normalized.includes('pend')) {
+  if (state === 'pendiente') {
     return {
-      title: 'Cuenta en validacion',
-      message: 'Tu acceso fue aceptado, pero el perfil aun aparece pendiente de validacion.',
+      title: 'Registro en revision',
+      message: 'Administracion esta validando tus documentos. Te avisaremos cuando tu perfil sea aprobado.',
       tone: 'warning',
     }
   }
 
-  if (normalized.includes('rechaz')) {
+  if (state === 'devuelto') {
     return {
-      title: 'Cuenta rechazada',
-      message: 'Tu perfil aparece rechazado. Revisa el estatus con administracion.',
+      title: 'Registro devuelto',
+      message: 'Debes corregir tu registro. Revisa las observaciones y reenvia tus documentos.',
+      tone: 'warning',
+    }
+  }
+
+  if (state === 'inhabilitado') {
+    return {
+      title: 'Cuenta inhabilitada',
+      message: 'Tu cuenta fue desactivada por administracion. Contacta a la coordinacion.',
       tone: 'error',
     }
   }
 
   return {
-    title: 'Estatus de validacion',
-    message: `Tu perfil aparece con estatus: ${status}.`,
-    tone: 'info',
+    title: 'Registro rechazado',
+    message: 'Tu perfil no fue aprobado. Revisa el motivo y reenvia tus documentos.',
+    tone: 'error',
   }
 }
 
@@ -113,10 +136,11 @@ export const useLogin = () => {
         toast.success('Sesion iniciada', 'Bienvenido de nuevo a la plataforma.')
       }
 
+      // Si el perfil no esta validado, PrivateRoute muestra la pantalla de
+      // revision en lugar del dashboard.
       if (rol === 'Admin') navigate(ROUTES.ADMIN_DASHBOARD)
       if (rol === 'Empresa') navigate(ROUTES.EMPRESA_DASHBOARD)
-      if (rol === 'Estudiante') navigate(ROUTES.ESTUDIANTE_DASHBOARD)
-      if (rol === 'Egresado') navigate(ROUTES.ESTUDIANTE_DASHBOARD)
+      if (rol === 'Estudiante' || rol === 'Egresado') navigate(ROUTES.ESTUDIANTE_DASHBOARD)
     },
 
     onError: (error: unknown) => {
