@@ -7,18 +7,18 @@ interface ActivitySectionProps {
 
 export const ActivitySection = ({ columns }: ActivitySectionProps) => {
   return (
-    <section className="mt-8">
-      <h2 className="text-3xl font-semibold tracking-tight">Actividad Reciente</h2>
+    <section className="mt-6">
+      <h2 className="text-xl font-bold tracking-tight text-slate-900">Actividad reciente</h2>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-3">
+      <div className="mt-4 grid gap-4 xl:grid-cols-3">
         {columns.map((column) => (
           <article
             key={column.title}
             className="rounded-2xl border border-[#e6e0d7] bg-white p-5 shadow-[0_4px_15px_rgba(29,37,56,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(29,37,56,0.10)]"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-semibold">{column.title}</h3>
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[rgba(16,185,129,0.12)] text-sm font-bold text-[#059669]">
+              <h3 className="text-base font-bold text-slate-900">{column.title}</h3>
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-[rgba(16,185,129,0.12)] text-sm font-bold text-[#059669]">
                 {column.count}
               </span>
             </div>

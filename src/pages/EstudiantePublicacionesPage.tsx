@@ -78,31 +78,23 @@ export const EstudiantePublicacionesPage = () => {
             <ErrorState title="No se pudieron cargar las vacantes" message="Intenta actualizar la pagina en unos segundos." />
           </div>
         ) : viewMode === 'detail' ? (
-          <section className="grid min-h-0 flex-1 gap-4 overflow-hidden px-4 py-4 lg:px-6 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
-            <PublicationDetail
-              vacante={selectedVacante}
-              onApply={postular}
-              isApplying={isApplying}
-              hasApplied={selectedVacante ? appliedIds.includes(selectedVacante.id) : false}
-            />
-
-            <aside className="publication-scroll h-full overflow-y-auto rounded-2xl border border-slate-100 bg-white/80 p-4 pr-2 shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-              <div className="space-y-5">
-                <section className="space-y-3">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-600">
-                        Disponibles
-                      </p>
-                      <h2 className="text-lg font-bold text-slate-900">Vacantes para postular</h2>
-                    </div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
+          // Patron de bolsa de trabajo: lista angosta a la izquierda para navegar,
+          // detalle ancho a la derecha con todo el espacio disponible.
+          <section className="grid min-h-0 flex-1 gap-4 overflow-hidden px-4 py-4 lg:px-6 lg:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[380px_minmax(0,1fr)]">
+            <aside className="publication-scroll hidden h-full overflow-y-auto pr-1 lg:block">
+              <div className="space-y-4">
+                <section className="space-y-2.5">
+                  <div className="flex items-center justify-between gap-3 px-1">
+                    <h2 className="text-sm font-black uppercase tracking-wide text-slate-500">
+                      Para postular
+                    </h2>
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
                       {listItems.length}
                     </span>
                   </div>
 
                   {listItems.length === 0 ? (
-                    <EmptyState title="No hay vacantes disponibles" message="Las vacantes donde ya postulaste se muestran mas abajo." compact />
+                    <EmptyState title="Sin vacantes nuevas" message="Ya te postulaste a todas las disponibles." compact />
                   ) : (
                     listItems.map((item) => (
                       <JobListCard
@@ -116,15 +108,12 @@ export const EstudiantePublicacionesPage = () => {
                 </section>
 
                 {appliedListItems.length > 0 ? (
-                  <section className="space-y-3 border-t border-slate-100 pt-5">
-                    <div className="flex items-end justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">
-                          Seguimiento
-                        </p>
-                        <h2 className="text-lg font-bold text-slate-900">Ya postuladas</h2>
-                      </div>
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                  <section className="space-y-2.5 border-t border-slate-200 pt-4">
+                    <div className="flex items-center justify-between gap-3 px-1">
+                      <h2 className="text-sm font-black uppercase tracking-wide text-slate-400">
+                        Ya postuladas
+                      </h2>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-500">
                         {appliedListItems.length}
                       </span>
                     </div>
@@ -141,6 +130,13 @@ export const EstudiantePublicacionesPage = () => {
                 ) : null}
               </div>
             </aside>
+
+            <PublicationDetail
+              vacante={selectedVacante}
+              onApply={postular}
+              isApplying={isApplying}
+              hasApplied={selectedVacante ? appliedIds.includes(selectedVacante.id) : false}
+            />
           </section>
         ) : (
           <section className="grid min-h-0 flex-1 gap-4 overflow-hidden px-4 py-4 lg:px-6 xl:grid-cols-[minmax(0,1fr)_300px]">

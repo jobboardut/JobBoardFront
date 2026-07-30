@@ -25,14 +25,18 @@ const EMPTY_PROFILE: StudentProfile = {
 const buildCurriculumData = (profile: StudentProfile): CurriculumData => {
   if (!profile.cvUrl) {
     return {
-      fileName: 'CV no disponible',
+      fileName: 'Aun no has subido tu CV',
       uploadDate: 'Sin archivo cargado',
     }
   }
 
+  // El almacenamiento guarda el archivo con un UUID; se muestra un nombre legible.
+  const nombreCompleto = `${profile.firstName} ${profile.lastName}`.trim()
+  const extension = extractFileName(profile.cvUrl).split('.').pop()?.toLowerCase()
+
   return {
-    fileName: extractFileName(profile.cvUrl) || 'Curriculum del estudiante',
-    uploadDate: 'Disponible en perfil',
+    fileName: nombreCompleto ? `CV - ${nombreCompleto}.${extension ?? 'pdf'}` : 'Tu curriculum',
+    uploadDate: 'Disponible en tu perfil',
     url: profile.cvUrl,
   }
 }

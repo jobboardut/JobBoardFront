@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { Loader2, UserRound, X } from 'lucide-react'
 import { SECURITY_LIMITS } from '@/shared/security/inputRules'
 import type { EditContactModalProps } from '../types/profile.types'
 import { useEditContact } from '../hooks/useEditContact'
@@ -25,18 +25,26 @@ export const EditContactModal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
       {/* Modal Container */}
-      <div className="w-full max-w-md rounded-2xl border border-[#e6e0d7] bg-white shadow-[0_20px_40px_rgba(0,0,0,0.15)]">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[#e6e0d7] bg-white shadow-[0_24px_60px_rgba(15,23,42,0.28)]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#e6e0d7] px-6 py-4">
-          <h2 className="text-2xl font-bold text-slate-900">Editar Contacto</h2>
+        <div className="flex items-start justify-between gap-3 border-b border-[#e6e0d7] px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-[#009A4D]">
+              <UserRound size={19} strokeWidth={2} />
+            </span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Editar contacto</h2>
+              <p className="text-xs text-slate-500">Los cambios se guardan en tu perfil.</p>
+            </div>
+          </div>
           <button
             onClick={handleClose}
-            className="grid h-9 w-9 place-items-center rounded-lg hover:bg-[#f4f1ec]"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-500 transition hover:bg-[#f4f1ec]"
             aria-label="Cerrar"
           >
-            <X size={20} className="text-slate-500" strokeWidth={2} />
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
 
@@ -125,9 +133,10 @@ export const EditContactModal = ({
           <button
             onClick={handleSaveClick}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-[#009A4D] bg-[#009A4D] py-2.5 font-semibold text-white transition hover:bg-[#10B981] disabled:opacity-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-[#009A4D] bg-[#009A4D] py-2.5 font-semibold text-white transition hover:bg-[#10B981] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoading ? 'Guardando...' : 'Guardar'}
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : null}
+            {isLoading ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
       </div>

@@ -1,9 +1,10 @@
+import { LayoutDashboard, Search } from 'lucide-react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { PageHero } from '@/shared/components/PageHero'
 import { JobDetailModal } from '@/shared/components/JobDetailModal'
 import { ActivitySection } from '@/features/estudiantes/components/ActivitySection'
 import { DashboardSearchCard } from '@/features/estudiantes/components/DashboardSearchCard'
 import { FilterPanel } from '@/features/estudiantes/components/FilterPanel'
-import { MetricsGrid } from '@/features/estudiantes/components/MetricsGrid'
 import { SearchHeader } from '@/features/estudiantes/components/SearchHeader'
 import { useDashboard } from '@/features/estudiantes/hooks/useDashboard'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
@@ -57,7 +58,42 @@ export const EstudianteDashboardPage = () => {
                 <ErrorState title="Error al cargar el panel" message="Intenta actualizar la vista en unos segundos." />
               ) : (
                 <>
-                  <MetricsGrid metrics={metrics} />
+                  <PageHero
+                    tone="estudiante"
+                    eyebrow="Tu espacio"
+                    title="Panel de control"
+                    description="Revisa como avanzan tus postulaciones y encuentra nuevas oportunidades."
+                    Icon={LayoutDashboard}
+                    actions={
+                      <button type="button" onClick={openSearchMode} className="hero-btn hero-btn--solid">
+                        <Search size={16} />
+                        Buscar vacantes
+                      </button>
+                    }
+                    aside={
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {metrics.map((metric) => {
+                          const Icon = metric.icon
+                          return (
+                            <div
+                              key={metric.label}
+                              className="flex items-center gap-3 rounded-xl bg-white/12 px-4 py-3 ring-1 ring-white/20"
+                            >
+                              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/15">
+                                <Icon size={20} strokeWidth={1.9} />
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-2xl font-bold leading-none">{metric.value}</p>
+                                <p className="mt-1 truncate text-xs font-semibold text-white/75">
+                                  {metric.label}
+                                </p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    }
+                  />
                   <ActivitySection columns={activityColumns} />
                 </>
               )}
