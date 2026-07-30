@@ -18,10 +18,8 @@ export const EditContactModal = ({
   }
 
   const handleSaveClick = async () => {
+    // El padre cierra el modal cuando el guardado fue exitoso.
     await handleSubmit(onSave)
-    if (!error) {
-      handleClose()
-    }
   }
 
   if (!isOpen) return null

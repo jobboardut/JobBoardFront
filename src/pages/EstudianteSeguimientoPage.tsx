@@ -1,4 +1,6 @@
+import { Send } from 'lucide-react'
 import { PageWrapper } from '@/components/layout/PageWrapper'
+import { PageHero } from '@/shared/components/PageHero'
 import { JobDetailModal } from '@/shared/components/JobDetailModal'
 import { PublicacionesFilterPanel } from '@/features/estudiantes/components/PublicacionesFilterPanel'
 import { PublicacionesSearchHeader } from '@/features/estudiantes/components/PublicacionesSearchHeader'
@@ -13,6 +15,7 @@ export const EstudianteSeguimientoPage = () => {
   const {
     viewMode,
     applications,
+    applicationsByStatus,
     isSearchOpen,
     searchText,
     searchInputRef,
@@ -58,11 +61,36 @@ export const EstudianteSeguimientoPage = () => {
               ) : isError ? (
                 <ErrorState title="Error al cargar postulaciones" message="Intenta actualizar la vista en unos segundos." />
               ) : (
-              <div className="grid gap-8 lg:grid-cols-4">
+              <>
+              <PageHero
+                tone="estudiante"
+                eyebrow="Mis procesos"
+                title="Seguimiento de postulaciones"
+                description="Consulta en que etapa va cada vacante a la que aplicaste."
+                Icon={Send}
+                aside={
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                    {[
+                      { label: 'Postulado', value: applicationsByStatus.POSTULADO },
+                      { label: 'CV visto', value: applicationsByStatus['CV VISTO'] },
+                      { label: 'Entrevista', value: applicationsByStatus.ENTREVISTA },
+                      { label: 'Contratado', value: applicationsByStatus.CONTRATADO },
+                      { label: 'Rechazado', value: applicationsByStatus.RECHAZADO },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-xl bg-white/12 px-3 py-2 ring-1 ring-white/20">
+                        <p className="text-xl font-bold leading-none">{item.value}</p>
+                        <p className="mt-1 text-[11px] font-semibold text-white/75">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                }
+              />
+
+              <div className="mt-6 grid gap-8 lg:grid-cols-4">
                 {/* Tabla de postulaciones - 3 columnas */}
                 <div className="lg:col-span-3">
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900">Tus Postulaciones</h2>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold text-slate-900">Tus postulaciones</h2>
                   </div>
                   <ApplicationSearchBar
                     searchText={applicationSearchText}
@@ -82,6 +110,7 @@ export const EstudianteSeguimientoPage = () => {
                   <StatusSummary />
                 </div>
               </div>
+              </>
               )}
             </div>
           </div>

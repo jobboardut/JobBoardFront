@@ -125,7 +125,7 @@ export const PerfilEmpresa = () => {
       )}
 
       <div>
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg mb-4">
+        <div className="rounded-3xl brand-banner brand-banner--empresa p-7 text-white shadow-lg mb-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <button

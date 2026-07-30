@@ -77,14 +77,15 @@ const toTrackingRow = (item: RawPostulacion, index: number): TrackingRow => {
   const vacancyTitle = asText(item.tituloVacante ?? item.vacante ?? item.titulo, 'Vacante')
 
   return {
-    id: String(item.id ?? index),
+    id: String(item.postulacionId ?? item.id ?? index),
     candidateName,
     candidateCareer: asText(item.carrera ?? item.programa, 'Sin carrera'),
     candidateLetter: initials(candidateName),
     vacancyTitle,
     companyName,
     vacancyLetter: companyName.charAt(0).toUpperCase(),
-    status: asStatus(item.estatus ?? item.status),
+    // El backend manda "estatusPostulacion"; los otros nombres son compatibilidad.
+    status: asStatus(item.estatusPostulacion ?? item.estatus ?? item.status),
     date: formatDate(item.fechaPostulacion ?? item.fecha ?? item.createdAt),
     email: asText(item.email ?? item.correo, 'Sin correo'),
     note: asText(item.motivoRechazo ?? item.observacion ?? item.nota, 'Sin observaciones'),

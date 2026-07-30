@@ -177,7 +177,7 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
 
   return (
     <div>
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl brand-banner brand-banner--empresa p-7 text-white shadow-lg">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 border-l-2 border-white/60 pl-3 text-xs font-semibold uppercase tracking-[0.12em]">

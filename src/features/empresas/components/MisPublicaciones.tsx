@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Eye, XCircle, Users, BriefcaseBusiness } from 'lucide-react'
+import { Search, Eye, XCircle, Users, BriefcaseBusiness, Plus } from 'lucide-react'
+import { PageHero } from '@/shared/components/PageHero'
 import { ROUTES } from '@/router/routes'
 import { formatMoney } from '@/shared/utils/money'
 import { getLugaresInfo } from '@/shared/utils/lugares'
@@ -111,22 +112,24 @@ export const MisPublicaciones = () => {
 
   return (
     <div>
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="mt-3 text-3xl font-semibold">Administra tus vacantes activas</h1>
-            <p className="mt-2 text-sm text-white/80">
-              Filtra, analiza y actualiza tus publicaciones sin perder el ritmo.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => navigate(ROUTES.EMPRESA_CREAR_VACANTE)}
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-emerald-600 shadow-sm"
-          >
-            Publicar nueva vacante
-          </button>
-        </div>
+      <div className="mb-6">
+        <PageHero
+          tone="empresa"
+          eyebrow="Vacantes"
+          title="Administra tus vacantes"
+          description="Filtra, analiza y actualiza tus publicaciones sin perder el ritmo."
+          Icon={BriefcaseBusiness}
+          actions={
+            <button
+              type="button"
+              onClick={() => navigate(ROUTES.EMPRESA_CREAR_VACANTE)}
+              className="hero-btn hero-btn--solid"
+            >
+              <Plus size={16} />
+              Publicar nueva vacante
+            </button>
+          }
+        />
       </div>
 
       {/* Stats */}
@@ -142,9 +145,9 @@ export const MisPublicaciones = () => {
           </p>
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Pendientes</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Postulantes</p>
           <p className="text-2xl font-semibold text-orange-500">
-            {vacantes.filter(v => v.estatus === 'Pendiente').length}
+            {vacantes.reduce((acc, v) => acc + contarPostulantes(v), 0)}
           </p>
         </div>
       </div>

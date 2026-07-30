@@ -41,8 +41,11 @@ function ValidationRejectionModal({
 				</button>
 
 				<header className="validation-reject-head">
-					<h2>Observaciones de rechazo</h2>
-					<p>Redacta el motivo por el que se rechazó el perfil de {requestName}.</p>
+					<h2>Devolver para correccion</h2>
+					<p>
+						Explica que debe corregir {requestName}. El usuario recibira estas observaciones por
+						correo y podra reenviar sus documentos.
+					</p>
 				</header>
 
 				<label className="validation-reject-field" htmlFor="validation-reject-observations">
@@ -51,7 +54,7 @@ function ValidationRejectionModal({
 						id="validation-reject-observations"
 						value={observations}
 						onChange={(event) => setObservations(event.target.value)}
-						placeholder="Escribe aquí el detalle del rechazo..."
+						placeholder="Ej: La foto del INE esta borrosa, vuelve a subirla..."
 						rows={7}
 						autoFocus
 					/>
@@ -67,7 +70,7 @@ function ValidationRejectionModal({
             onClick={handleSubmit}
             disabled={!observations.trim() || isSubmitting}
           >
-            Enviar observaciones
+            Devolver con observaciones
           </button>
 				</footer>
 			</article>

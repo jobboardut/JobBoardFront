@@ -54,6 +54,63 @@ const ListaDetalle = ({ titulo, items, color }: { titulo: string; items: string[
   </section>
 )
 
+const TONES = {
+  emerald: { icon: 'bg-emerald-50 text-emerald-600', value: 'text-emerald-700', bar: 'bg-emerald-500' },
+  orange: { icon: 'bg-orange-50 text-orange-600', value: 'text-slate-800', bar: 'bg-orange-500' },
+  slate: { icon: 'bg-slate-100 text-slate-500', value: 'text-slate-800', bar: 'bg-slate-400' },
+  red: { icon: 'bg-red-50 text-red-500', value: 'text-red-600', bar: 'bg-red-400' },
+} as const
+
+type MetricTileProps = {
+  icon: React.ReactNode
+  tone: keyof typeof TONES
+  label: string
+  value: string
+  badge?: string
+  progress?: number
+  highlight?: boolean
+}
+
+/** Dato compacto de la vacante. El texto se ajusta para no desbordar la tarjeta. */
+const MetricTile = ({ icon, tone, label, value, badge, progress, highlight }: MetricTileProps) => {
+  const palette = TONES[tone]
+
+  return (
+    <div className="group rounded-2xl border border-slate-100 bg-white p-3.5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)]">
+      <div className="flex items-center gap-2">
+        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${palette.icon}`}>
+          {icon}
+        </span>
+        <span className="truncate text-[11px] font-bold uppercase tracking-wide text-slate-400">
+          {label}
+        </span>
+      </div>
+
+      <p
+        className={`mt-2 text-balance break-words text-[15px] font-bold leading-snug ${
+          highlight ? palette.value : palette.value
+        }`}
+      >
+        {value}
+        {badge ? (
+          <span className="ml-1.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-black text-red-600">
+            {badge}
+          </span>
+        ) : null}
+      </p>
+
+      {typeof progress === 'number' ? (
+        <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <span
+            className={`block h-full rounded-full transition-all duration-500 ${palette.bar}`}
+            style={{ width: `${progress}%` }}
+          />
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
 export const PublicationDetail = ({ vacante, onApply, isApplying, hasApplied }: PublicationDetailProps) => {
   if (!vacante) {
     return (
@@ -122,50 +179,34 @@ export const PublicationDetail = ({ vacante, onApply, isApplying, hasApplied }: 
 
       <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_240px] lg:p-6">
         <div className="min-w-0 space-y-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl bg-[#f7f5f1] p-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-                <WalletCards size={15} className="text-emerald-600" />
-                Salario
-              </div>
-              <p className="mt-2 text-lg font-bold text-[#009A4D]">{formatSalary(vacante.sueldoAprox)}</p>
-            </div>
-            <div className="rounded-2xl bg-[#f7f5f1] p-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-                <BriefcaseBusiness size={15} className="text-orange-500" />
-                Modalidad
-              </div>
-              <p className="mt-2 text-lg font-bold text-slate-800">{vacante.modalidad}</p>
-            </div>
-            <div className="rounded-2xl bg-[#f7f5f1] p-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-                <UsersRound size={15} className="text-slate-500" />
-                Postulantes
-              </div>
-              <p className="mt-2 text-lg font-bold text-slate-800">{vacante.totalPostulantes}</p>
-            </div>
-            <div className="rounded-2xl bg-[#f7f5f1] p-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-                <BriefcaseBusiness size={15} className={lugares?.isFull ? 'text-red-500' : 'text-emerald-600'} />
-                Cupo
-              </div>
-              {lugares ? (
-                <>
-                  <p className={`mt-2 text-lg font-bold ${lugares.isFull ? 'text-red-600' : 'text-slate-800'}`}>
-                    {lugares.label}
-                    {lugares.isFull ? <span className="ml-2 text-xs font-black">LLENO</span> : null}
-                  </p>
-                  <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-white">
-                    <span
-                      className={`block h-full rounded-full ${lugares.isFull ? 'bg-red-400' : 'bg-emerald-500'}`}
-                      style={{ width: `${lugares.percent}%` }}
-                    />
-                  </span>
-                </>
-              ) : (
-                <p className="mt-2 text-lg font-bold text-slate-800">No especificados</p>
-              )}
-            </div>
+          <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricTile
+              icon={<WalletCards size={16} />}
+              tone="emerald"
+              label="Salario"
+              value={formatSalary(vacante.sueldoAprox)}
+              highlight
+            />
+            <MetricTile
+              icon={<BriefcaseBusiness size={16} />}
+              tone="orange"
+              label="Modalidad"
+              value={vacante.modalidad || 'No especificada'}
+            />
+            <MetricTile
+              icon={<UsersRound size={16} />}
+              tone="slate"
+              label="Postulantes"
+              value={String(vacante.totalPostulantes ?? 0)}
+            />
+            <MetricTile
+              icon={<BriefcaseBusiness size={16} />}
+              tone={lugares?.isFull ? 'red' : 'emerald'}
+              label="Cupo"
+              value={lugares ? `${lugares.label} contratados` : 'Sin definir'}
+              badge={lugares?.isFull ? 'LLENO' : undefined}
+              progress={lugares?.percent}
+            />
           </div>
 
           <section className="rounded-2xl border border-slate-100 bg-white p-4">

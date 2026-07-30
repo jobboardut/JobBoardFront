@@ -68,6 +68,45 @@ const getTimelineSegmentClass = (status: string, stepIndex: number) => {
 
 const puedeRetirarse = (status: string) => !TERMINALES.includes(status)
 
+const formatInterviewDate = (value?: string | null): string | null => {
+  if (!value) return null
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
+
+/** Nota contextual: motivo del rechazo o fecha de la entrevista agendada. */
+const NotaEstatus = ({ app }: { app: Application }) => {
+  if (app.status === 'RECHAZADO' && app.rejectionReason) {
+    return (
+      <p className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">
+        <span className="font-bold">Motivo: </span>
+        {app.rejectionReason}
+      </p>
+    )
+  }
+
+  const interviewDate = app.status === 'ENTREVISTA' ? formatInterviewDate(app.interviewDate) : null
+  if (interviewDate) {
+    return (
+      <p className="mt-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+        <span className="font-bold">Entrevista: </span>
+        {interviewDate}
+      </p>
+    )
+  }
+
+  return null
+}
+
 export const ApplicationsTable = ({ applications, onViewDetails, onRetirar, isRetirando = false }: ApplicationsTableProps) => {
   if (!applications.length) {
     return <EmptyState title="No hay postulaciones para mostrar" message="Tus aplicaciones apareceran aqui cuando postules a una vacante." />
@@ -98,6 +137,7 @@ export const ApplicationsTable = ({ applications, onViewDetails, onRetirar, isRe
                 {app.status}
               </span>
             </div>
+            <NotaEstatus app={app} />
             <p className="mt-3 text-xs font-semibold text-slate-500">Postulacion: {app.postulationDate}</p>
             {puedeRetirarse(app.status) && onRetirar ? (
               <button
@@ -167,6 +207,9 @@ export const ApplicationsTable = ({ applications, onViewDetails, onRetirar, isRe
                       >
                         {app.status}
                       </span>
+                    </div>
+                    <div className="max-w-xs">
+                      <NotaEstatus app={app} />
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">

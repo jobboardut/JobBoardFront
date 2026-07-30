@@ -108,7 +108,7 @@ export const DetalleVacante = () => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
+      <div className="rounded-3xl brand-banner brand-banner--empresa p-7 text-white shadow-lg">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <button

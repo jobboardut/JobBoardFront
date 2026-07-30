@@ -43,8 +43,6 @@ export const useProfile = () => {
   const queryClient = useQueryClient()
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
-  const [contactOverrides, setContactOverrides] =
-    useState<Partial<Pick<StudentProfile, 'phone' | 'email' | 'civilStatus' | 'address'>>>({})
 
   const profileQuery = useQuery({
     queryKey: ['estudiante', 'perfil', userId],
@@ -52,12 +50,10 @@ export const useProfile = () => {
     enabled: !!userId,
   })
 
+  // El perfil viene siempre del servidor: los cambios se guardan y se recargan.
   const studentProfile = useMemo(
-    () => ({
-      ...(profileQuery.data ?? EMPTY_PROFILE),
-      ...contactOverrides,
-    }),
-    [contactOverrides, profileQuery.data]
+    () => profileQuery.data ?? EMPTY_PROFILE,
+    [profileQuery.data]
   )
 
   const curriculumData = useMemo(() => buildCurriculumData(studentProfile), [studentProfile])
@@ -73,6 +69,14 @@ export const useProfile = () => {
   const cvMutation = useMutation({
     mutationFn: (file: File) =>
       estudianteService.actualizarArchivos(userId, { cv: file }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'perfil', userId] })
+    },
+  })
+
+  const contactMutation = useMutation({
+    mutationFn: (data: EditContactFormData) =>
+      estudianteService.actualizarContacto(userId, studentProfile, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['estudiante', 'perfil', userId] })
     },
@@ -142,15 +146,18 @@ export const useProfile = () => {
     }
   }
 
-  const handleSaveContact = (data: EditContactFormData) => {
-    setContactOverrides({
-      phone: data.phone,
-      email: data.email,
-      civilStatus: data.civilStatus,
-      address: data.address,
-    })
-    toast.success('Contacto actualizado', 'Los datos se guardaron en esta vista.')
-    setIsContactModalOpen(false)
+  const handleSaveContact = async (data: EditContactFormData) => {
+    try {
+      await contactMutation.mutateAsync(data)
+      toast.success('Contacto actualizado', 'Tus datos se guardaron correctamente.')
+      setIsContactModalOpen(false)
+    } catch (error) {
+      toast.error(
+        'No se pudo guardar',
+        describeApiError(error, 'Intenta de nuevo en unos segundos.')
+      )
+      throw error
+    }
   }
 
   const handleDownloadCV = async () => {
@@ -183,6 +190,7 @@ export const useProfile = () => {
     isImageModalOpen,
     isSavingImage: imageMutation.isPending,
     isUploadingCV: cvMutation.isPending,
+    isSavingContact: contactMutation.isPending,
     isLoading: profileQuery.isLoading,
     isError: profileQuery.isError,
     handleEditClick,

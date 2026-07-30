@@ -35,41 +35,27 @@ export const useEditContact = ({ initialData }: UseEditContactProps) => {
     setError(null)
   }
 
-  const handleSubmit = async (onSave: (data: EditContactFormData) => void) => {
+  const handleSubmit = async (onSave: (data: EditContactFormData) => void | Promise<void>) => {
+    const validationError =
+      validateRequiredPhoneField(formData.phone, 'Telefono') ??
+      validateEmailField(formData.email, 'Email') ??
+      validateOptionalText(formData.address, 'Domicilio', SECURITY_LIMITS.address)
+
+    if (validationError) {
+      setError(validationError)
+      return false
+    }
+
     try {
       setIsLoading(true)
       setError(null)
 
-      const validationError =
-        validateRequiredPhoneField(formData.phone, 'Telefono') ??
-        validateEmailField(formData.email, 'Email') ??
-        validateOptionalText(formData.address, 'Domicilio', SECURITY_LIMITS.address)
-
-      if (validationError) {
-        setError(validationError)
-        return
-      }
-
-      // Validaciones básicas
-      if (!formData.phone.trim()) {
-        setError('El teléfono es requerido')
-        return
-      }
-      if (!formData.email.trim()) {
-        setError('El email es requerido')
-        return
-      }
-      if (!formData.email.includes('@')) {
-        setError('Email inválido')
-        return
-      }
-
-      // Simular delay de API
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      onSave(formData)
+      // Guardado real contra la API; el padre resuelve cuando el servidor responde.
+      await onSave(formData)
+      return true
     } catch {
-      setError('Error al guardar los cambios')
+      setError('No se pudieron guardar los cambios. Intenta de nuevo.')
+      return false
     } finally {
       setIsLoading(false)
     }

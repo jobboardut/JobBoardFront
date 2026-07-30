@@ -217,7 +217,7 @@ export const EditarPerfilEmpresa = () => {
         </div>
       )}
 
-      <div className="mb-8 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
+      <div className="mb-8 rounded-3xl brand-banner brand-banner--empresa p-7 text-white shadow-lg">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="mt-3 text-2xl font-semibold">Editar perfil</h1>

@@ -1,0 +1,232 @@
+/* ==========================================================================
+   Encabezado de seccion (estudiante / empresa)
+   Misma familia visual que el panel de administracion: degradado profundo
+   con halo suave. Colores institucionales: verde #009A4D y naranja #EA580C.
+   ========================================================================== */
+
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 26px 28px;
+  color: #ffffff;
+  isolation: isolate;
+}
+
+/* Verde institucional con profundidad (no un degradado plano de 3 colores). */
+.page-hero--estudiante {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(234, 88, 12, 0.42) 0%, transparent 55%),
+    linear-gradient(118deg, #06251c 0%, #06663f 48%, #009a4d 100%);
+  box-shadow: 0 20px 44px rgba(4, 66, 43, 0.28);
+}
+
+/* Naranja institucional para el area de empresa. */
+.page-hero--empresa {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(0, 154, 77, 0.38) 0%, transparent 55%),
+    linear-gradient(118deg, #2a1206 0%, #9a3412 46%, #ea580c 100%);
+  box-shadow: 0 20px 44px rgba(124, 45, 18, 0.26);
+}
+
+/* Halo que da sensacion de luz, sutil y sin ruido. */
+.page-hero__glow {
+  position: absolute;
+  z-index: -1;
+  top: -55%;
+  right: -12%;
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.page-hero__content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.page-hero__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.page-hero__icon {
+  display: grid;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(6px);
+}
+
+.page-hero__eyebrow {
+  margin: 0 0 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.page-hero__title {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.page-hero__description {
+  max-width: 62ch;
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.page-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex: none;
+  align-items: center;
+  gap: 9px;
+}
+
+.page-hero__aside {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* -------------------- Banner simple (mismo acabado) ----------------------
+   Para encabezados que conservan su estructura propia pero deben usar el
+   degradado institucional en lugar del arcoiris de tres colores.
+   -------------------------------------------------------------------------- */
+
+.brand-banner {
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.brand-banner::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 68%);
+  pointer-events: none;
+}
+
+.brand-banner--estudiante {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(234, 88, 12, 0.42) 0%, transparent 55%),
+    linear-gradient(118deg, #06251c 0%, #06663f 48%, #009a4d 100%);
+  box-shadow: 0 20px 44px rgba(4, 66, 43, 0.28);
+}
+
+.brand-banner--empresa {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(0, 154, 77, 0.38) 0%, transparent 55%),
+    linear-gradient(118deg, #2a1206 0%, #9a3412 46%, #ea580c 100%);
+  box-shadow: 0 20px 44px rgba(124, 45, 18, 0.26);
+}
+
+/* El contenido debe quedar por encima del halo. */
+.brand-banner > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------- Botones del hero ---------------------------- */
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 180ms var(--anim-ease), background-color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.hero-btn:hover {
+  transform: translateY(-1px);
+}
+
+.hero-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Solido: la accion principal. */
+.hero-btn--solid {
+  background: #ffffff;
+  color: #06402b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+.hero-btn--solid:hover {
+  background: #f3fbf7;
+}
+
+.page-hero--empresa .hero-btn--solid {
+  color: #7c2d12;
+}
+
+.page-hero--empresa .hero-btn--solid:hover {
+  background: #fff7ed;
+}
+
+/* Contorno: acciones secundarias sobre el degradado. */
+.hero-btn--ghost {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+}
+
+.hero-btn--ghost:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ------------------------------ Responsivo ------------------------------- */
+
+@media (max-width: 640px) {
+  .page-hero {
+    border-radius: 20px;
+    padding: 20px;
+  }
+
+  .page-hero__content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-hero__actions {
+    width: 100%;
+  }
+
+  .page-hero__actions .hero-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

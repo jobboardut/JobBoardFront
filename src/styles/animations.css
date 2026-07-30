@@ -342,6 +342,49 @@ button:not(:disabled):active {
   background: var(--role-accent-strong);
 }
 
+/* ------------- Pulido de tarjetas en estudiante y empresa ---------------- */
+/* Elevacion sutil y borde que reacciona: da sensacion de interfaz viva sin
+   depender de sombras pesadas. */
+
+.feature-content .rounded-2xl,
+.feature-content .rounded-3xl {
+  transition: transform 220ms var(--anim-ease), box-shadow 220ms var(--anim-ease),
+    border-color 220ms ease;
+}
+
+/* Solo las tarjetas clicables se levantan. */
+.feature-content article[role='button']:hover,
+.feature-content .group:hover {
+  transform: translateY(-2px);
+}
+
+/* Barras de progreso (cupo) animadas al entrar. */
+@keyframes anim-bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.feature-content [style*='width:'] {
+  transform-origin: left center;
+}
+
+/* Encabezado: entra con un desplazamiento corto y elegante. */
+.page-hero {
+  animation: anim-fade-up 520ms var(--anim-ease) both;
+}
+
+/* Los botones del hero heredan el feedback tactil global. */
+.hero-btn:focus-visible,
+.feature-content button:focus-visible,
+.admin-content button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 /* ----------------------------- Accesibilidad ----------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

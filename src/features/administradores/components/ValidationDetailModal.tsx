@@ -173,7 +173,7 @@ function ValidationDetailModal({ request, onClose, onValidate, isValidating = fa
 						onClick={() => setIsRejectModalOpen(true)}
 					>
 						<XCircle size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
-						Rechazar
+						Devolver para correccion
 					</button>
 				</footer>
 			</article>

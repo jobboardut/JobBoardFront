@@ -187,6 +187,8 @@ const mapApplication = (payload: unknown, index: number): Application => {
     experience: pickString(records, ['experiencia', 'experience'], 'No especificado'),
     description,
     responsibilities: requirements ? splitTextList(requirements) : [],
+    rejectionReason: pickString(records, ['motivoRechazo', 'rejectionReason']) || null,
+    interviewDate: pickString(records, ['fechaEntrevista', 'interviewDate']) || null,
   }
 }
 
@@ -214,6 +216,25 @@ export const estudianteService = {
     fotoUrl: string
   ): Promise<StudentProfile> => {
     const payload = buildProfileUpdatePayload(userId, profile, fotoUrl)
+    const response = await api.put(`/estudiante/${userId}/perfil`, payload) as unknown
+
+    return mapStudentProfile(response ?? payload)
+  },
+
+  /** Guarda los datos de contacto en el servidor (antes solo se cambiaban en pantalla). */
+  actualizarContacto: async (
+    userId: number,
+    profile: StudentProfile,
+    contacto: { phone: string; email: string; civilStatus: string; address: string }
+  ): Promise<StudentProfile> => {
+    const payload = {
+      ...buildProfileUpdatePayload(userId, profile, profile.profileImage ?? ''),
+      telefono: contacto.phone,
+      email: contacto.email,
+      estadoCivil: contacto.civilStatus,
+      direccion: contacto.address,
+    }
+
     const response = await api.put(`/estudiante/${userId}/perfil`, payload) as unknown
 
     return mapStudentProfile(response ?? payload)

@@ -23,6 +23,10 @@ export interface Application {
   experience?: string
   description?: string
   responsibilities?: string[]
+  /** Motivo que la empresa escribio al rechazar. */
+  rejectionReason?: string | null
+  /** Fecha/hora de la entrevista agendada por la empresa. */
+  interviewDate?: string | null
 }
 
 export interface StatusInfo {

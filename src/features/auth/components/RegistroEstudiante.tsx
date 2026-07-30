@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { User, MapPin, Mail, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2, Hash, X } from 'lucide-react'
+import { User, MapPin, Mail, Phone, Camera, Upload, GraduationCap, ArrowLeft, CheckCircle2, Hash, X } from 'lucide-react'
 import campusImg from '@/assets/images/campus.png'
 import { catalogService } from '@/services/catalog.service'
 import type { CatalogItem } from '@/services/catalog.service'
@@ -15,6 +15,7 @@ import {
   validateEmailField,
   validateFile,
   validatePasswordField,
+  validateRequiredPhoneField,
   validateRequiredText,
 } from '@/shared/security/inputRules'
 import { authService } from '../services/auth.service'
@@ -49,6 +50,7 @@ const ESTUDIANTE_FIELD_LIMITS = {
   fechaNacimiento: 10,
   estadoCivil: SECURITY_LIMITS.shortText,
   correo: SECURITY_LIMITS.email,
+  telefono: SECURITY_LIMITS.phone,
   password: SECURITY_LIMITS.passwordMax,
   matricula: SECURITY_LIMITS.shortText,
   programaEducativoId: 12,
@@ -78,6 +80,7 @@ export const RegistroEstudiante = () => {
     fechaNacimiento: '',
     estadoCivil: '',
     correo: '',
+    telefono: '',
     password: '',
     matricula: '',
     programaEducativoId: '',
@@ -270,6 +273,7 @@ export const RegistroEstudiante = () => {
       validateRequiredText(form.fechaNacimiento, 'Fecha de nacimiento', 10),
       validateRequiredText(form.estadoCivil, 'Estado civil', SECURITY_LIMITS.shortText),
       validateEmailField(form.correo, 'Correo electronico'),
+      validateRequiredPhoneField(form.telefono, 'Telefono'),
       validatePasswordField(form.password),
       validateRequiredText(form.matricula, 'Matricula', SECURITY_LIMITS.shortText),
       validateRequiredText(form.programaEducativoId, 'Programa educativo', 12),
@@ -324,6 +328,7 @@ export const RegistroEstudiante = () => {
         direccion: form.direccion,
         fechaNacimiento: form.fechaNacimiento,
         estadoCivil: form.estadoCivil,
+        telefono: form.telefono,
         matricula: form.matricula,
         programaEducativoId: form.programaEducativoId,
         programaEducativo: programaSeleccionado?.nombre ?? '',
@@ -354,6 +359,7 @@ export const RegistroEstudiante = () => {
       items: [
         { label: 'Tipo de cuenta', value: estatusAcademico },
         { label: 'Correo', value: form.correo },
+        { label: 'Telefono', value: form.telefono },
         { label: 'Contraseña', value: form.password ? 'Configurada' : '' },
       ],
     },
@@ -566,6 +572,25 @@ export const RegistroEstudiante = () => {
                 />
               </div>
               <p className="text-xs text-gray-400">Con este correo iniciaras sesion. Usa el formato correo@dominio.com.</p>
+            </div>
+
+            {/* Telefono */}
+            <div className="flex flex-col gap-1 mb-6">
+              <label className="text-sm text-gray-600">Telefono</label>
+              <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white gap-2">
+                <Phone size={16} className="text-gray-400" />
+                <input
+                  type="tel"
+                  name="telefono"
+                  value={form.telefono}
+                  onChange={handleChange}
+                  placeholder="222 000 0000"
+                  maxLength={SECURITY_LIMITS.phone}
+                  className="flex-1 text-sm outline-none bg-transparent"
+                  required
+                />
+              </div>
+              <p className="text-xs text-gray-400">A este numero te contactaran las empresas. De 7 a 18 digitos.</p>
             </div>
 
             <div className="flex flex-col gap-1 mb-6">

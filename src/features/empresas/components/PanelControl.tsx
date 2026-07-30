@@ -1,5 +1,6 @@
-import { Briefcase, TrendingUp, Users } from 'lucide-react'
+import { Briefcase, LayoutDashboard, Plus, TrendingUp, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { PageHero } from '@/shared/components/PageHero'
 import { ROUTES } from '@/router/routes'
 import { useVacantes } from '../hooks/useEmpresa'
 import { StatCard } from './StatCard'
@@ -10,9 +11,13 @@ export const PanelControl = () => {
   const { data: vacantes = [], isLoading } = useVacantes()
   const safeVacantes = Array.isArray(vacantes) ? vacantes : []
 
+  // El backend nombra el conteo "totalPostulantes"; "postulantes" queda por compatibilidad.
+  const contarPostulantes = (v: { totalPostulantes?: number; postulantes?: number }) =>
+    v.totalPostulantes ?? v.postulantes ?? 0
+
   const totalVacantes    = safeVacantes.length
   const totalActivas     = safeVacantes.filter(v => v.estatus === 'Activa').length
-  const totalPostulantes = safeVacantes.reduce((acc, v) => acc + (v.postulantes ?? 0), 0)
+  const totalPostulantes = safeVacantes.reduce((acc, v) => acc + contarPostulantes(v), 0)
 
   const stats = [
     { label: 'Vacantes',    valor: totalVacantes,    icono: Briefcase,  tone: 'orange'  as const },
@@ -28,24 +33,34 @@ export const PanelControl = () => {
 
   return (
     <div>
-      <div className="mb-8 grid gap-6 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-8 text-white shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold">Panel de control</h1>
-            <p className="mt-2 text-sm text-white/80">
-              Tu actividad más reciente en vacantes y postulantes, todo en un vistazo.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(ROUTES.EMPRESA_POSTULANTES)}
-              className="rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Ver postulantes
-            </button>
-          </div>
-        </div>
+      <div className="mb-6">
+        <PageHero
+          tone="empresa"
+          eyebrow="Resumen"
+          title="Panel de control"
+          description="Tu actividad mas reciente en vacantes y postulantes, todo en un vistazo."
+          Icon={LayoutDashboard}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.EMPRESA_CREAR_VACANTE)}
+                className="hero-btn hero-btn--solid"
+              >
+                <Plus size={16} />
+                Publicar vacante
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(ROUTES.EMPRESA_POSTULANTES)}
+                className="hero-btn hero-btn--ghost"
+              >
+                <Users size={16} />
+                Ver postulantes
+              </button>
+            </>
+          }
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3 mb-8">
@@ -68,7 +83,7 @@ export const PanelControl = () => {
           estatus: v.estatus === 'Activa' ? 'activo'
                  : v.estatus === 'Finalizada' || v.estatus === 'Pausada' ? 'cerrada'
                  : 'pendiente' as 'activo' | 'pendiente' | 'cerrada',
-          postulantes: v.postulantes ?? 0,
+          postulantes: contarPostulantes(v),
           fechaPublicacion: v.fechaPublicacion ?? '',
         }))}
         onView={(id) => navigate(ROUTES.EMPRESA_DETALLE_VACANTE.replace(':id', id))}

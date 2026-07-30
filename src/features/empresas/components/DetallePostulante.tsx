@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, FileText, GraduationCap, Mail, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, FileText, GraduationCap, Mail, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { useCambiarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
 import type { PostulanteEstatus } from '../types/empresa.types'
 import { ETIQUETA_ACCION, TRANSICIONES_EMPRESA, getPostulanteStatusMeta } from '../utils/postulanteStatus'
+import { ModalCitarEntrevista } from './ModalCitarEntrevista'
 import { ModalRechazoPostulacion } from './ModalRechazoPostulacion'
 
 export const DetallePostulante = () => {
@@ -18,6 +19,7 @@ export const DetallePostulante = () => {
   const toast = useAppToast()
   const { confirm } = useConfirmDialog()
   const [isRejectOpen, setIsRejectOpen] = useState(false)
+  const [isInterviewOpen, setIsInterviewOpen] = useState(false)
 
   const {
     data: postulantes = [],
@@ -83,7 +85,10 @@ export const DetallePostulante = () => {
     return texto || 'Intenta de nuevo en unos segundos.'
   }
 
-  const ejecutarCambio = (estatus: PostulanteEstatus, motivoRechazo?: string) => {
+  const ejecutarCambio = (
+    estatus: PostulanteEstatus,
+    extra?: { motivoRechazo?: string; fechaEntrevista?: string },
+  ) => {
     if (!postulante.postulacionId) {
       toast.warning('No se encontro la postulacion', 'Abre el postulante desde una vacante publicada.')
       return
@@ -95,11 +100,13 @@ export const DetallePostulante = () => {
       {
         postulacionId: postulante.postulacionId,
         estatus,
-        ...(motivoRechazo ? { motivoRechazo } : {}),
+        ...(extra?.motivoRechazo ? { motivoRechazo: extra.motivoRechazo } : {}),
+        ...(extra?.fechaEntrevista ? { fechaEntrevista: extra.fechaEntrevista } : {}),
       },
       {
         onSuccess: () => {
           setIsRejectOpen(false)
+          setIsInterviewOpen(false)
           toast.success('Estatus actualizado', `${postulante.nombre} ahora aparece como ${nextStatus.label}.`)
         },
         onError: (error: unknown) => {
@@ -113,6 +120,12 @@ export const DetallePostulante = () => {
     // El rechazo exige motivo: se captura en su propio modal.
     if (estatus === 'Rechazado') {
       setIsRejectOpen(true)
+      return
+    }
+
+    // La entrevista permite agendar fecha (opcional) en su propio modal.
+    if (estatus === 'Entrevista') {
+      setIsInterviewOpen(true)
       return
     }
 
@@ -134,7 +147,7 @@ export const DetallePostulante = () => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
+      <div className="rounded-3xl brand-banner brand-banner--empresa p-7 text-white shadow-lg">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <button
@@ -215,20 +228,17 @@ export const DetallePostulante = () => {
             <Phone size={16} />
             <p className="text-xs font-semibold uppercase">Telefono</p>
           </div>
-          <p className="mt-2 text-sm font-semibold text-gray-800">{postulante.telefono ?? 'Sin telefono'}</p>
+          <p className="mt-2 text-sm font-semibold text-gray-800">
+            {postulante.telefono?.trim() || 'No registrado'}
+          </p>
         </div>
         <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
           <div className="flex items-center gap-2 text-emerald-500">
-            <MapPin size={16} />
-            <p className="text-xs font-semibold uppercase">Ubicacion</p>
+            <GraduationCap size={16} />
+            <p className="text-xs font-semibold uppercase">Carrera</p>
           </div>
-          <p className="mt-2 text-sm font-semibold text-gray-800">{postulante.ubicacion ?? postulante.carrera ?? 'Sin dato'}</p>
+          <p className="mt-2 text-sm font-semibold text-gray-800">{postulante.carrera || 'Sin dato'}</p>
         </div>
-      </div>
-
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">Resumen</h2>
-        <p className="text-sm text-gray-600">{postulante.descripcion || 'Sin descripcion adicional.'}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -271,7 +281,15 @@ export const DetallePostulante = () => {
         candidatoNombre={postulante.nombre}
         isSubmitting={isUpdating}
         onClose={() => setIsRejectOpen(false)}
-        onSubmit={(motivo) => ejecutarCambio('Rechazado', motivo)}
+        onSubmit={(motivo) => ejecutarCambio('Rechazado', { motivoRechazo: motivo })}
+      />
+
+      <ModalCitarEntrevista
+        isOpen={isInterviewOpen}
+        candidatoNombre={postulante.nombre}
+        isSubmitting={isUpdating}
+        onClose={() => setIsInterviewOpen(false)}
+        onSubmit={(fechaEntrevista) => ejecutarCambio('Entrevista', { fechaEntrevista })}
       />
     </div>
   )

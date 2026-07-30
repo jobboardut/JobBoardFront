@@ -78,8 +78,8 @@ function PublicacionesGrid({ rows, onSelect }: PublicationsGridProps) {
 								return (
 									<span className={`publication-places ${lugares.isFull ? 'is-full' : ''}`}>
 										<BriefcaseBusiness size={14} strokeWidth={APP_ICON_STROKE_WIDTH} />
-										{lugares.label} lugares
-										{lugares.isFull ? <strong> · LLENA</strong> : null}
+										{lugares.label} contratados
+										{lugares.isFull ? <strong> · CUPO LLENO</strong> : null}
 									</span>
 								)
 							})()}

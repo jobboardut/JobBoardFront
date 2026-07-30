@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BriefcaseBusiness, Eye, FileText, GraduationCap, Hash, LayoutGrid, List, Mail, UserCircle } from 'lucide-react'
+import { BriefcaseBusiness, Eye, FileText, GraduationCap, Hash, LayoutGrid, List, Mail, UserCircle, UsersRound } from 'lucide-react'
+import { PageHero } from '@/shared/components/PageHero'
 import { ROUTES } from '@/router/routes'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
 import { getLugaresInfo } from '@/shared/utils/lugares'
@@ -167,50 +168,54 @@ export const Postulantes = () => {
 
   return (
     <div>
-      <div className="mb-6 rounded-3xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-orange-400 p-7 text-white shadow-lg">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="mt-3 text-3xl font-semibold">Gestiona talento en un solo lugar</h1>
-            <p className="mt-2 text-sm text-white/80">
-              Revisa avances, filtra candidatos y toma decisiones rapidas para tus vacantes activas.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {vacantes.length > 0 && (
-              <select
-                value={vacanteSeleccionada ?? ''}
-                onChange={(event) => setVacanteSeleccionadaManual(Number(event.target.value))}
-                className="rounded-full border border-white/40 bg-white px-4 py-2 text-sm font-semibold text-emerald-600 outline-none"
-              >
-                {vacantes.map((vacante) => (
-                  <option key={vacante.id} value={vacante.id}>
-                    {vacante.titulo}
-                  </option>
-                ))}
-              </select>
-            )}
-            <button
-              type="button"
-              onClick={() => setVista('lista')}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
-                vista === 'lista' ? 'bg-white text-emerald-600' : 'border border-white/40 text-white'
-              }`}
-            >
-              <List size={16} />
-              Lista
-            </button>
-            <button
-              type="button"
-              onClick={() => setVista('kanban')}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
-                vista === 'kanban' ? 'bg-white text-emerald-600' : 'border border-white/40 text-white'
-              }`}
-            >
-              <LayoutGrid size={16} />
-              Kanban
-            </button>
-          </div>
-        </div>
+      <div className="mb-6">
+        <PageHero
+          tone="empresa"
+          eyebrow="Talento"
+          title="Gestiona tus candidatos"
+          description="Revisa avances, filtra candidatos y toma decisiones rapidas para tus vacantes activas."
+          Icon={UsersRound}
+          actions={
+            <>
+              {vacantes.length > 0 && (
+                <select
+                  value={vacanteSeleccionada ?? ''}
+                  onChange={(event) => setVacanteSeleccionadaManual(Number(event.target.value))}
+                  aria-label="Vacante a revisar"
+                  className="hero-btn hero-btn--ghost max-w-[15rem] cursor-pointer truncate pr-3 text-white [&>option]:text-slate-800"
+                >
+                  {vacantes.map((vacante) => (
+                    <option key={vacante.id} value={vacante.id}>
+                      {vacante.titulo}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <div className="inline-flex rounded-xl bg-white/12 p-1 ring-1 ring-white/25 backdrop-blur">
+                <button
+                  type="button"
+                  onClick={() => setVista('lista')}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    vista === 'lista' ? 'bg-white text-orange-700 shadow-sm' : 'text-white/85 hover:text-white'
+                  }`}
+                >
+                  <List size={15} />
+                  Lista
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVista('kanban')}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    vista === 'kanban' ? 'bg-white text-orange-700 shadow-sm' : 'text-white/85 hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid size={15} />
+                  Kanban
+                </button>
+              </div>
+            </>
+          }
+        />
       </div>
 
       {vacantes.length === 0 ? (

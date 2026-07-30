@@ -21,6 +21,12 @@ Cada rol comparte la misma estructura (sidebar + contenido) pero se distingue po
 | **Empresa** | Naranja `#EA580C` | Barra superior y botón "Publicar vacante" en naranja |
 | **Admin** | Slate + Esmeralda | Sidebar claro; headers con banner degradado institucional |
 
+### Encabezados de seccion — `src/shared/components/PageHero.tsx`
+Componente compartido por estudiante y empresa con el mismo acabado del panel de
+administracion: degradado profundo + halo suave (`src/styles/page-hero.css`).
+Sustituye al degradado plano de tres colores que se usaba antes.
+Para encabezados con estructura propia existe la clase `.brand-banner--empresa`.
+
 ### Animaciones (estilo reactbits) — `src/styles/animations.css`
 - Entrada en cascada (fade-up escalonado) de cada pantalla y de las rejillas de tarjetas.
 - Elevación al hover en tarjetas; feedback táctil (scale) en botones.
