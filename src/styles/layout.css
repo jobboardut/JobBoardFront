@@ -1,6 +1,9 @@
 .app-shell {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
+  /* El ancho lo controla la barra lateral (ver sidebar-collapse.css).
+     Sin transicion: grid-template-columns con minmax() no interpola y el
+     navegador se quedaria en el valor inicial. */
+  grid-template-columns: var(--sidebar-width, 264px) minmax(0, 1fr);
   height: 100vh;
   overflow: hidden;
 }

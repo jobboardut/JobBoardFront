@@ -1,5 +1,5 @@
-import { Menu, X, type LucideIcon } from 'lucide-react'
-import { useState } from 'react'
+import { Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { APP_ICONS, APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '@/config/iconConfig'
 import { useLogout } from '@/features/auth/hooks/useAuth'
@@ -122,21 +122,54 @@ const roleAccount: Record<UserRole, Required<Pick<SidebarAccount, 'title' | 'sub
   },
 }
 
+const COLLAPSE_KEY = 'sidebar-collapsed'
+
 export const Sidebar = ({ role, account }: SidebarProps) => {
   const { logout, isLoggingOut } = useLogout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  // Preferencia del usuario: la barra recuerda si quedo colapsada.
+  const [isCollapsed, setIsCollapsed] = useState(
+    () => localStorage.getItem(COLLAPSE_KEY) === 'true',
+  )
   const groups = navigationGroups[role]
   const defaultAccount = roleAccount[role]
   const AccountIcon = account?.icon ?? defaultAccount.icon
 
+  const toggleCollapse = () => {
+    setIsCollapsed((current) => {
+      const next = !current
+      localStorage.setItem(COLLAPSE_KEY, String(next))
+      return next
+    })
+  }
+
+  // El layout lee esta clase para ajustar el ancho de la columna.
+  useEffect(() => {
+    document.documentElement.classList.toggle('sidebar-is-collapsed', isCollapsed)
+  }, [isCollapsed])
+
   return (
-    <aside className={`sidebar ${role.toLowerCase()}-sidebar ${isMenuOpen ? 'is-open' : ''}`}>
+    <aside
+      className={`sidebar ${role.toLowerCase()}-sidebar ${isMenuOpen ? 'is-open' : ''} ${
+        isCollapsed ? 'is-collapsed' : ''
+      }`}
+    >
       <div className="sidebar-topbar">
         <div className="brand">
           <div className="brand-mark">
             <img className="brand-logo" src="/logouttecam-removebg-preview.png" alt="UTTECAM" />
           </div>
         </div>
+
+        <button
+          type="button"
+          className="sidebar-collapse-toggle"
+          aria-label={isCollapsed ? 'Expandir menu' : 'Colapsar menu'}
+          title={isCollapsed ? 'Expandir menu' : 'Colapsar menu'}
+          onClick={toggleCollapse}
+        >
+          {isCollapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
+        </button>
 
         <button
           type="button"
@@ -161,11 +194,13 @@ export const Sidebar = ({ role, account }: SidebarProps) => {
                     className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
+                    // El title sirve de tooltip cuando la barra esta colapsada.
+                    title={item.label}
                   >
                     <span className="nav-icon">
                       <item.icon size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
                     </span>
-                    <span>{item.label}</span>
+                    <span className="nav-label">{item.label}</span>
                   </NavLink>
                 ))}
               </div>
@@ -184,11 +219,17 @@ export const Sidebar = ({ role, account }: SidebarProps) => {
             </span>
           </div>
 
-          <button type="button" className="nav-item" onClick={logout} disabled={isLoggingOut}>
+          <button
+            type="button"
+            className="nav-item"
+            onClick={logout}
+            disabled={isLoggingOut}
+            title="Salir"
+          >
             <span className="nav-icon">
               <APP_ICONS.logout size={APP_ICON_SIZE} strokeWidth={APP_ICON_STROKE_WIDTH} />
             </span>
-            {isLoggingOut ? 'Saliendo...' : 'Salir'}
+            <span className="nav-label">{isLoggingOut ? 'Saliendo...' : 'Salir'}</span>
           </button>
         </div>
       </div>

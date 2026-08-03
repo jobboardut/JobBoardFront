@@ -27,6 +27,14 @@ administracion: degradado profundo + halo suave (`src/styles/page-hero.css`).
 Sustituye al degradado plano de tres colores que se usaba antes.
 Para encabezados con estructura propia existe la clase `.brand-banner--empresa`.
 
+### Barra lateral colapsable — `src/styles/sidebar-collapse.css`
+El boton de la barra la reduce a una franja de iconos (264px -> 76px) y le
+devuelve ~188px al contenido. La preferencia se guarda en `localStorage`
+(`sidebar-collapsed`) y el layout la lee por la variable `--sidebar-width`.
+Nota: `grid-template-columns` no lleva `transition` porque con `minmax()` no
+interpola y el navegador se queda en el valor inicial; el movimiento lo da el
+contenido de la barra. En movil manda el menu hamburguesa.
+
 ### Animaciones (estilo reactbits) — `src/styles/animations.css`
 - Entrada en cascada (fade-up escalonado) de cada pantalla y de las rejillas de tarjetas.
 - Elevación al hover en tarjetas; feedback táctil (scale) en botones.

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Barra lateral colapsable
+   Reduce la navegacion a una franja de iconos para devolverle ~190px de
+   ancho al contenido. La preferencia se guarda en localStorage.
+   ========================================================================== */
+
+:root {
+  --sidebar-width: 264px;
+  --sidebar-width-collapsed: 76px;
+}
+
+/* Al plegar solo cambia la variable: el layout la lee y se ajusta solo.
+   Se hace por variable (no por regla) para no depender del orden de las hojas. */
+html.sidebar-is-collapsed {
+  --sidebar-width: var(--sidebar-width-collapsed);
+}
+
+/* Boton para plegar/desplegar: solo en escritorio. */
+.sidebar-collapse-toggle {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--gray-soft);
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.sidebar-collapse-toggle:hover {
+  border-color: var(--role-accent, #009a4d);
+  color: var(--role-accent, #009a4d);
+}
+
+.role-admin .sidebar-collapse-toggle {
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+/* ----------------------------- Estado plegado ----------------------------
+   El ancho de la columna cambia de golpe (el grid no interpola minmax), asi
+   que la sensacion de movimiento la da el contenido de la barra.
+   -------------------------------------------------------------------------- */
+
+.sidebar {
+  transition: padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sidebar .nav-item {
+  transition: justify-content 200ms ease, padding 200ms ease, background 160ms ease;
+}
+
+.sidebar.is-collapsed .nav-icon,
+.sidebar.is-collapsed .sidebar-account-icon {
+  animation: anim-fade-in 260ms ease both;
+}
+
+.sidebar.is-collapsed {
+  padding-inline: 10px;
+}
+
+/* El logo cede su lugar al boton. */
+.sidebar.is-collapsed .brand {
+  display: none;
+}
+
+.sidebar.is-collapsed .sidebar-topbar {
+  justify-content: center;
+}
+
+/* Los titulos de grupo estorban sin texto al lado. */
+.sidebar.is-collapsed .nav-group-label {
+  height: 1px;
+  margin: 6px 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  color: transparent;
+}
+
+.role-admin .sidebar.is-collapsed .nav-group-label {
+  border-top-color: rgba(15, 23, 42, 0.1);
+}
+
+/* Cada enlace queda como un boton cuadrado centrado. */
+.sidebar.is-collapsed .nav-item {
+  justify-content: center;
+  gap: 0;
+  padding-inline: 0;
+}
+
+.sidebar.is-collapsed .nav-label {
+  display: none;
+}
+
+/* Al plegar, el indicador de activo pasa a ser un borde izquierdo. */
+.sidebar.is-collapsed .nav-item.active::after {
+  top: 50%;
+  right: auto;
+  left: 2px;
+  height: 18px;
+  transform: translateY(-50%);
+}
+
+.sidebar.is-collapsed .nav-item:hover {
+  transform: none;
+}
+
+/* La tarjeta de cuenta se reduce al avatar. */
+.sidebar.is-collapsed .sidebar-account {
+  grid-template-columns: 1fr;
+  place-items: center;
+  padding: 7px;
+}
+
+.sidebar.is-collapsed .sidebar-account-copy {
+  display: none;
+}
+
+/* ------------------------------ Responsivo -------------------------------
+   En movil manda el menu hamburguesa: el plegado no aplica.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .sidebar-collapse-toggle {
+    display: none;
+  }
+
+  html.sidebar-is-collapsed {
+    --sidebar-width: 100%;
+  }
+
+  .sidebar.is-collapsed {
+    padding-inline: 14px;
+  }
+
+  .sidebar.is-collapsed .brand,
+  .sidebar.is-collapsed .nav-label,
+  .sidebar.is-collapsed .sidebar-account-copy {
+    display: revert;
+  }
+
+  .sidebar.is-collapsed .nav-item {
+    justify-content: flex-start;
+    gap: 12px;
+    padding-inline: 12px;
+  }
+
+  .sidebar.is-collapsed .nav-group-label {
+    height: auto;
+    border-top: 0;
+    color: #94a3b8;
+  }
+
+  .sidebar.is-collapsed .sidebar-account {
+    grid-template-columns: 38px minmax(0, 1fr);
+    place-items: stretch;
+    padding: 9px;
+  }
+}
