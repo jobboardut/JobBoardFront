@@ -1,6 +1,6 @@
 import { Menu, PanelLeftClose, PanelLeftOpen, X, type LucideIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { APP_ICONS, APP_ICON_SIZE, APP_ICON_STROKE_WIDTH } from '@/config/iconConfig'
 import { useLogout } from '@/features/auth/hooks/useAuth'
 import type { UserRole } from '@/features/auth/types/auth.types'
@@ -124,23 +124,48 @@ const roleAccount: Record<UserRole, Required<Pick<SidebarAccount, 'title' | 'sub
 
 const COLLAPSE_KEY = 'sidebar-collapsed'
 
+/** Vistas de lista + detalle: se pliega sola para darles todo el ancho. */
+const isDenseRoute = (pathname: string) => pathname.includes('/publicaciones')
+
 export const Sidebar = ({ role, account }: SidebarProps) => {
   const { logout, isLoggingOut } = useLogout()
+  const { pathname } = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   // Preferencia del usuario: la barra recuerda si quedo colapsada.
-  const [isCollapsed, setIsCollapsed] = useState(
+  const [userPreference, setUserPreference] = useState(
     () => localStorage.getItem(COLLAPSE_KEY) === 'true',
   )
+  // Si el usuario decide manualmente en una vista densa, mandamos su decision
+  // hasta que cambie de pantalla.
+  const [manualOverride, setManualOverride] = useState<boolean | null>(null)
+  const [lastPathname, setLastPathname] = useState(pathname)
+
+  // Al navegar se vuelve a aplicar la regla automatica (patron de React para
+  // ajustar estado cuando cambia una entrada, sin usar un efecto).
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname)
+    setManualOverride(null)
+  }
+
+  const denseRoute = isDenseRoute(pathname)
+  const isCollapsed = manualOverride ?? (denseRoute || userPreference)
+
   const groups = navigationGroups[role]
   const defaultAccount = roleAccount[role]
   const AccountIcon = account?.icon ?? defaultAccount.icon
 
   const toggleCollapse = () => {
-    setIsCollapsed((current) => {
-      const next = !current
-      localStorage.setItem(COLLAPSE_KEY, String(next))
-      return next
-    })
+    const next = !isCollapsed
+
+    if (denseRoute) {
+      // En vistas densas el cambio es temporal: no pisa la preferencia guardada.
+      setManualOverride(next)
+      return
+    }
+
+    setManualOverride(null)
+    setUserPreference(next)
+    localStorage.setItem(COLLAPSE_KEY, String(next))
   }
 
   // El layout lee esta clase para ajustar el ancho de la columna.
@@ -165,7 +190,11 @@ export const Sidebar = ({ role, account }: SidebarProps) => {
           type="button"
           className="sidebar-collapse-toggle"
           aria-label={isCollapsed ? 'Expandir menu' : 'Colapsar menu'}
-          title={isCollapsed ? 'Expandir menu' : 'Colapsar menu'}
+          title={
+            denseRoute
+              ? `${isCollapsed ? 'Expandir' : 'Colapsar'} menu (esta vista se pliega sola)`
+              : `${isCollapsed ? 'Expandir' : 'Colapsar'} menu`
+          }
           onClick={toggleCollapse}
         >
           {isCollapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
