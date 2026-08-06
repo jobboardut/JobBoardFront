@@ -14,10 +14,14 @@ import {
   SECURITY_LIMITS,
   validateEmailField,
   validateFile,
-  validatePasswordField,
   validateRequiredPhoneField,
   validateRequiredText,
 } from '@/shared/security/inputRules'
+import {
+  describePasswordProblem,
+  validatePasswordConfirmation,
+} from '@/shared/security/passwordStrength'
+import { PasswordField } from '@/shared/components/PasswordField'
 import { authService } from '../services/auth.service'
 import { getRegistroErrorMessage } from '../utils/registroErrors'
 import { RegistroResumenDialog, type RegistroResumenSection } from './RegistroResumenDialog'
@@ -52,6 +56,7 @@ const ESTUDIANTE_FIELD_LIMITS = {
   correo: SECURITY_LIMITS.email,
   telefono: SECURITY_LIMITS.phone,
   password: SECURITY_LIMITS.passwordMax,
+  confirmPassword: SECURITY_LIMITS.passwordMax,
   matricula: SECURITY_LIMITS.shortText,
   programaEducativoId: 12,
 } as const
@@ -70,7 +75,8 @@ export const RegistroEstudiante = () => {
 
   const { restoreDraft, saveDraft, clearDraft } = useFormDraft<typeof initialForm>({
     key: `registro-estudiante-${estatusAcademico}`,
-    exclude: ['password'],
+    // Ninguna contraseña se guarda en el borrador local.
+    exclude: ['password', 'confirmPassword'],
   })
 
   const initialForm = {
@@ -82,6 +88,7 @@ export const RegistroEstudiante = () => {
     correo: '',
     telefono: '',
     password: '',
+    confirmPassword: '',
     matricula: '',
     programaEducativoId: '',
   }
@@ -89,7 +96,8 @@ export const RegistroEstudiante = () => {
   const [form, setForm] = useState(() => {
     const draft = restoreDraft()
     if (draft) {
-      const restored = { ...initialForm, ...draft, password: '' }
+      // Las contraseñas nunca se restauran del borrador.
+      const restored = { ...initialForm, ...draft, password: '', confirmPassword: '' }
       return restored
     }
     return initialForm
@@ -104,6 +112,12 @@ export const RegistroEstudiante = () => {
   const [docFile, setDocFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Aviso inmediato al confirmar: no hay que esperar al envio para saberlo.
+  const confirmError =
+    form.confirmPassword && form.password !== form.confirmPassword
+      ? 'Las contraseñas no coinciden.'
+      : null
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [programas, setProgramas] = useState<CatalogItem[]>([])
@@ -274,7 +288,9 @@ export const RegistroEstudiante = () => {
       validateRequiredText(form.estadoCivil, 'Estado civil', SECURITY_LIMITS.shortText),
       validateEmailField(form.correo, 'Correo electronico'),
       validateRequiredPhoneField(form.telefono, 'Telefono'),
-      validatePasswordField(form.password),
+      // Dice exactamente que le falta a la contraseña, no la regla completa.
+      describePasswordProblem(form.password),
+      validatePasswordConfirmation(form.password, form.confirmPassword),
       validateRequiredText(form.matricula, 'Matricula', SECURITY_LIMITS.shortText),
       validateRequiredText(form.programaEducativoId, 'Programa educativo', 12),
     ].filter(Boolean)
@@ -593,23 +609,25 @@ export const RegistroEstudiante = () => {
               <p className="text-xs text-gray-400">A este numero te contactaran las empresas. De 7 a 18 digitos.</p>
             </div>
 
-            <div className="flex flex-col gap-1 mb-6">
-              <label className="text-sm text-gray-600">Contraseña</label>
-              <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 bg-white gap-2">
-                <Mail size={16} className="text-gray-400" />
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  maxLength={SECURITY_LIMITS.passwordMax}
-                  className="flex-1 text-sm outline-none bg-transparent"
-                  required
-                  minLength={8}
-                />
-              </div>
-              <p className="text-xs text-gray-400">Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero.</p>
-            </div>
+            <PasswordField
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              showStrength
+              className="mb-5"
+              hint="Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero."
+            />
+
+            <PasswordField
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              label="Confirmar contraseña"
+              autoComplete="new-password"
+              className="mb-6"
+              error={confirmError}
+              hint="Vuelve a escribirla para confirmar que coincide."
+            />
 
             <hr className="border-gray-200 mb-6" />
 

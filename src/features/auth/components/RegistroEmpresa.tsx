@@ -34,9 +34,13 @@ import {
   validateOptionalPhoneField,
   validateOptionalText,
   validateOptionalUrlField,
-  validatePasswordField,
   validateRequiredText,
 } from '@/shared/security/inputRules'
+import {
+  describePasswordProblem,
+  validatePasswordConfirmation,
+} from '@/shared/security/passwordStrength'
+import { PasswordField } from '@/shared/components/PasswordField'
 import { authService } from '../services/auth.service'
 import { getRegistroErrorMessage } from '../utils/registroErrors'
 import { RegistroResumenDialog, type RegistroResumenSection } from './RegistroResumenDialog'
@@ -194,11 +198,13 @@ export const RegistroEmpresa = () => {
 
   const { restoreDraft, saveDraft, clearDraft } = useFormDraft<typeof initialForm>({
     key: 'registro-empresa',
-    exclude: ['password'],
+    // Ninguna contraseña se guarda en el borrador local.
+    exclude: ['password', 'confirmPassword'],
   })
 
   const initialForm = {
     password: '',
+    confirmPassword: '',
     nombreEmpresa: '',
     telefonoEmpresa: '',
     direccion: '',
@@ -215,7 +221,7 @@ export const RegistroEmpresa = () => {
 
   const [form, setForm] = useState(() => {
     const draft = restoreDraft()
-    if (draft) return { ...initialForm, ...draft, password: '' }
+    if (draft) return { ...initialForm, ...draft, password: '', confirmPassword: '' }
     return initialForm
   })
   const [draftRestored, setDraftRestored] = useState(() => Boolean(restoreDraft()))
@@ -230,6 +236,12 @@ export const RegistroEmpresa = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Aviso inmediato al confirmar: no hay que esperar al envio para saberlo.
+  const confirmError =
+    form.confirmPassword && form.password !== form.confirmPassword
+      ? 'Las contraseñas no coinciden.'
+      : null
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isReviewOpen, setIsReviewOpen] = useState(false)
   const [sectores, setSectores] = useState<{ id: string; nombre: string }[]>([])
@@ -384,7 +396,9 @@ export const RegistroEmpresa = () => {
   const validateForm = () => {
     const validations = [
       validateEmailField(form.correoEmpresa, 'Correo de la empresa'),
-      validatePasswordField(form.password),
+      // Dice exactamente que le falta a la contraseña, no la regla completa.
+      describePasswordProblem(form.password),
+      validatePasswordConfirmation(form.password, form.confirmPassword),
       validateRequiredText(form.nombreEmpresa, 'Nombre de la empresa', SECURITY_LIMITS.companyName),
       validateRequiredText(form.sectorId, 'Sector', 12),
       validateOptionalPhoneField(form.telefonoEmpresa, 'Telefono de la empresa'),
@@ -617,19 +631,23 @@ export const RegistroEmpresa = () => {
                       required
                     />
                   </FormControl>
-                  <FormControl label="Contraseña" help="Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero.">
-                    <input
-                      type="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      className={FORM_FIELD_CLASS}
-                      placeholder="Crea una contraseña segura"
-                      minLength={SECURITY_LIMITS.passwordMin}
-                      maxLength={SECURITY_LIMITS.passwordMax}
-                      required
-                    />
-                  </FormControl>
+                  <PasswordField
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="Crea una contraseña segura"
+                    showStrength
+                    hint="Minimo 8 caracteres, con al menos una mayuscula, una minuscula y un numero."
+                  />
+                  <PasswordField
+                    name="confirmPassword"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    label="Confirmar contraseña"
+                    placeholder="Repite la contraseña"
+                    error={confirmError}
+                    hint="Vuelve a escribirla para confirmar que coincide."
+                  />
                   <FormControl label="Telefono de la empresa" help="Opcional. De 7 a 18 caracteres: numeros, espacios, +, - o parentesis.">
                     <input
                       name="telefonoEmpresa"

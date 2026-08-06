@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import campusImg from '@/assets/images/campus.png'
 import logoBlanco from '@/assets/images/logoblanco.png'
@@ -16,6 +17,7 @@ import './auth-flow.css'
 export const LoginForm = () => {
   const { mutate: login, isPending } = useLogin()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [form, setForm] = useState<LoginRequest>({
     email: '',
     password: '',
@@ -92,14 +94,24 @@ export const LoginForm = () => {
                 <span className="relative">
                   <input
                     name="password"
-                    type="password"
+                    type={isPasswordVisible ? 'text' : 'password'}
                     value={form.password}
                     onChange={handleChange}
                     maxLength={SECURITY_LIMITS.passwordMax}
                     placeholder="Ingresa tu contraseña"
+                    autoComplete="current-password"
                     required
-                    className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
+                    className="auth-login-input w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-12 text-sm outline-none focus:border-[#009A4D] focus:ring-2 focus:ring-[#009A4D]/25"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordVisible((current) => !current)}
+                    aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    title={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                  >
+                    {isPasswordVisible ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
                 </span>
               </label>
 
