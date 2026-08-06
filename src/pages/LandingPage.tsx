@@ -10,9 +10,17 @@ type CompanyLogo = {
   /** Sector y zona; se muestra bajo el nombre. */
   sector: string
   website: string
-  /** Opcional: si no hay logotipo disponible se muestra solo el nombre. */
-  logoUrl?: string
+  /** Dominio del que se obtiene el logotipo. */
+  domain: string
 }
+
+// Las marcas regionales no estan en los catalogos de logotipos vectoriales,
+// asi que el icono se toma del propio sitio de cada empresa. Se intenta una
+// segunda fuente y, si tampoco responde, la tarjeta cae al monograma.
+const logoSources = (domain: string): string[] => [
+  `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+  `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+]
 
 const heroPhotoUrl = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200'
 
@@ -23,44 +31,49 @@ const companies: CompanyLogo[] = [
   {
     name: 'Volkswagen de Mexico',
     sector: 'Automotriz - Puebla',
-    logoUrl: 'https://cdn.simpleicons.org/volkswagen/001E50',
+    domain: 'vw.com.mx',
     website: 'https://www.vw.com.mx',
   },
   {
     name: 'Audi Mexico',
     sector: 'Automotriz - San Jose Chiapa',
-    logoUrl: 'https://cdn.simpleicons.org/audi/111827',
+    domain: 'audi.com.mx',
     website: 'https://www.audi.com.mx',
   },
   {
     name: 'Bachoco',
     sector: 'Avicultura - Tecamachalco',
+    domain: 'bachoco.com.mx',
     website: 'https://www.bachoco.com.mx',
   },
   {
     name: 'Granjas Carroll',
     sector: 'Agroindustria - Valle de Perote',
+    domain: 'granjascarroll.com',
     website: 'https://www.granjascarroll.com',
   },
   {
     name: 'Ternium',
     sector: 'Acero - Puebla',
+    domain: 'ternium.com',
     website: 'https://mx.ternium.com',
   },
   {
     name: 'Grupo Bimbo',
     sector: 'Alimentos - Puebla',
+    domain: 'grupobimbo.com',
     website: 'https://www.grupobimbo.com',
   },
   {
     name: 'Cementos Moctezuma',
     sector: 'Construccion - Tepetzingo',
+    domain: 'cmoctezuma.com.mx',
     website: 'https://www.cmoctezuma.com.mx',
   },
   {
     name: 'Pemex',
     sector: 'Energia - Nacional',
-    logoUrl: 'https://cdn.simpleicons.org/pemex/CC0000',
+    domain: 'pemex.com',
     website: 'https://www.pemex.com',
   },
 ]
@@ -79,9 +92,10 @@ const getMonogram = (name: string): string => {
 }
 
 const CompanyLogoCard = ({ company }: { company: CompanyLogo }) => {
-  // No todas las empresas regionales tienen logotipo publico: las que faltan
-  // usan un monograma para que todas las tarjetas se vean igual de acabadas.
-  const [hasLogo, setHasLogo] = useState(Boolean(company.logoUrl))
+  const sources = logoSources(company.domain)
+  // Se prueba cada fuente en orden; agotadas todas, queda el monograma.
+  const [sourceIndex, setSourceIndex] = useState(0)
+  const currentSource = sources[sourceIndex]
 
   return (
     <a
@@ -92,9 +106,14 @@ const CompanyLogoCard = ({ company }: { company: CompanyLogo }) => {
       aria-label={`Visitar sitio de ${company.name}`}
     >
       <span className="landing-company__mark">
-        {hasLogo && company.logoUrl ? (
+        {currentSource ? (
           // Sin lazy: dentro del carrusel quedan fuera de vista y no se cargarian.
-          <img src={company.logoUrl} alt="" onError={() => setHasLogo(false)} />
+          <img
+            src={currentSource}
+            alt=""
+            className="landing-company__icon"
+            onError={() => setSourceIndex((index) => index + 1)}
+          />
         ) : (
           <span className="landing-company__monogram" aria-hidden="true">
             {getMonogram(company.name)}

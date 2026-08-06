@@ -342,10 +342,18 @@
   place-items: center;
 }
 
-.landing-company img {
-  max-width: 104px;
-  max-height: 30px;
+/* Los iconos vienen del sitio de cada empresa y son cuadrados: se muestran
+   como distintivo de app para que la fila se vea pareja. */
+.landing-company__icon {
+  width: 34px;
+  height: 34px;
+  padding: 4px;
+  border: 1px solid #eef2f7;
+  border-radius: 11px;
+  background: #ffffff;
   object-fit: contain;
+  /* Los favicons pequenos se ven mas limpios sin suavizado agresivo. */
+  image-rendering: -webkit-optimize-contrast;
 }
 
 /* Monograma para las empresas sin logotipo publico. */
