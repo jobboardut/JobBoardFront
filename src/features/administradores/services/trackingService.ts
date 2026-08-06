@@ -1,4 +1,5 @@
 import { CircleCheckBig, CircleX, FileCheck2, MessagesSquare, Users } from 'lucide-react'
+import { getAcademicLabel } from '@/shared/utils/academicStatus'
 import { adminService } from './admin.service'
 import type { TrackingMetric, TrackingRow, TrackingStatus } from '../types/seguimiento.types'
 
@@ -80,6 +81,9 @@ const toTrackingRow = (item: RawPostulacion, index: number): TrackingRow => {
     id: String(item.postulacionId ?? item.id ?? index),
     candidateName,
     candidateCareer: asText(item.carrera ?? item.programa, 'Sin carrera'),
+    candidateAcademic: getAcademicLabel(
+      typeof item.estatusAcademico === 'string' ? item.estatusAcademico : null
+    ),
     candidateLetter: initials(candidateName),
     vacancyTitle,
     companyName,

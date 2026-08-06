@@ -36,7 +36,9 @@ export async function getDashboardOverview(): Promise<DashboardOverview> {
     adminService.getVacantesRecientes(),
   ])
 
-  const totalUsers = stats.totalEstudiantes + stats.totalEmpresas
+  // Los egresados son un tipo de usuario aparte y deben sumar al total.
+  const totalGraduates = stats.totalEgresados ?? 0
+  const totalUsers = stats.totalEstudiantes + totalGraduates + stats.totalEmpresas
   const totalApplications = publications.publicaciones.reduce(
     (total, vacancy) => total + vacancy.totalPostulantes,
     0
@@ -49,7 +51,7 @@ export async function getDashboardOverview(): Promise<DashboardOverview> {
         value: totalUsers,
         Icon: Users,
         accent: 'orange',
-        subtitle: `${stats.totalEstudiantes} estudiantes / ${stats.totalEmpresas} empresas`,
+        subtitle: `${stats.totalEstudiantes} estudiantes / ${totalGraduates} egresados / ${stats.totalEmpresas} empresas`,
       },
       {
         label: 'Vacantes activas',

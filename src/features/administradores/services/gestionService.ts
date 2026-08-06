@@ -1,4 +1,5 @@
 import { Ban, Building2, CheckCircle2, GraduationCap, UserSquare2, XCircle } from 'lucide-react'
+import { getAcademicKind, getAcademicLabel } from '@/shared/utils/academicStatus'
 import { adminService } from './admin.service'
 import type { AdminUsuario } from '../types/admin.types'
 import type { ManagementMetric, ManagementUser, ManagementUserState, ManagementUserType } from '../types/management.types'
@@ -28,12 +29,18 @@ const normalizeRole = (rol: string): string =>
     .trim()
     .toLowerCase()
 
-const toUserType = (rol: string): ManagementUserType | null => {
+/**
+ * El rol solo distingue Estudiante / Empresa / Admin: quien separa a un
+ * egresado de un alumno es `estatusAcademico`.
+ */
+const toUserType = (rol: string, estatusAcademico?: string | null): ManagementUserType | null => {
   const normalizedRole = normalizeRole(rol)
 
   if (normalizedRole === 'empresa') return 'Empresa'
   if (normalizedRole === 'egresado') return 'Egresado'
-  if (normalizedRole === 'estudiante' || normalizedRole === 'alumno') return 'Alumno'
+  if (normalizedRole === 'estudiante' || normalizedRole === 'alumno') {
+    return getAcademicKind(estatusAcademico)
+  }
 
   return null
 }
@@ -61,16 +68,20 @@ const STATE_ORDER: Record<ManagementUserState, number> = {
 }
 
 const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
-  const type = toUserType(user.rol)
+  const type = toUserType(user.rol, user.estatusAcademico)
   if (!type) return null
 
   const fullName = user.nombreCompleto ?? user.email
   const state = toUserState(user.estatusValidacion)
   const ultimaObservacion = user.ultimaObservacion ?? user.observaciones ?? null
 
+  // Para personas se muestra el tipo academico; "Estudiante" a secas no
+  // distingue a un egresado.
+  const roleLabel = type === 'Empresa' ? 'Empresa' : getAcademicLabel(user.estatusAcademico)
+
   const detailItems = [
     { label: 'Correo', value: user.email },
-    { label: 'Rol', value: user.rol },
+    { label: 'Tipo', value: roleLabel },
     { label: 'Registro', value: formatDate(user.fechaRegistro) },
     { label: 'Estado', value: user.estatusValidacion },
   ]
@@ -88,7 +99,7 @@ const toManagementUser = (user: AdminUsuario): ManagementUser | null => {
   return {
     id: String(user.id),
     fullName,
-    description: user.rol,
+    description: roleLabel,
     avatarLetter: fullName.charAt(0).toUpperCase(),
     type,
     contact: user.email,
@@ -105,6 +116,7 @@ export async function getManagementOverview(): Promise<ManagementOverview> {
   const response = await adminService.getUsuarios()
   const users = response.usuarios
     .filter((user) => isManageableRole(user.rol))
+    // El listado conserva el orden por estado; el tipo se resuelve al mapear.
     .map(toManagementUser)
     .filter((user): user is ManagementUser => Boolean(user))
     .sort((a, b) => STATE_ORDER[a.state] - STATE_ORDER[b.state])

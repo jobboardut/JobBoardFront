@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { ArrowRight, CalendarDays } from 'lucide-react'
+import { AcademicPill } from '@/shared/components/AcademicPill'
 import { APP_ICON_STROKE_WIDTH } from '../../../config/iconConfig'
 import type { TrackingRow } from '../types/seguimiento.types'
 
@@ -84,7 +85,10 @@ function TrackingList({ rows }: TrackingListProps) {
                   <span className="tracking-avatar person">{row.candidateLetter}</span>
                   <div>
                     <strong>{row.candidateName}</strong>
-                    <p>{row.candidateCareer}</p>
+                    <p>
+                      <AcademicPill estatusAcademico={row.candidateAcademic} compact />
+                      <span className="tracking-person-career">{row.candidateCareer}</span>
+                    </p>
                   </div>
                 </header>
               </section>

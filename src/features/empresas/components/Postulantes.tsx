@@ -1,6 +1,7 @@
 import { memo, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BriefcaseBusiness, Eye, FileText, GraduationCap, Hash, LayoutGrid, List, Mail, UserCircle, UsersRound } from 'lucide-react'
+import { AcademicPill } from '@/shared/components/AcademicPill'
 import { PageHero } from '@/shared/components/PageHero'
 import { ROUTES } from '@/router/routes'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/StateFeedback'
@@ -45,12 +46,16 @@ const CandidatoCard = memo(({
       )}
 
       <div className="min-w-0">
-        <p className="truncate text-base font-bold text-slate-900">{postulante.nombre}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate text-base font-bold text-slate-900">{postulante.nombre}</p>
+          {/* Un egresado ya termino su carrera: cambia lo que la empresa puede ofrecerle. */}
+          <AcademicPill estatusAcademico={postulante.estatusAcademico} />
+        </div>
 
         <div className="mt-1 grid gap-1 text-xs text-slate-500 sm:grid-cols-2">
           <span className="inline-flex items-center gap-1.5 truncate">
             <GraduationCap size={13} className="shrink-0 text-emerald-500" />
-            {postulante.carrera || postulante.tipoUsuario || 'Sin carrera'}
+            {postulante.carrera || 'Sin carrera'}
           </span>
           <span className="inline-flex items-center gap-1.5 truncate">
             <Hash size={13} className="shrink-0 text-slate-400" />

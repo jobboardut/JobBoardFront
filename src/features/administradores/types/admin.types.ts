@@ -1,6 +1,9 @@
 export interface EstadisticasUsuarios {
   totalEstudiantes: number
   totalEmpresas: number
+  /** Los egresados se cuentan aparte de los estudiantes. */
+  totalEgresados?: number
+  totalVinculaciones?: number
 }
 
 export type VacanteRecienteEstado = 'ACTIVO' | 'PAUSADO' | 'BORRADOR'

@@ -16,6 +16,8 @@ export type TrackingRow = {
   id: string
   candidateName: string
   candidateCareer: string
+  /** Estudiante o Egresado; el rol por si solo no lo distingue. */
+  candidateAcademic: string
   candidateLetter: string
   vacancyTitle: string
   companyName: string

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, FileText, GraduationCap, Mail, Phone } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
+import { getAcademicLabel } from '@/shared/utils/academicStatus'
 import { useConfirmDialog } from '@/shared/components/appConfirmContext'
 import { useAppToast } from '@/shared/components/appToastContext'
 import { useCambiarEstatusPostulante, usePostulantes } from '../hooks/useEmpresa'
@@ -164,7 +165,12 @@ export const DetallePostulante = () => {
               />
             ) : null}
             <div>
-              <h1 className="text-2xl font-semibold">{postulante.nombre}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-semibold">{postulante.nombre}</h1>
+                <span className="rounded-full border border-white/40 bg-white/15 px-2.5 py-0.5 text-[11px] font-bold">
+                  {getAcademicLabel(postulante.estatusAcademico)}
+                </span>
+              </div>
               <p className="text-sm text-white/80">Estatus: {currentStatus.label}</p>
               {postulante.carrera ? (
                 <p className="text-sm text-white/70">{postulante.carrera}</p>

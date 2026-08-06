@@ -1,4 +1,5 @@
 import { Building2, FileBadge, GraduationCap, Users } from 'lucide-react'
+import { getAcademicKind, getAcademicLabel } from '@/shared/utils/academicStatus'
 import { adminService } from './admin.service'
 import type { AdminUsuario, ValidarUsuarioAccion, ValidarUsuarioRequest } from '../types/admin.types'
 import type { ValidationMetric, ValidationRequest, ValidationType } from '../types/validation.types'
@@ -8,7 +9,7 @@ export type ValidationOverview = {
   requests: ValidationRequest[]
 }
 
-const toValidationType = (rol: string): ValidationType => {
+const toValidationType = (rol: string, estatusAcademico?: string | null): ValidationType => {
   const normalizedRole = rol
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -24,10 +25,11 @@ const toValidationType = (rol: string): ValidationType => {
   }
 
   if (normalizedRole === 'estudiante' || normalizedRole === 'alumno') {
-    return 'Alumno'
+    // El rol no distingue al egresado: eso lo dice el estatus academico.
+    return getAcademicKind(estatusAcademico)
   }
 
-  return 'Alumno'
+  return getAcademicKind(estatusAcademico)
 }
 
 const isValidableRole = (rol: string): boolean => {
@@ -53,28 +55,31 @@ const toRelativeDate = (value: string): string => {
   }).format(date)
 }
 
-const buildDetailItems = (user: AdminUsuario) => [
+const buildDetailItems = (user: AdminUsuario, roleLabel: string) => [
   { label: 'Correo', value: user.email },
-  { label: 'Rol', value: user.rol },
+  { label: 'Tipo', value: roleLabel },
   { label: 'Estatus', value: user.estatusValidacion },
   { label: 'Registro', value: toRelativeDate(user.fechaRegistro) },
 ]
 
 const mapUserToRequest = (user: AdminUsuario): ValidationRequest => {
-  const type = toValidationType(user.rol)
+  const type = toValidationType(user.rol, user.estatusAcademico)
+  // El admin necesita saber si revisa a un alumno o a un egresado: los
+  // documentos que debe pedir no son los mismos.
+  const roleLabel = type === 'Empresa' ? 'Empresa' : getAcademicLabel(user.estatusAcademico)
 
   return {
     id: String(user.id),
     fullName: user.nombreCompleto ?? user.email,
-    profile: user.rol,
+    profile: roleLabel,
     type,
     contactEmail: user.email,
     contactPhone: 'No registrado',
     submittedAgo: toRelativeDate(user.fechaRegistro),
     state: 'Pendiente',
     accountState: user.estatusValidacion === 'Validado' ? 'Activo' : 'Inactivo',
-    detailTitle: type === 'Empresa' ? 'Datos de la Empresa' : 'Datos del Alumno',
-    detailItems: buildDetailItems(user),
+    detailTitle: type === 'Empresa' ? 'Datos de la empresa' : `Datos del ${roleLabel.toLowerCase()}`,
+    detailItems: buildDetailItems(user, roleLabel),
   }
 }
 
