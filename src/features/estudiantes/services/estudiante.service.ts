@@ -1,4 +1,4 @@
-import api from '@/services/api'
+import api, { UPLOAD_TIMEOUT } from '@/services/api'
 import { formatMoney } from '@/shared/utils/money'
 import type { JobItem } from '../types/dashboard.types'
 import type { StudentProfile } from '../types/profile.types'
@@ -128,6 +128,7 @@ const mapStudentProfile = (payload: unknown): StudentProfile => {
     address: pickString([profile], ['direccion', 'address'], 'No especificado'),
     academicStatus: pickString([profile], ['estatusAcademico', 'academicStatus'], 'Estudiante'),
     validationStatus: pickString([profile], ['estatusValidacion', 'validationStatus']),
+    lastObservation: pickString([profile], ['ultimaObservacion', 'observaciones', 'lastObservation']),
     cvUrl: pickString([profile], ['cvUrl', 'curriculumUrl']),
     documentUrl: pickString([profile], ['docProbatorioUrl', 'documentUrl']),
     raw: profile,
@@ -249,7 +250,11 @@ export const estudianteService = {
     if (archivos.cv) formData.append('Cv', archivos.cv)
     if (archivos.docProbatorio) formData.append('DocProbatorio', archivos.docProbatorio)
 
-    const response = await api.patch(`/estudiante/${userId}/archivos`, formData) as unknown
+    // Subir hasta tres archivos supera el timeout global de 10s de axios:
+    // sin este margen la peticion se cancela sola a medio envio.
+    const response = await api.patch(`/estudiante/${userId}/archivos`, formData, {
+      timeout: UPLOAD_TIMEOUT,
+    }) as unknown
 
     return mapStudentProfile(response)
   },

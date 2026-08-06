@@ -1,4 +1,4 @@
-import api from '@/services/api'
+import api, { UPLOAD_TIMEOUT } from '@/services/api'
 import type {
   EmpresaPerfil,
   EmpresaPerfilUpdateRequest,
@@ -59,7 +59,10 @@ export const empresaService = {
     if (archivos.repDocCargo) formData.append('RepDocCargo', archivos.repDocCargo)
     if (archivos.repFotoIne) formData.append('RepFotoIne', archivos.repFotoIne)
 
-    return api.patch(`/empresa/${userId}/archivos`, formData) as Promise<EmpresaPerfil>
+    // Hasta cinco documentos: sin margen extra, axios cancela el envio a los 10s.
+    return api.patch(`/empresa/${userId}/archivos`, formData, {
+      timeout: UPLOAD_TIMEOUT,
+    }) as Promise<EmpresaPerfil>
   },
 
   getVacantes: (empresaId: number): Promise<Vacante[]> =>

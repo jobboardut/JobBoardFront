@@ -1,6 +1,13 @@
 import axios from 'axios'
 import { config } from '@/config/env'
 
+/**
+ * Margen para peticiones que suben archivos (multipart).
+ * El timeout global de 10s no alcanza para varios documentos y axios cancela
+ * el envio a media subida, sin error claro para el usuario.
+ */
+export const UPLOAD_TIMEOUT = 60000
+
 // Cliente HTTP compartido para toda la app.
 // - Usa baseURL desde variables de entorno.
 // - Inyecta token automaticamente en cada request.

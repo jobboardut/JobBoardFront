@@ -13,6 +13,8 @@ export interface StudentProfile {
   address?: string
   academicStatus?: string
   validationStatus?: string
+  /** Motivo que administracion escribio al devolver el registro. */
+  lastObservation?: string
   cvUrl?: string
   documentUrl?: string
   raw?: Record<string, unknown>

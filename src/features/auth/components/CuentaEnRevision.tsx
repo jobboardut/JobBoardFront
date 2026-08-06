@@ -102,14 +102,41 @@ const COPY: Record<Exclude<ValidationState, 'validado'>, {
 }
 
 /**
+ * Traduce el fallo del envio a algo accionable.
+ * Un timeout no es lo mismo que un archivo rechazado por el servidor.
+ */
+const describirErrorDeEnvio = (error: unknown): string => {
+  const apiError = error as {
+    code?: string
+    message?: string
+    detalle?: string
+    detail?: string
+    title?: string
+  }
+
+  if (apiError?.code === 'ECONNABORTED' || /timeout/i.test(apiError?.message ?? '')) {
+    return 'La subida tardo demasiado. Revisa tu conexion e intenta con archivos mas ligeros.'
+  }
+
+  return (
+    apiError?.detalle ||
+    apiError?.detail ||
+    apiError?.title ||
+    apiError?.message ||
+    'Intenta de nuevo en unos segundos.'
+  )
+}
+
+/**
  * Puerta de acceso para perfiles sin validar.
  * Bloquea la plataforma y, si el registro fue devuelto o rechazado,
  * permite reenviar los documentos con PATCH /estudiante/{id}/archivos.
  */
 export const CuentaEnRevision = () => {
   const estado = getValidationState()
-  const observacion = getLastObservation()
   const userId = getUserId()
+  // El motivo puede llegar en el login o al refrescar el estatus.
+  const [observacion, setObservacion] = useState<string | null>(() => getLastObservation())
   const toast = useAppToast()
   const { logout, isLoggingOut } = useLogout()
 
@@ -131,7 +158,12 @@ export const CuentaEnRevision = () => {
     try {
       const perfil = await estudianteService.getPerfil(userId)
       const nuevoEstado = normalizeValidationState(perfil.validationStatus)
-      updateValidationState(perfil.validationStatus)
+      updateValidationState(perfil.validationStatus, perfil.lastObservation)
+
+      // Si administracion agrego observaciones, se muestran sin recargar.
+      if (perfil.lastObservation) {
+        setObservacion(perfil.lastObservation)
+      }
 
       if (nuevoEstado === 'validado') {
         toast.success('Perfil aprobado', 'Ya puedes usar la plataforma.')
@@ -192,9 +224,10 @@ export const CuentaEnRevision = () => {
     try {
       await estudianteService.actualizarArchivos(userId, archivos)
       setEnviado(true)
+      updateValidationState('Pendiente')
       toast.success('Documentos enviados', 'Tu registro volvio a la fila de revision.')
-    } catch {
-      toast.error('No se pudieron enviar', 'Intenta de nuevo en unos segundos.')
+    } catch (error) {
+      toast.error('No se pudieron enviar', describirErrorDeEnvio(error))
     } finally {
       setIsSending(false)
     }
@@ -213,11 +246,23 @@ export const CuentaEnRevision = () => {
           </div>
 
           {observacion ? (
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="text-xs font-black uppercase tracking-wide text-amber-700">
+                Que debes corregir
+              </p>
+              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-amber-900">{observacion}</p>
+            </div>
+          ) : copy.puedeReenviar ? (
+            // Sin motivo el usuario no sabe que corregir: se le dice como obtenerlo.
             <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Observaciones de administracion
+                Sin observaciones registradas
               </p>
-              <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700">{observacion}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Administracion no dejo un detalle visible. Usa{' '}
+                <strong>Revisar estatus</strong> para volver a consultarlo, o escribe a
+                servicios escolares para saber que documento corregir.
+              </p>
             </div>
           ) : null}
 

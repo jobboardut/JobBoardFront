@@ -1,9 +1,6 @@
-import api from '@/services/api'
+import api, { UPLOAD_TIMEOUT } from '@/services/api'
 import { clearSession, saveSession } from './session'
 import type { LoginRequest, LoginResponse, RegistroEmpresaRequest, RegistroEstudianteRequest } from '../types/auth.types'
-
-// Tiempo extra para las subidas de archivos del registro (el timeout global de axios es de 10s).
-const UPLOAD_TIMEOUT = 60000
 
 const appendFileOrEmpty = (formData: FormData, key: string, file?: File | null) => {
   if (file) {
