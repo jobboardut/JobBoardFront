@@ -5,6 +5,8 @@ export type PasswordLevel = 'vacia' | 'debil' | 'regular' | 'segura'
 export interface PasswordRequirement {
   id: string
   label: string
+  /** Version breve para el mensaje de error; evita minusculizar "(A-Z)". */
+  short: string
   met: boolean
 }
 
@@ -35,15 +37,45 @@ const LEVEL_LABELS: Record<PasswordLevel, string> = {
  */
 export const analyzePassword = (value: string): PasswordAnalysis => {
   const requirements: PasswordRequirement[] = [
-    { id: 'length', label: `Al menos ${SECURITY_LIMITS.passwordMin} caracteres`, met: value.length >= SECURITY_LIMITS.passwordMin },
-    { id: 'upper', label: 'Una letra mayuscula (A-Z)', met: /[A-Z]/.test(value) },
-    { id: 'lower', label: 'Una letra minuscula (a-z)', met: /[a-z]/.test(value) },
-    { id: 'number', label: 'Un numero (0-9)', met: /\d/.test(value) },
+    {
+      id: 'length',
+      label: `Al menos ${SECURITY_LIMITS.passwordMin} caracteres`,
+      short: `${SECURITY_LIMITS.passwordMin} caracteres como minimo`,
+      met: value.length >= SECURITY_LIMITS.passwordMin,
+    },
+    {
+      id: 'upper',
+      label: 'Una letra mayuscula (A-Z)',
+      short: 'una letra mayuscula',
+      met: /[A-Z]/.test(value),
+    },
+    {
+      id: 'lower',
+      label: 'Una letra minuscula (a-z)',
+      short: 'una letra minuscula',
+      met: /[a-z]/.test(value),
+    },
+    {
+      id: 'number',
+      label: 'Un numero (0-9)',
+      short: 'un numero',
+      met: /\d/.test(value),
+    },
   ]
 
   const bonus: PasswordRequirement[] = [
-    { id: 'symbol', label: 'Un simbolo (!@#$...) — opcional', met: /[^A-Za-z0-9]/.test(value) },
-    { id: 'long', label: '12 caracteres o mas — opcional', met: value.length >= 12 },
+    {
+      id: 'symbol',
+      label: 'Un simbolo (!@#$...) — opcional',
+      short: 'un simbolo',
+      met: /[^A-Za-z0-9]/.test(value),
+    },
+    {
+      id: 'long',
+      label: '12 caracteres o mas — opcional',
+      short: '12 caracteres o mas',
+      met: value.length >= 12,
+    },
   ]
 
   const requiredMet = requirements.filter((item) => item.met).length
@@ -71,7 +103,7 @@ export const analyzePassword = (value: string): PasswordAnalysis => {
     levelLabel: LEVEL_LABELS[level],
     score,
     requirements: [...requirements, ...bonus],
-    missing: requirements.filter((item) => !item.met).map((item) => item.label),
+    missing: requirements.filter((item) => !item.met).map((item) => item.short),
     isValid,
   }
 }
@@ -90,9 +122,13 @@ export const describePasswordProblem = (value: string): string | null => {
   const { missing } = analyzePassword(value)
   if (missing.length === 0) return null
 
-  const detalle = missing.map((item) => item.toLowerCase()).join(', ')
+  // "a y b" se lee mejor que "a, b" cuando solo faltan dos cosas.
+  const detalle =
+    missing.length === 1
+      ? missing[0]
+      : `${missing.slice(0, -1).join(', ')} y ${missing[missing.length - 1]}`
 
-  return `A tu contraseña le falta: ${detalle}.`
+  return `A tu contraseña le falta ${detalle}.`
 }
 
 /** Valida que la confirmacion coincida. */
