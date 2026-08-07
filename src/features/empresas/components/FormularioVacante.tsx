@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, BriefcaseBusiness } from 'lucide-react'
 import { ROUTES } from '@/router/routes'
 import { AppButton } from '@/shared/components/AppButton'
+import { BulletListInput } from '@/shared/components/BulletListInput'
 import { FormControl, FORM_FIELD_CLASS } from '@/shared/components/FormControl'
 import { LoadingState } from '@/shared/components/StateFeedback'
 import { useAppToast } from '@/shared/components/appToastContext'
@@ -15,7 +16,8 @@ import {
 import { useCrearVacante, useVacante } from '../hooks/useEmpresa'
 import type { CreateVacanteRequest, Vacante } from '../types/empresa.types'
 
-const modalidades = ['Presencial', 'Remota', 'Hibrida']
+// El backend valida el valor exacto: acepta "Hibrido", no "Hibrida".
+const modalidades = ['Presencial', 'Remota', 'Hibrido']
 
 const MAX_LUGARES = 999
 
@@ -47,6 +49,14 @@ const VACANTE_FIELD_LIMITS = {
 
 const getVacanteFieldLimit = (name: string): number =>
   VACANTE_FIELD_LIMITS[name as keyof typeof VACANTE_FIELD_LIMITS] ?? SECURITY_LIMITS.shortText
+
+// El editor de viñetas conserva lineas vacias mientras se escribe.
+const limpiarViñetas = (valor: string): string =>
+  valor
+    .split('\n')
+    .map((linea) => linea.trim())
+    .filter(Boolean)
+    .join('\n')
 
 // Deja solo digitos y respeta el campo vacio (para poder borrar y reescribir).
 const limitDigits = (value: string, max: number): string => {
@@ -113,6 +123,17 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
     }))
   }
 
+  // Para campos que no emiten un evento de input (editor de viñetas).
+  const handleFieldChange = (name: keyof VacanteForm, value: string) => {
+    setDraftState(prev => ({
+      key: formKey,
+      values: {
+        ...(prev.key === formKey ? prev.values : {}),
+        [name]: limitText(value, getVacanteFieldLimit(name)),
+      },
+    }))
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -124,12 +145,17 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
       return
     }
 
+    // Las viñetas vacias no deben viajar al backend ni contar como contenido.
+    const requisitos = limpiarViñetas(form.requisitos)
+    const responsabilidades = limpiarViñetas(form.responsabilidades)
+
     const validationError =
       validateRequiredText(form.titulo, 'Titulo del puesto', SECURITY_LIMITS.shortText) ??
       validateRequiredText(form.ubicacion, 'Ubicacion', SECURITY_LIMITS.address) ??
+      validateRequiredText(form.modalidad, 'Modalidad', SECURITY_LIMITS.shortText) ??
       validateRequiredText(form.descripcion, 'Descripcion del puesto', SECURITY_LIMITS.vacancyText) ??
-      validateRequiredText(form.requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText) ??
-      validateRequiredText(form.responsabilidades, 'Responsabilidades', SECURITY_LIMITS.vacancyText)
+      validateRequiredText(requisitos, 'Requisitos', SECURITY_LIMITS.vacancyText) ??
+      validateRequiredText(responsabilidades, 'Responsabilidades', SECURITY_LIMITS.vacancyText)
 
     if (validationError) {
       toast.warning('Revisa los datos', validationError)
@@ -152,10 +178,10 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
     const payload: CreateVacanteRequest = {
       titulo: form.titulo,
       descripcion: form.descripcion,
-      requisitos: form.requisitos,
+      requisitos,
       modalidad: form.modalidad,
       ubicacion: form.ubicacion,
-      responsabilidades: form.responsabilidades,
+      responsabilidades,
       sueldoAprox,
       lugares,
     }
@@ -306,33 +332,29 @@ export const FormularioVacante = ({ modo = 'crear' }: FormularioVacanteProps) =>
         <div className="flex flex-col gap-6">
 
           <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-slate-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Requisitos</h2>
-            <textarea
-              name="requisitos"
+            <h2 className="text-lg font-bold text-gray-800 mb-1">Requisitos</h2>
+            <p className="mb-3 text-xs text-slate-500">
+              Un requisito por viñeta. Asi los ve el candidato en la vacante.
+            </p>
+            <BulletListInput
               value={form.requisitos}
-              onChange={handleChange}
-              placeholder="Lista los requisitos del puesto..."
-              rows={5}
-              maxLength={SECURITY_LIMITS.vacancyText}
-              required
-              className={`${FORM_FIELD_CLASS} resize-none`}
+              onChange={(value) => handleFieldChange('requisitos', value)}
+              placeholder="Ej: Licenciatura en Administracion o afin"
+              addLabel="Agregar requisito"
             />
-            <p className="mt-2 text-xs text-slate-500">{getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm p-6 ring-1 ring-slate-100">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Responsabilidades</h2>
-            <textarea
-              name="responsabilidades"
+            <h2 className="text-lg font-bold text-gray-800 mb-1">Responsabilidades</h2>
+            <p className="mb-3 text-xs text-slate-500">
+              Una responsabilidad por viñeta.
+            </p>
+            <BulletListInput
               value={form.responsabilidades}
-              onChange={handleChange}
-              placeholder="Escribe una responsabilidad por linea..."
-              rows={5}
-              maxLength={SECURITY_LIMITS.vacancyText}
-              required
-              className={`${FORM_FIELD_CLASS} resize-none`}
+              onChange={(value) => handleFieldChange('responsabilidades', value)}
+              placeholder="Ej: Elaborar y controlar presupuestos"
+              addLabel="Agregar responsabilidad"
             />
-            <p className="mt-2 text-xs text-slate-500">Una por linea. {getLengthHelp(SECURITY_LIMITS.vacancyText)}</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

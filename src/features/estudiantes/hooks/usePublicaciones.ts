@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { formatMoney } from '@/shared/utils/money'
 import { getLugaresInfo } from '@/shared/utils/lugares'
+import { normalizeModalidad } from '@/shared/utils/modalidad'
 import { publicacionesService } from '../services/publicaciones.service'
 import { estudianteService } from '../services/estudiante.service'
 import type { Application } from '../types/seguimiento.types'
@@ -155,7 +156,8 @@ export const usePublicaciones = () => {
 
   const vacantesFiltradas = useMemo(() => {
     const term = searchText.trim().toLowerCase()
-    const modalidadesNormalizadas = selectedModalidades.map(normalizeText)
+    // Se compara por clave normalizada: hay vacantes guardadas como "Hibrida".
+    const modalidadesNormalizadas = selectedModalidades.map(normalizeModalidad)
 
     return vacantes.filter((vacante) => {
       const matchTerm = !term || [vacante.titulo, vacante.nombreEmpresa, vacante.descripcion, vacante.modalidad]
@@ -163,7 +165,7 @@ export const usePublicaciones = () => {
         .some((value) => value.toLowerCase().includes(term))
 
       const matchModalidad = modalidadesNormalizadas.length === 0 ||
-        modalidadesNormalizadas.includes(normalizeText(vacante.modalidad ?? ''))
+        modalidadesNormalizadas.includes(normalizeModalidad(vacante.modalidad))
 
       const matchSueldo = minSalary <= SALARY_BOUNDS.min ||
         !vacante.sueldoAprox ||
