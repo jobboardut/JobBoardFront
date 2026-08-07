@@ -4,9 +4,8 @@ import { useAppToast } from '@/shared/components/appToastContext'
 import { extractFileName, getPresignedUrl } from '@/services/filesService'
 import { FILE_LIMITS, validateFile } from '@/shared/security/inputRules'
 import { estudianteService } from '../services/estudiante.service'
+import { getUserId } from './useEstudianteId'
 import type { CurriculumData, EditContactFormData, StudentProfile } from '../types/profile.types'
-
-const getUserId = () => Number(localStorage.getItem('userId'))
 
 const EMPTY_PROFILE: StudentProfile = {
   id: '',

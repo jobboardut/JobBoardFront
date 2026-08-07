@@ -6,8 +6,7 @@ import type { Application } from '../types/seguimiento.types'
 import type { JobDetailData } from '@/shared/types/job.types'
 import { seguimientoService } from '../services/seguimiento.service'
 import { estudianteService } from '../services/estudiante.service'
-
-const getUserId = () => Number(localStorage.getItem('userId'))
+import { getUserId, useEstudianteId } from './useEstudianteId'
 
 const normalizeText = (value: string): string =>
   value
@@ -22,7 +21,9 @@ const normalizeText = (value: string): string =>
     .toLowerCase()
 
 export const useSeguimiento = () => {
-  const estudianteId = getUserId()
+  // Escribir (retirar) va con el userId; leer va con el estudianteId.
+  const userId = getUserId()
+  const estudianteId = useEstudianteId()
   const toast = useAppToast()
   const { confirm } = useConfirmDialog()
   const queryClient = useQueryClient()
@@ -38,7 +39,7 @@ export const useSeguimiento = () => {
 
   const applicationsQuery = useQuery({
     queryKey: ['estudiante', 'postulaciones', estudianteId],
-    queryFn: () => seguimientoService.getApplications(estudianteId),
+    queryFn: () => seguimientoService.getApplications(estudianteId as number),
     enabled: !!estudianteId,
   })
 
@@ -128,8 +129,10 @@ export const useSeguimiento = () => {
   }
 
   const retirarMutation = useMutation({
-    mutationFn: (postulacionId: number) => estudianteService.retirarPostulacion(estudianteId, postulacionId),
+    // Retirar es una escritura: el backend la autoriza por userId.
+    mutationFn: (postulacionId: number) => estudianteService.retirarPostulacion(userId, postulacionId),
     onSuccess: () => {
+      // La invalidacion usa el estudianteId, que es la llave de las lecturas.
       queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones', estudianteId] })
       queryClient.invalidateQueries({ queryKey: ['estudiante', 'dashboard', estudianteId] })
     },
@@ -176,7 +179,8 @@ export const useSeguimiento = () => {
     hasActiveFilters: selectedModalidades.length > 0,
     toggleModalidad,
     clearFilters,
-    isLoading: applicationsQuery.isLoading,
+    // Mientras se resuelve el estudianteId seguimos en estado de carga.
+    isLoading: estudianteId === null || applicationsQuery.isLoading,
     isError: applicationsQuery.isError,
     openSearchMode,
     closeSearchMode,

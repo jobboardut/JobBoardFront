@@ -5,10 +5,9 @@ import { getLugaresInfo } from '@/shared/utils/lugares'
 import { normalizeModalidad } from '@/shared/utils/modalidad'
 import { publicacionesService } from '../services/publicaciones.service'
 import { estudianteService } from '../services/estudiante.service'
+import { getUserId, useEstudianteId } from './useEstudianteId'
 import type { Application } from '../types/seguimiento.types'
 import type { JobCardItem, SearchPublicationItem, Vacante } from '../types/publicaciones.types'
-
-const getUserId = () => Number(localStorage.getItem('userId'))
 
 const formatSalary = (value: number | null): string => formatMoney(value)
 
@@ -101,7 +100,9 @@ const describirErrorPostulacion = (error: unknown): string => {
 const SALARY_BOUNDS = { min: 5000, max: 100000 }
 
 export const usePublicaciones = () => {
+  // Postular es escritura (userId); leer las postulaciones es lectura (estudianteId).
   const userId = getUserId()
+  const estudianteId = useEstudianteId()
   const queryClient = useQueryClient()
   const [viewMode, setViewMode] = useState<'detail' | 'search'>('detail')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -123,9 +124,9 @@ export const usePublicaciones = () => {
   })
 
   const postulacionesQuery = useQuery({
-    queryKey: ['estudiante', 'postulaciones', userId],
-    queryFn: () => estudianteService.getPostulaciones(userId),
-    enabled: !!userId,
+    queryKey: ['estudiante', 'postulaciones', estudianteId],
+    queryFn: () => estudianteService.getPostulaciones(estudianteId as number),
+    enabled: !!estudianteId,
   })
 
   const appliedVacanteIds = useMemo(() => {
@@ -240,11 +241,10 @@ export const usePublicaciones = () => {
         current.includes(publicacionId) ? current : [...current, publicacionId]
       ))
       setFeedback({ type: 'ok', message: 'Tu postulacion fue enviada correctamente.' })
-      // Las postulaciones y el dashboard se registran con userId en la llave:
-      // sin el prefijo exacto la invalidacion no surtia efecto y el seguimiento
-      // quedaba desactualizado al refrescar.
-      queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones', userId] })
-      queryClient.invalidateQueries({ queryKey: ['estudiante', 'dashboard', userId] })
+      // La invalidacion usa el estudianteId, que es la llave de las lecturas;
+      // asi el seguimiento y el dashboard se refrescan al postularse.
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'postulaciones', estudianteId] })
+      queryClient.invalidateQueries({ queryKey: ['estudiante', 'dashboard', estudianteId] })
       queryClient.invalidateQueries({ queryKey: ['estudiante', 'vacantes'] })
     },
     onError: (error: unknown) => {

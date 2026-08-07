@@ -9,8 +9,7 @@ import type { JobDetailData } from '@/shared/types/job.types'
 import { dashboardService } from '../services/dashboard.service'
 import { publicacionesService } from '../services/publicaciones.service'
 import { mapApplicationToJobItem } from '../services/estudiante.service'
-
-const getUserId = () => Number(localStorage.getItem('userId'))
+import { useEstudianteId } from './useEstudianteId'
 
 export const MODALIDADES_DASHBOARD = ['Presencial', 'Remota', 'Hibrida'] as const
 export const SALARY_BOUNDS_DASHBOARD = { min: 5000, max: 100000 } as const
@@ -96,7 +95,8 @@ const convertJobItemToJobDetailData = (item: JobItem): JobDetailData => ({
 })
 
 export const useDashboard = () => {
-  const estudianteId = getUserId()
+  // El dashboard solo lee: va con el estudianteId (perfil.id).
+  const estudianteId = useEstudianteId()
   const [viewMode, setViewMode] = useState<'detail' | 'search'>('detail')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
@@ -109,7 +109,7 @@ export const useDashboard = () => {
 
   const dashboardQuery = useQuery({
     queryKey: ['estudiante', 'dashboard', estudianteId],
-    queryFn: () => dashboardService.getOverview(estudianteId),
+    queryFn: () => dashboardService.getOverview(estudianteId as number),
     enabled: !!estudianteId,
   })
 
@@ -210,7 +210,7 @@ export const useDashboard = () => {
     searchPublicationItems,
     selectedJobModal,
     isJobModalOpen,
-    isLoading: dashboardQuery.isLoading,
+    isLoading: estudianteId === null || dashboardQuery.isLoading,
     isError: dashboardQuery.isError,
     isLoadingVacantes: vacantesQuery.isLoading,
     openSearchMode,
